@@ -188,6 +188,23 @@
 function trouverAutourDeMoi() {
   alert("La fonction Autour de moi fonctionne !");
 }
+function activerGeolocalisation() {
+  if (!navigator.geolocation) {
+    alert("La géolocalisation n'est pas disponible sur cet appareil.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      alert("Position trouvée : " + latitude + ", " + longitude);
+    },
+    function(error) {
+      alert("Impossible d'obtenir votre position. Autorisez la localisation dans Safari.");
+    }
+  );
+}
 </script>
 </body>
 </html>
