@@ -197,7 +197,7 @@ function activerGeolocalisation() {
     function(position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      alert("Position trouvée : " + latitude + ", " + longitude);
+      window.open("https://www.google.com/maps?q=" + latitude + "," + longitude, "_blank");
     },
     function(error) {
       alert("Impossible d'obtenir votre position. Autorisez la localisation dans Safari.");
