@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOKI CONNECT</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #17201b;
+      padding-bottom: 85px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #087a3d, #0a9b50);
+      color: white;
+      padding: 28px 20px 25px;
+      border-radius: 0 0 28px 28px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    header p {
+      margin-top: 5px;
+      opacity: 0.9;
+    }
+
+    .search {
+      margin: 20px;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 16px 18px;
+      border: none;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .section {
+      padding: 5px 20px 20px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .quick,
+    .services {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 18px 12px;
+      min-height: 105px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+    }
+
+    .card span {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .card strong {
+      font-size: 15px;
+    }
+
+    .highlight {
+      background: #e8f6ed;
+      color: #075f32;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 4px 18px;
+      box-shadow: 0 -3px 15px rgba(0,0,0,0.08);
+    }
+
+    nav div {
+      text-align: center;
+      font-size: 12px;
+    }
+
+    nav span {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .active {
+      color: #087a3d;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>KOKI CONNECT</h1>
+    <p>Tout Koki, dans votre poche.</p>
+  </header>
+
+  <div class="search">
+    <input type="search" placeholder="🔎 Que recherchez-vous ?">
+  </div>
+
+  <section class="section">
+    <h2>Accès rapide</h2>
+
+    <div class="quick">
+      <div class="card highlight">
+        <span>📍</span>
+        <strong>Autour de moi</strong>
+      </div>
+
+      <div class="card highlight">
+        <span>🚀</span>
+        <strong>Opportunités jeunes</strong>
+      </div>
+
+      <div class="card">
+        <span>🛠️</span>
+        <strong>Je propose mes services</strong>
+      </div>
+
+      <div class="card">
+        <span>📢</span>
+        <strong>Signaler un problème</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Explorer Koki</h2>
+
+    <div class="services">
+      <div class="card"><span>🎓</span><strong>Éducation</strong></div>
+      <div class="card"><span>💼</span><strong>Emploi & PME</strong></div>
+      <div class="card"><span>🛍️</span><strong>Commerce</strong></div>
+      <div class="card"><span>🚕</span><strong>Transport</strong></div>
+      <div class="card"><span>🌾</span><strong>Agriculture</strong></div>
+      <div class="card"><span>🐄</span><strong>Élevage</strong></div>
+      <div class="card"><span>🏥</span><strong>Santé</strong></div>
+      <div class="card"><span>🏛️</span><strong>Services publics</strong></div>
+      <div class="card"><span>⚽</span><strong>Jeunesse & Sport</strong></div>
+      <div class="card"><span>📅</span><strong>Événements</strong></div>
+      <div class="card"><span>🔨</span><strong>Artisans</strong></div>
+      <div class="card"><span>📰</span><strong>Actualités</strong></div>
+    </div>
+  </section>
+
+  <nav>
+    <div class="active"><span>🏠</span>Accueil</div>
+    <div><span>📍</span>Carte</div>
+    <div><span>➕</span>Publier</div>
+    <div><span>❤️</span>Favoris</div>
+    <div><span>👤</span>Profil</div>
+  </nav>
+
+</body>
+</html>
