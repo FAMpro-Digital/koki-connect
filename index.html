@@ -202,7 +202,9 @@ function activerGeolocalisation() {
     function(position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      window.location.href = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+      const servicesValides = servicesKoki.filter(service => service.latitude !== 0 && service.longitude !== 0);
+
+      window.location.href = "https://www.google.com/maps?q=" + serviceProche.latitude + "," + serviceProche.longitude;
     },
     function(error) {
       alert("Impossible d'obtenir votre position. Autorisez la localisation dans Safari.");
