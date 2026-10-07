@@ -195,7 +195,12 @@
     </div>
     <div class="entete-infos">
       <div><strong>📍 Koki, Louga</strong><p id="date-entete"></p></div>
-      <button type="button" class="meteo-entete" onclick="afficherRubrique('Météo de Koki')" aria-label="Météo de Koki, données à venir"><span aria-hidden="true">☀️</span> Météo<p>Données à venir</p></button>
+      <div class="meteo-entete" role="status" aria-live="polite">
+        <span id="icone-meteo" aria-hidden="true">🌤️</span> <strong id="temperature-meteo">— °C</strong>
+        <p id="condition-meteo">Chargement…</p>
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" style="color:inherit; font-size:10px;">Open-Meteo</a>
+        <button id="actualiser-meteo" type="button" onclick="chargerMeteo()" style="border:0; background:transparent; color:inherit; cursor:pointer; font-size:11px;" aria-label="Actualiser la météo de Koki">↻</button>
+      </div>
     </div>
   </header>
 
@@ -381,6 +386,52 @@ function rechercherRubriques(texte) {
   });
   document.getElementById('resultat-recherche').textContent = texte.trim() ? visibles + ' rubrique(s) trouvée(s).' : '';
 }
+function decrireMeteo(code, jour) {
+  if (code === 0) return [jour ? '☀️' : '🌙', jour ? 'Ciel dégagé' : 'Nuit dégagée'];
+  if (code === 1 || code === 2) return [jour ? '🌤️' : '☁️', 'Peu nuageux'];
+  if (code === 3) return ['☁️', 'Ciel couvert'];
+  if (code === 45 || code === 48) return ['🌫️', 'Brouillard'];
+  if ([51,53,55,56,57].includes(code)) return ['🌦️', 'Bruine'];
+  if ([61,63,65,66,67,80,81,82].includes(code)) return ['🌧️', 'Pluie'];
+  if ([71,73,75,77,85,86].includes(code)) return ['🌨️', 'Neige'];
+  if ([95,96,99].includes(code)) return ['⛈️', 'Orages'];
+  return ['🌡️', 'Conditions actuelles'];
+}
+let meteoEnCours = false;
+async function chargerMeteo() {
+  if (meteoEnCours) return;
+  meteoEnCours = true;
+  const bouton = document.getElementById('actualiser-meteo');
+  const temperature = document.getElementById('temperature-meteo');
+  const condition = document.getElementById('condition-meteo');
+  bouton.disabled = true;
+  condition.textContent = 'Chargement…';
+  const controleur = new AbortController();
+  const delai = setTimeout(() => controleur.abort(), 10000);
+  try {
+    const reponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=15.503&longitude=-15.991&current=temperature_2m,weather_code,is_day&timezone=Africa%2FDakar', { signal: controleur.signal });
+    if (!reponse.ok) throw new Error('Météo indisponible');
+    const donnees = await reponse.json();
+    const actuelle = donnees.current;
+    if (!actuelle || !Number.isFinite(actuelle.temperature_2m) || !Number.isInteger(actuelle.weather_code)) throw new Error('Données météo invalides');
+    const [icone, description] = decrireMeteo(actuelle.weather_code, actuelle.is_day === 1);
+    document.getElementById('icone-meteo').textContent = icone;
+    temperature.textContent = Math.round(actuelle.temperature_2m) + ' °C';
+    condition.textContent = description;
+    temperature.title = 'Météo de Koki · ' + actuelle.time.replace('T', ' ');
+  } catch (erreur) {
+    temperature.textContent = '— °C';
+    document.getElementById('icone-meteo').textContent = '🌡️';
+    condition.textContent = 'Météo indisponible';
+    temperature.removeAttribute('title');
+  } finally {
+    clearTimeout(delai);
+    bouton.disabled = false;
+    meteoEnCours = false;
+  }
+}
+chargerMeteo();
+setInterval(chargerMeteo, 15 * 60 * 1000);
 </script>
 </body>
 </html>
