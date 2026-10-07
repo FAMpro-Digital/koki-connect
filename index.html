@@ -188,6 +188,12 @@
       .entete-koki { height: max(300px,76vw); }
       .entete-infos { padding-left: 18px; padding-right: 18px; }
     }
+    .menu-liens { display: grid; gap: 10px; margin-bottom: 22px; }
+    .menu-liens button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 16px; border: 1px solid #dce8df; border-radius: 14px; background: white; color: #17201b; text-align: left; font: inherit; cursor: pointer; }
+    .menu-liens button:focus-visible { outline: 3px solid #087a3d; outline-offset: 3px; }
+    #vue-menu .card { margin-bottom: 18px; }
+    #vue-menu .card p { margin-top: 12px; line-height: 1.6; }
+    #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
   </style>
 </head>
 
@@ -196,7 +202,7 @@
   <header class="entete-koki">
     <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
     <div class="entete-commandes">
-      <button type="button" aria-label="Ouvrir le menu" onclick="afficherRubrique('Menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" aria-label="Ouvrir le menu" onclick="afficherMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button type="button" aria-label="Notifications" onclick="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     </div>
     <div class="entete-infos">
@@ -286,6 +292,33 @@
     </div>
   </section>
 
+  <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
+    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-menu" tabindex="-1">Menu</h2>
+    <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
+      <button type="button" onclick="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sports / ASC</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Commerces et services')"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherOpportunites()"><span>💼 Opportunités jeunes</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Carte de Koki')"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
+    </div>
+    <article class="card" aria-labelledby="titre-a-propos">
+      <h3 id="titre-a-propos">À propos de KOKI CONNECT</h3>
+      <p>KOKI CONNECT est une application communautaire dédiée à Koki. Elle rassemble les informations locales, les services de proximité et les opportunités pour les habitants.</p>
+      <p><strong>Tout Koki, dans votre poche.</strong></p>
+    </article>
+    <article class="card" aria-labelledby="titre-contact-menu">
+      <h3 id="titre-contact-menu">Contact et assistance</h3>
+      <p>Une question, une information à partager ou un problème à signaler ? Contactez KOKI CONNECT.</p>
+      <p>📞 <a href="tel:772875252">77 287 52 52</a><br>✉️ <a href="mailto:kokiconnect221@gmail.com">kokiconnect221@gmail.com</a></p>
+    </article>
+  </section>
+
   <section id="vue-notifications" class="section" hidden aria-labelledby="titre-notifications">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
@@ -308,7 +341,7 @@
     <button type="button" onclick="afficherRubrique('Actualités')"><span>📰</span>Actualités</button>
     <button type="button" onclick="afficherRubrique('Carte de Koki')"><span>📍</span>Carte</button>
     <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢</span>Annonces</button>
-    <button type="button" onclick="afficherRubrique('Menu')"><span>☰</span>Menu</button>
+    <button type="button" onclick="afficherMenu()"><span>☰</span>Menu</button>
   </nav>
   <script>
     document.getElementById('date-entete').textContent = new Intl.DateTimeFormat('fr-SN', {
@@ -379,9 +412,17 @@ function afficherOpportunites() {
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
   document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications'].includes(section.id);
+    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu'].includes(section.id);
   });
   document.querySelector('[onclick="afficherOpportunites()"]').focus();
+  window.scrollTo(0, 0);
+}
+function afficherMenu() {
+  document.querySelector('.search').hidden = true;
+  document.querySelectorAll('body > .section').forEach(section => {
+    section.hidden = section.id !== 'vue-menu';
+  });
+  document.getElementById('titre-menu').focus();
   window.scrollTo(0, 0);
 }
 function afficherNotifications() {
