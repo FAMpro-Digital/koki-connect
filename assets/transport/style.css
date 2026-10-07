@@ -1,0 +1,29 @@
+#vue-transport { padding-top: 20px; }
+#vue-transport .transport-marque { color: #075f32; font-size: 14px; line-height: 1.5; margin-bottom: 18px; }
+#vue-transport .transport-grille { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+#vue-transport .transport-bloc { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 3px 14px #0000000f; margin-bottom: 16px; min-width: 0; }
+#vue-transport h3 { font-size: 17px; margin-bottom: 12px; }
+#vue-transport label { display: block; font-size: 14px; margin: 12px 0 6px; }
+#vue-transport input:not([type=checkbox]), #vue-transport select { width: 100%; min-height: 46px; padding: 12px; border: 1px solid #ccdcd2; border-radius: 10px; background: white; color: #17201b; font: inherit; }
+#vue-transport button, #vue-transport .transport-lien { min-height: 44px; padding: 12px 14px; border: 1px solid #ccdcd2; border-radius: 10px; background: white; color: #075f32; font: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+#vue-transport .transport-principal { background: #087a3d; color: white; border-color: #087a3d; }
+#vue-transport button:disabled { opacity: 0.55; cursor: not-allowed; }
+#vue-transport button:focus-visible, #vue-transport input:focus-visible, #vue-transport select:focus-visible, #vue-transport a:focus-visible { outline: 3px solid #245d88; outline-offset: 3px; }
+#vue-transport p { line-height: 1.5; }
+#vue-transport .transport-aide { font-size: 13px; color: #526359; margin: 10px 0; }
+#vue-transport .transport-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#vue-transport .transport-categories { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
+#vue-transport .transport-categories button { padding: 12px 4px; font-size: 13px; }
+#vue-transport [aria-pressed=true] { background: #e8f6ed; border-color: #087a3d; font-weight: bold; }
+#vue-transport .transport-demo { background: #fff4d9; border: 1px solid #e6cd92; padding: 14px; border-radius: 12px; margin-bottom: 18px; }
+#vue-transport .transport-demo label { display: flex; gap: 10px; align-items: center; margin: 0; }
+#vue-transport .transport-demo input { width: 20px; height: 20px; }
+#vue-transport .transport-statut { padding: 10px; border-radius: 10px; background: #e8f6ed; color: #075f32; margin-bottom: 12px; }
+#vue-transport .transport-etapes { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; }
+#vue-transport .transport-etapes li { font-size: 12px; border-radius: 20px; padding: 8px; background: #f0f3f1; }
+#vue-transport .transport-etapes li[aria-current=step] { background: #087a3d; color: white; }
+#transport-carte { height: 260px; border-radius: 12px; position: relative; z-index: 0; margin-top: 12px; }
+#vue-transport .transport-chauffeur { border: 1px solid #dce8df; border-radius: 12px; padding: 14px; margin-top: 12px; }
+#vue-transport .transport-chauffeur h4 { margin-bottom: 8px; }
+#vue-transport [role=status] { margin: 12px 0; overflow-wrap: anywhere; }
+@media (max-width: 650px) { #vue-transport .transport-grille { grid-template-columns: minmax(0,1fr); } #vue-transport .transport-bloc { padding: 16px; } }

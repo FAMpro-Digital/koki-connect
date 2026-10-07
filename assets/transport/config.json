@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "chauffeurs": [],
+  "tarifs": null,
+  "reservationConnectee": false,
+  "demoTarifs": {
+    "Moto": {"base": 300, "parKm": 150},
+    "Taxi": {"base": 500, "parKm": 250},
+    "Voiture": {"base": 700, "parKm": 300},
+    "Minicar": {"base": 1000, "parKm": 400}
+  }
+}

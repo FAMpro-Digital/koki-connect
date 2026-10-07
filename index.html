@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KOKI CONNECT</title>
   <link rel="stylesheet" href="assets/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/transport/style.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
@@ -232,7 +233,7 @@
       <button type="button" class="raccourci" data-recherche="Petites annonces" style="background:#820ed8;" onclick="afficherRubrique('Petites annonces')"><span aria-hidden="true">📢</span><strong>Petites annonces</strong></button>
       <button type="button" class="raccourci" data-recherche="Opportunités jeunes" style="background:#008397;" onclick="afficherOpportunites()"><span aria-hidden="true">💼</span><strong>Opportunités jeunes</strong></button>
       <button type="button" class="raccourci" data-recherche="Numéros utiles" style="background:#d8004f;" onclick="afficherRubrique('Numéros utiles')"><span aria-hidden="true">📞</span><strong>Numéros utiles</strong></button>
-      <button type="button" class="raccourci" data-recherche="Autour de moi" style="background:#245d88;" onclick="activerGeolocalisation()"><span aria-hidden="true">📍</span><strong>Autour de moi</strong></button>
+      <button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88;" onclick="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
     </div>
     <div id="service-proche" style="margin-top:18px;"></div>
   </section>
@@ -290,6 +291,69 @@
       <div class="card" data-rubrique="Concours"><span>🏆</span><strong>Concours</strong><p>Aucune offre publiée pour le moment.</p></div>
       <div class="card" data-rubrique="Bourses"><span>📚</span><strong>Bourses</strong><p>Aucune offre publiée pour le moment.</p></div>
       <div class="card" data-rubrique="Financements"><span>🌱</span><strong>Financements</strong><p>Aucune offre publiée pour le moment.</p></div>
+    </div>
+  </section>
+
+  <section id="vue-transport" class="section" hidden aria-labelledby="titre-transport">
+    <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
+    <h2 id="titre-transport" tabindex="-1" style="margin-top:18px;">🚕 Transport</h2>
+    <p class="transport-marque">KOKI CONNECT — Transport | Une solution FAMpro Digital</p>
+    <div class="transport-demo">
+      <label><input id="transport-demo" type="checkbox" onchange="KokiTransport.changerMode()">Tester le mode démonstration</label>
+      <p id="transport-mode-info" class="transport-aide">Aucun chauffeur n’est encore inscrit. Activez la démonstration pour essayer une course fictive.</p>
+    </div>
+    <div class="transport-grille">
+      <div>
+        <div class="transport-bloc">
+          <h3>Votre trajet à Koki</h3>
+          <label for="transport-depart">Point de départ</label>
+          <select id="transport-depart" onchange="KokiTransport.changerLieu('depart')"><option value="">Choisir un lieu de départ</option></select>
+          <button id="transport-position" type="button" onclick="KokiTransport.utiliserPosition()" style="margin-top:10px;">📍 Utiliser ma position</button>
+          <label for="transport-destination">Destination</label>
+          <select id="transport-destination" onchange="KokiTransport.changerLieu('destination')"><option value="">Choisir une destination</option></select>
+          <p class="transport-aide">Choisissez un lieu référencé ou placez un point sur la carte.</p>
+          <div class="transport-actions">
+            <button id="transport-point-depart" type="button" aria-pressed="false" onclick="KokiTransport.choisirPoint('depart')">Placer le départ</button>
+            <button id="transport-point-destination" type="button" aria-pressed="false" onclick="KokiTransport.choisirPoint('destination')">Placer la destination</button>
+          </div>
+          <div id="transport-carte" aria-label="Carte pour choisir le départ et la destination"></div>
+          <p id="transport-message" role="status"></p>
+          <h3 style="margin-top:18px;">Véhicule</h3>
+          <div class="transport-categories" role="group" aria-label="Catégorie de véhicule">
+            <button type="button" data-vehicule="Moto" aria-pressed="true" onclick="KokiTransport.categorie('Moto')">🏍️ Moto</button>
+            <button type="button" data-vehicule="Taxi" aria-pressed="false" onclick="KokiTransport.categorie('Taxi')">🚕 Taxi</button>
+            <button type="button" data-vehicule="Voiture" aria-pressed="false" onclick="KokiTransport.categorie('Voiture')">🚗 Voiture</button>
+            <button type="button" data-vehicule="Minicar" aria-pressed="false" onclick="KokiTransport.categorie('Minicar')">🚐 Minicar</button>
+          </div>
+        </div>
+        <div class="transport-bloc">
+          <h3>Estimation</h3>
+          <p id="transport-estimation" role="status">Sélectionnez le départ et la destination.</p>
+          <p class="transport-aide">Distance à vol d’oiseau : le trajet routier peut être plus long. Le tarif réel sera à confirmer avec le chauffeur.</p>
+        </div>
+      </div>
+      <div>
+        <div class="transport-bloc">
+          <h3>Chauffeurs à proximité</h3>
+          <p class="transport-aide">Disponibles à moins de 10 km du départ, avec une position mise à jour depuis moins de 15 minutes.</p>
+          <div id="transport-chauffeurs"></div>
+          <button id="transport-demander" class="transport-principal" type="button" onclick="KokiTransport.demander()" disabled style="width:100%; margin-top:16px;">Demander une course</button>
+          <p class="transport-aide" id="transport-reservation-info">Les réservations réelles ne sont pas encore ouvertes.</p>
+        </div>
+        <div id="transport-course" class="transport-bloc" hidden>
+          <h3>Suivi de la course</h3>
+          <p id="transport-statut" class="transport-statut" role="status"></p>
+          <p id="transport-resume"></p>
+          <ol class="transport-etapes" aria-label="Étapes de la course">
+            <li>En attente</li><li>Acceptée</li><li>Chauffeur en route</li><li>Course en cours</li><li>Terminée</li>
+          </ol>
+          <div class="transport-actions">
+            <button id="transport-suivant" type="button" class="transport-principal" onclick="KokiTransport.avancer()">Simuler : Acceptée</button>
+            <button type="button" onclick="KokiTransport.reinitialiserCourse()">Effacer la course démo</button>
+          </div>
+          <p class="transport-aide">Simulation sur cet appareil uniquement. Aucun chauffeur n’est contacté. Les statuts réels seront confirmés par le service de réservation.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -386,12 +450,22 @@
 function trouverAutourDeMoi() {
   alert("La fonction Autour de moi fonctionne !");
 }
+function obtenirPositionActuelle() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) { reject(new Error('La localisation n’est pas disponible sur cet appareil.')); return; }
+    navigator.geolocation.getCurrentPosition(resolve, erreur => {
+      const message = erreur.code === 1 ? 'Localisation refusée. Autorisez-la dans votre navigateur ou choisissez un départ sur la carte.' : erreur.code === 3 ? 'La localisation prend trop de temps. Réessayez ou choisissez un lieu.' : 'Position indisponible. Choisissez un départ sur la carte.';
+      reject(new Error(message));
+    }, {timeout:10000, maximumAge:60000});
+  });
+}
 async function activerGeolocalisation() {
   const resultat = document.getElementById('service-proche');
   if (!navigator.geolocation) { resultat.textContent = 'La localisation n’est pas disponible sur cet appareil.'; return; }
   resultat.textContent = 'Chargement des lieux de Koki…';
   try { await chargerDonneesCarte(); } catch (erreur) { resultat.textContent = 'Impossible de charger les lieux. Réessayez plus tard.'; return; }
-  navigator.geolocation.getCurrentPosition(position => {
+  try {
+    const position = await obtenirPositionActuelle();
     const distance = lieu => {
       const rad = Math.PI / 180;
       const a = Math.sin((lieu.latitude-position.coords.latitude)*rad/2)**2 + Math.cos(position.coords.latitude*rad)*Math.cos(lieu.latitude*rad)*Math.sin((lieu.longitude-position.coords.longitude)*rad/2)**2;
@@ -405,7 +479,7 @@ async function activerGeolocalisation() {
       lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude;
       lien.target = '_blank'; lien.rel = 'noopener'; ligne.append(lien); resultat.append(ligne);
     });
-  }, () => { resultat.textContent = 'Position indisponible. Autorisez la localisation pour trouver les lieux proches.'; }, {timeout:10000, maximumAge:60000});
+  } catch (erreur) { resultat.textContent = erreur.message; }
 }
 function filtrerOpportunites(rubrique) {
   const vue = document.getElementById('opportunites-jeunes');
@@ -432,7 +506,7 @@ function afficherOpportunites() {
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
   document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte'].includes(section.id);
+    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport'].includes(section.id);
   });
   document.querySelector('[onclick="afficherOpportunites()"]').focus();
   window.scrollTo(0, 0);
@@ -569,5 +643,7 @@ function filtrerCarte() {
   });
 }
 </script>
+  <script src="assets/transport/core.js"></script>
+  <script src="assets/transport/app.js"></script>
 </body>
 </html>
