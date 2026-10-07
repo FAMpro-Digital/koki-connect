@@ -197,7 +197,7 @@
     <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
     <div class="entete-commandes">
       <button type="button" aria-label="Ouvrir le menu" onclick="afficherRubrique('Menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-      <button type="button" aria-label="Notifications" onclick="afficherRubrique('Notifications')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
+      <button type="button" aria-label="Notifications" onclick="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     </div>
     <div class="entete-infos">
       <div><strong>📍 Koki, Louga</strong><p id="date-entete"></p></div>
@@ -286,6 +286,17 @@
     </div>
   </section>
 
+  <section id="vue-notifications" class="section" hidden aria-labelledby="titre-notifications">
+    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
+    <p style="margin-bottom:18px; line-height:1.5;">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
+    <div class="card" style="text-align:center; padding:32px 20px;" role="status">
+      <span aria-hidden="true">🔔</span>
+      <h3>Aucune notification pour le moment</h3>
+      <p style="margin-top:12px; color:#526359; line-height:1.5;">Vous êtes à jour. Revenez ici pour consulter vos prochaines notifications.</p>
+    </div>
+  </section>
+
   <section id="vue-rubrique" class="section" hidden aria-labelledby="titre-rubrique">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
     <h2 id="titre-rubrique" tabindex="-1"></h2>
@@ -368,9 +379,17 @@ function afficherOpportunites() {
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
   document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = section.id === 'opportunites-jeunes' || section.id === 'vue-rubrique';
+    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications'].includes(section.id);
   });
   document.querySelector('[onclick="afficherOpportunites()"]').focus();
+  window.scrollTo(0, 0);
+}
+function afficherNotifications() {
+  document.querySelector('.search').hidden = true;
+  document.querySelectorAll('body > .section').forEach(section => {
+    section.hidden = section.id !== 'vue-notifications';
+  });
+  document.getElementById('titre-notifications').focus();
   window.scrollTo(0, 0);
 }
 function afficherRubrique(titre) {
