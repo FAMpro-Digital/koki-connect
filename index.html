@@ -205,7 +205,6 @@ function activerGeolocalisation() {
       const servicesValides = servicesKoki.filter(service => service.latitude !== 0 && service.longitude !== 0);
       const distance = (service) => Math.sqrt(Math.pow(service.latitude - latitude, 2) + Math.pow(service.longitude - longitude, 2));
     const serviceProche = servicesValides.reduce((a, b) => distance(a) < distance(b) ? a : b);  
-      const serviceProche = servicesValides[0];
 
       window.location.href = "https://www.google.com/maps?q=" + serviceProche.latitude + "," + serviceProche.longitude;
     },
