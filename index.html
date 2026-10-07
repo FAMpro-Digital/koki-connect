@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#087a3d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="KOKI CONNECT">
-  <link rel="preload" as="image" href="assets/entete-koki-wifi.webp">
+  <link rel="preload" as="image" href="assets/entete-original.webp">
 
   <style>
     * {
@@ -173,8 +173,9 @@
     nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
     [hidden] { display: none !important; }
     @media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-    .entete-koki { position: relative; height: clamp(240px,32vw,340px); padding: 18px 20px; border-radius: 0 0 24px 24px; background: #dbe9e9 url('assets/entete-koki-wifi.webp') center center / cover no-repeat; }
-    .entete-commandes { display: flex; justify-content: space-between; }
+    .entete-koki { position: relative; height: 350px; padding: 18px 20px; border-radius: 0 0 24px 24px; background: #f4f7f5; }
+    .visuel-original { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 280px; height: 280px; object-fit: contain; }
+    .entete-commandes { position: relative; z-index: 1; display: flex; justify-content: space-between; }
     .entete-commandes button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffffffb8; color: #172b26; cursor: pointer; }
     .entete-commandes svg { width: 24px; height: 24px; }
     .entete-infos { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 34px 20px 28px; background: linear-gradient(transparent,#003e2fdd); border-radius: 0 0 24px 24px; }
@@ -185,7 +186,8 @@
     .search { position: relative; margin-top: -16px; z-index: 1; }
     .visuellement-cache { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
     @media (max-width: 600px) {
-      .entete-koki { height: 240px; }
+      .entete-koki { height: 330px; }
+      .visuel-original { width: 260px; height: 260px; }
       .entete-infos { padding-left: 18px; padding-right: 18px; }
     }
   </style>
@@ -194,6 +196,7 @@
 <body>
 
   <header class="entete-koki">
+    <img class="visuel-original" src="assets/entete-original.webp" alt="" width="600" height="600" fetchpriority="high" decoding="async">
     <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
     <div class="entete-commandes">
       <button type="button" aria-label="Ouvrir le menu" onclick="afficherRubrique('Menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
