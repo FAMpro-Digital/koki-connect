@@ -211,7 +211,7 @@ function activerGeolocalisation() {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
       const servicesValides = servicesKoki.filter(service => service.latitude !== 0 && service.longitude !== 0);
-      const distance = (service) => 111 * Math.sqrt(Math.pow(service.latitude - latitude, 2) + Math.pow(service.longitude - longitude, 2));
+      const distance = (service) => { const R = 6371; const dLat = (service.latitude - latitude) * Math.PI / 180; const dLon = (service.longitude - longitude) * Math.PI / 180; const a = Math.sin(dLat / 2) ** 2 + Math.cos(latitude * Math.PI / 180) * Math.cos(service.latitude * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(a)); };
       const servicesProches = servicesValides.sort((a, b) => distance(a) - distance(b));
 
      document.getElementById("service-proche").innerHTML = servicesProches.map(service => "📍 " + service.nom + " — " + service.categorie + " — " + distance(service).toFixed(2) + " km"+ '<br><button onclick="window.location.href=\'https://www.google.com/maps?q=' + service.latitude + ',' + service.longitude + '\'">🗺️ Itinéraire</button><br><br>').join("");
