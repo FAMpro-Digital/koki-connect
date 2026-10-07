@@ -1,0 +1,7 @@
+(function(r){'use strict';
+const types=['Actualités','Annonces','Publicités','Opportunités','Sports & ASC','Événements'];
+const categories=['Actualité générale','Éducation','Sport','Jeunesse','Économie','Agriculture/élevage','Santé','Religion','Culture','Vie communautaire','Communiqué','Petite annonce','Avis important','Objet perdu/trouvé','Emploi','Stage','Formation','Concours','Bourse','Financement','Appel à projets','Match à venir','Résultat','Compétition'];
+function visible(x,now=Date.now()){return x.statut==='publié'&&Number.isFinite(Date.parse(x.publication))&&Date.parse(x.publication)<=now&&(x.type!=='Publicités'||(x.actif!==false&&(!x.fin||Date.parse(x.fin)>now)));}
+function valider(x){if(!types.includes(x.type)||!['brouillon','publié'].includes(x.statut)||!x.titre.trim()||!x.resume.trim())throw Error('Complétez le type, le titre et le résumé.');if(!Number.isFinite(Date.parse(x.publication)))throw Error('Date de publication invalide.');if(x.fin&&(!Number.isFinite(Date.parse(x.fin))||Date.parse(x.fin)<=Date.parse(x.publication)))throw Error('La fin doit être après la publication.');if(x.type==='Événements'&&(!x.lieu.trim()||!Number.isFinite(Date.parse(x.evenement))))throw Error('Précisez la date et le lieu de l’événement.');return x;}
+const api={types,categories,visible,valider,normaliser:x=>String(x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),trier:xs=>[...xs].sort((a,b)=>Date.parse(b.publication)-Date.parse(a.publication))};r.KokiPortailCore=api;if(typeof module!=='undefined')module.exports=api;
+})(globalThis);

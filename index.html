@@ -198,6 +198,7 @@
     #vue-menu .card p { margin-top: 12px; line-height: 1.6; }
     #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
   </style>
+  <link rel="stylesheet" href="assets/portail/style.css">
 </head>
 
 <body>
@@ -206,6 +207,7 @@
     <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
     <div class="entete-commandes">
       <button type="button" aria-label="Ouvrir le menu" onclick="afficherMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" aria-label="Profil utilisateur" onclick="KokiPortail.profil()">👤</button>
       <button type="button" aria-label="Notifications" onclick="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     </div>
     <div class="entete-infos">
@@ -220,49 +222,36 @@
   </header>
 
   <div class="search">
-    <input type="search" aria-label="Rechercher une rubrique" oninput="rechercherRubriques(this.value)" placeholder="🔎 Rechercher une rubrique, un service…">
+    <input type="search" aria-label="Que recherchez-vous à Koki ?" oninput="KokiPortail.rechercher(this.value)" placeholder="🔎 Que recherchez-vous à Koki ?">
+    <div id="portail-recherche" class="portail-grid"></div>
     <p id="resultat-recherche" role="status" style="margin-top:10px; font-size:14px;"></p>
   </div>
 
   <section class="section" id="tableau-de-bord">
-    <h2>Votre tableau de bord</h2>
+    <h2>Votre quotidien à Koki</h2>
     <div class="quick">
-      <button type="button" class="raccourci" data-recherche="Actualités" style="background:#087dff;" onclick="afficherRubrique('Actualités')"><span aria-hidden="true">📰</span><strong>Actualités</strong></button>
-      <button type="button" class="raccourci" data-recherche="Sports / ASC" style="background:#008444;" onclick="afficherRubrique('Sports / ASC')"><span aria-hidden="true">⚽</span><strong>Sports / ASC</strong></button>
-      <button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b;" onclick="afficherRubrique('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
-      <button type="button" class="raccourci" data-recherche="Commerces & services" style="background:#c76a00;" onclick="afficherCommerce()"><span aria-hidden="true">🏪</span><strong>Commerces & services</strong></button>
-      <button type="button" class="raccourci" data-recherche="Petites annonces" style="background:#820ed8;" onclick="afficherRubrique('Petites annonces')"><span aria-hidden="true">📢</span><strong>Petites annonces</strong></button>
-      <button type="button" class="raccourci" data-recherche="Opportunités jeunes" style="background:#008397;" onclick="afficherOpportunites()"><span aria-hidden="true">💼</span><strong>Opportunités jeunes</strong></button>
-      <button type="button" class="raccourci" data-recherche="Numéros utiles" style="background:#d8004f;" onclick="afficherRubrique('Numéros utiles')"><span aria-hidden="true">📞</span><strong>Numéros utiles</strong></button>
-      <button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88;" onclick="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
+<button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" onclick="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
+<button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" onclick="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
+<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" onclick="KokiPortail.lieux('Éducation')"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
+<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" onclick="KokiPortail.liste('Opportunités')"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
+<button type="button" class="raccourci" data-recherche="Sports & ASC" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sports & ASC</strong></button>
+<button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" onclick="KokiPortail.lieux('Santé')"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
+<button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" onclick="KokiPortail.liste('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
+<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" onclick="KokiPortail.lieux('Services publics')"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
     </div>
     <div id="service-proche" style="margin-top:18px;"></div>
   </section>
-  <section class="section" id="bienvenue-koki">
-    <div class="banniere">
-      <h2>Vivre, bouger, développer Koki ensemble.</h2>
-      <p>Les services de proximité et les opportunités pour faire avancer vos projets.</p>
-    </div>
-  </section>
-  <section class="section">
-    <h2>Explorer Koki</h2>
-
-    <div class="services">
-      <div class="card"><span>🎓</span><strong>Éducation</strong></div>
-      <div class="card"><span>💼</span><strong>Emploi & PME</strong></div>
-      <div class="card"><span>🛍️</span><strong>Commerce</strong></div>
-      <div class="card"><span>🚕</span><strong>Transport</strong></div>
-      <div class="card"><span>🌾</span><strong>Agriculture</strong></div>
-      <div class="card"><span>🐄</span><strong>Élevage</strong></div>
-      <div class="card"><span>🏥</span><strong>Santé</strong></div>
-      <div class="card"><span>🏛️</span><strong>Services publics</strong></div>
-      <div class="card"><span>⚽</span><strong>Jeunesse & Sport</strong></div>
-      <div class="card"><span>📅</span><strong>Événements</strong></div>
-      <div class="card"><span>🔨</span><strong>Artisans</strong></div>
-      <div class="card"><span>📰</span><strong>Actualités</strong></div>
-    </div>
-  </section>
-
+<section class="section" id="accueil-une"><div class="portail-title"><h2>🔥 À la une à Koki</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Actualités')">Voir plus</button></div><div id="portail-une" class="portail-grid"></div></section>
+<section class="section" id="accueil-actualites"><div class="portail-title"><h2>📰 Actualités de Koki</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Actualités')">Voir toutes les actualités</button></div><div id="portail-actualites" class="portail-grid"></div></section>
+<section class="section" id="accueil-annonces"><div class="portail-title"><h2>📢 Annonces</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Annonces')">Voir toutes les annonces</button></div><div id="portail-annonces" class="portail-grid"></div></section>
+<section class="section" id="accueil-publicites"><div class="portail-title"><h2>📣 Publicités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Publicités')">Voir plus</button></div><div id="portail-publicites" class="portail-grid"></div></section>
+<section class="section" id="accueil-commerces"><div class="portail-title"><h2>🛍️ Commerces & promotions</h2><button class="portail-more" type="button" onclick="afficherCommerce()">Voir plus</button></div><div id="portail-commerces" class="portail-grid"></div></section>
+<section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Opportunités')">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
+<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sports & ASC</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
+<section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
+<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.lieux('Éducation')">🎓 Écoles</button><button onclick="KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
+<section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
+<section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
@@ -454,7 +443,7 @@
 
   <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
-    <h2 id="titre-menu" tabindex="-1">Menu</h2>
+    <h2 id="titre-menu" tabindex="-1">Menu</h2><div class="portail-actions"><button onclick="KokiPortail.admin()">Tableau de bord des contenus</button></div>
     <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
       <button type="button" onclick="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
@@ -497,12 +486,12 @@
   </section>
 
   <nav aria-label="Navigation principale">
-    <button type="button" class="active" onclick="fermerOpportunites()"><span>🏠</span>Accueil</button>
-    <button type="button" onclick="afficherRubrique('Actualités')"><span>📰</span>Actualités</button>
-    <button type="button" onclick="afficherCarte()"><span>📍</span>Carte</button>
-    <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢</span>Annonces</button>
-    <button type="button" onclick="afficherMenu()"><span>☰</span>Menu</button>
-  </nav>
+<button type="button" onclick="fermerOpportunites()"><span>🏠</span>Accueil</button>
+<button type="button" onclick="afficherCarte()"><span>📍</span>Carte</button>
+<button type="button" onclick="KokiPortail.publier()"><span>➕</span>Publier</button>
+<button type="button" onclick="KokiPortail.favoris()"><span>♡</span>Favoris</button>
+<button type="button" onclick="KokiPortail.profil()"><span>👤</span>Profil</button>
+</nav>
   <script src="assets/leaflet/leaflet.js">
 </script>
   <script>
@@ -584,7 +573,7 @@ function afficherOpportunites() {
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
   document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce'].includes(section.id);
+    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce', 'vue-portail'].includes(section.id);
   });
   document.querySelector('[onclick="afficherOpportunites()"]').focus();
   window.scrollTo(0, 0);
@@ -606,6 +595,7 @@ function afficherNotifications() {
   window.scrollTo(0, 0);
 }
 function afficherRubrique(titre) {
+  if(window.KokiPortail && KokiPortail.rubrique(titre))return;
   document.querySelector('.search').hidden = true;
   document.querySelectorAll('body > .section').forEach(section => {
     section.hidden = section.id !== 'vue-rubrique';
@@ -725,5 +715,7 @@ function filtrerCarte() {
   <script src="assets/transport/app.js"></script>
   <script src="assets/commerce/core.js"></script>
   <script src="assets/commerce/app.js"></script>
+<script src="assets/portail/core.js"></script>
+<script src="assets/portail/app.js"></script>
 </body>
 </html>
