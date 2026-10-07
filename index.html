@@ -166,15 +166,27 @@
     nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
     [hidden] { display: none !important; }
     @media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    .entete-koki { display: flex; align-items: center; gap: 28px; }
+    .logo-koki { display: block; width: 190px; height: auto; flex-shrink: 0; border-radius: 28px; box-shadow: 0 8px 24px #00291e40; }
+    .identite-koki { min-width: 0; }
+    @media (max-width: 600px) {
+      .entete-koki { flex-direction: column; gap: 16px; text-align: center; padding: 22px 20px; }
+      .logo-koki { width: 170px; max-width: 100%; }
+      .entete-koki h1 { font-size: 24px; }
+      .entete-koki .localite { margin-top: 14px; line-height: 1.5; }
+    }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <h1>KOKI CONNECT</h1>
-    <p>Tout Koki, dans votre poche.</p>
-    <div class="localite">📍 Koki, Louga · Votre ville, vos services</div>
+  <header class="entete-koki">
+    <img class="logo-koki" src="assets/koki-connect.png" alt="KOKI CONNECT — Tout Koki, dans votre poche." width="1254" height="1254">
+    <div class="identite-koki">
+      <h1>KOKI CONNECT</h1>
+      <p>Tout Koki, dans votre poche.</p>
+      <div class="localite">📍 Koki, Louga · Votre ville, vos services</div>
+    </div>
   </header>
 
   <div class="search">
