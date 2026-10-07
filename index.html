@@ -117,6 +117,39 @@
       color: #087a3d;
       font-weight: bold;
     }
+    .opportunites-filtres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .opportunites-filtres button {
+      border: 1px solid #087a3d;
+      border-radius: 20px;
+      padding: 10px 14px;
+      background: white;
+      color: #075f32;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .opportunites-filtres button[aria-pressed="true"] {
+      background: #087a3d;
+      color: white;
+    }
+
+    #opportunites-jeunes .card p {
+      margin-top: 12px;
+      color: #526359;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    #opportunites-jeunes button:focus-visible {
+      outline: 3px solid #17201b;
+      outline-offset: 3px;
+    }
   </style>
 </head>
 
@@ -141,7 +174,7 @@
       </div>
 <button onclick="activerGeolocalisation()">📍 Voir les services autour de moi</button>
 <div id="service-proche"></div>
-      <div class="card highlight">
+      <div class="card highlight" onclick="afficherOpportunites()" style="cursor:pointer;">
         <span>🚀</span>
         <strong>Opportunités jeunes</strong>
       </div>
@@ -174,6 +207,38 @@
       <div class="card"><span>📅</span><strong>Événements</strong></div>
       <div class="card"><span>🔨</span><strong>Artisans</strong></div>
       <div class="card"><span>📰</span><strong>Actualités</strong></div>
+    </div>
+  </section>
+
+  <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
+    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
+    <p style="margin-bottom:15px;">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
+    <article class="card highlight" aria-labelledby="titre-fampro" style="margin-bottom:20px;">
+      <img src="assets/fampro-digital.png" alt="Logo Fampro Digital" style="display:block; width:100%; max-width:360px; height:auto; margin-bottom:16px; border-radius:12px;">
+      <h3 id="titre-fampro">Découvrez Fampro Digital</h3>
+      <p>Vous avez une idée ou un projet numérique ? Présentez-le à Fampro Digital pour échanger sur vos objectifs et vos besoins.</p>
+      <p>📩 Contactez Fampro Digital pour en savoir plus.</p>
+      <p>📞 <a href="tel:772875252">77 287 52 52</a><br>
+      ✉️ <a href="mailto:kokiconnect221@gmail.com">kokiconnect221@gmail.com</a></p>
+    </article>
+    <div class="opportunites-filtres" role="group" aria-label="Filtrer les opportunités par rubrique">
+      <button type="button" data-filtre="Toutes" aria-pressed="true" onclick="filtrerOpportunites(this.dataset.filtre)">Toutes</button>
+      <button type="button" data-filtre="Emplois" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Emplois</button>
+      <button type="button" data-filtre="Stages" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Stages</button>
+      <button type="button" data-filtre="Formations" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Formations</button>
+      <button type="button" data-filtre="Concours" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Concours</button>
+      <button type="button" data-filtre="Bourses" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Bourses</button>
+      <button type="button" data-filtre="Financements" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Financements</button>
+    </div>
+    <p id="statut-opportunites" role="status" style="margin-bottom:15px;">6 rubriques affichées.</p>
+    <div class="services">
+      <div class="card" data-rubrique="Emplois"><span>💼</span><strong>Emplois</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Stages"><span>🤝</span><strong>Stages</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Formations"><span>🎓</span><strong>Formations</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Concours"><span>🏆</span><strong>Concours</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Bourses"><span>📚</span><strong>Bourses</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Financements"><span>🌱</span><strong>Financements</strong><p>Aucune offre publiée pour le moment.</p></div>
     </div>
   </section>
 
@@ -224,6 +289,36 @@ function activerGeolocalisation() {
       alert("Impossible d'obtenir votre position. Autorisez la localisation dans Safari.");
     }
   );
+}
+function filtrerOpportunites(rubrique) {
+  const vue = document.getElementById('opportunites-jeunes');
+  let visibles = 0;
+  vue.querySelectorAll('[data-rubrique]').forEach(carte => {
+    carte.hidden = rubrique !== 'Toutes' && carte.dataset.rubrique !== rubrique;
+    if (!carte.hidden) visibles++;
+  });
+  vue.querySelectorAll('[data-filtre]').forEach(bouton => {
+    bouton.setAttribute('aria-pressed', String(bouton.dataset.filtre === rubrique));
+  });
+  document.getElementById('statut-opportunites').textContent =
+    visibles === 1 ? '1 rubrique affichée : ' + rubrique + '.' : visibles + ' rubriques affichées.';
+}
+function afficherOpportunites() {
+  filtrerOpportunites('Toutes');
+  document.querySelector('.search').hidden = true;
+  document.querySelectorAll('body > .section').forEach(section => {
+    section.hidden = section.id !== 'opportunites-jeunes';
+  });
+  document.getElementById('titre-opportunites').focus();
+  window.scrollTo(0, 0);
+}
+function fermerOpportunites() {
+  document.querySelector('.search').hidden = false;
+  document.querySelectorAll('body > .section').forEach(section => {
+    section.hidden = section.id === 'opportunites-jeunes';
+  });
+  document.querySelector('[onclick="afficherOpportunites()"]').focus();
+  window.scrollTo(0, 0);
 }
 </script>
 </body>
