@@ -183,6 +183,16 @@
   }
   function avancer() { if(!etat.demo || !etat.course)return;const suivant=core.statuts[core.statuts.indexOf(etat.course.statut)+1];if(!suivant)return;etat.course=core.transition(etat.course,suivant);depot.sauverCourse(etat.course);actualiser(); }
   function reinitialiserCourse() { etat.course=null;depot.sauverCourse(null);actualiser(); }
-  window.KokiTransport=Object.freeze({afficher,changerLieu,utiliserPosition,changerMode,categorie,choisirPoint,demander,avancer,reinitialiserCourse});
+  async function preparerTrajet(trajet) {
+    if (!core.pointValide(trajet.depart) || !core.pointValide(trajet.destination)) return;
+    await afficher();
+    if (courseActive()) { message('Une course démo est déjà active. Terminez-la avant de préparer ce déplacement.'); return; }
+    etat.depart={...trajet.depart};etat.destination={...trajet.destination};etat.choisi=null;
+    pointOption('depart',etat.depart);pointOption('destination',etat.destination);
+    actualiser();
+    if (carte) carte.fitBounds([[etat.depart.latitude,etat.depart.longitude],[etat.destination.latitude,etat.destination.longitude]],{padding:[20,20],maxZoom:15});
+    message('Trajet préparé depuis Commerces & Services. Aucun chauffeur ni livreur n’est réservé.');
+  }
+  window.KokiTransport=Object.freeze({afficher,changerLieu,utiliserPosition,changerMode,categorie,choisirPoint,demander,avancer,reinitialiserCourse,preparerTrajet});
   window.afficherTransport=afficher;
 })();

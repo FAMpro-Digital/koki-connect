@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict');
+const C=require('../assets/commerce/core.js');
+const catalogue=[{id:'riz',nom:'Riz',proId:'p',prix:500,stock:3,disponible:true}];
+const panier=[{id:'riz',quantite:2}];
+assert.equal(C.total(panier,catalogue),1000);
+const c=C.commander(panier,catalogue,'livraison',{nom:'Koki'});
+assert.equal(c.catalogue[0].stock,1);assert.equal(c.lignes[0].prix,500);assert.equal(catalogue[0].stock,3);
+for(const q of [0,-1,1.5,4])assert.throws(()=>C.commander([{id:'riz',quantite:q}],catalogue,'retrait'));
+assert.throws(()=>C.commander([],catalogue,'retrait'));
+assert.throws(()=>C.commander(panier,catalogue,'livraison'));
+assert.throws(()=>C.commander([...panier,...panier],catalogue,'retrait'));
+assert.throws(()=>C.commander(panier,[{...catalogue[0],disponible:false}],'retrait'));
+for(const chain of [C.commandes,C.retraits,C.demandes]){let x={statut:chain[0]};for(const expected of chain.slice(1)){x=C.avancer(x,chain);assert.equal(x.statut,expected);}assert.throws(()=>C.avancer(x,chain));}
+C.validerDemande('Réparer une fuite',{nom:'Koki'},'2026-10-08','2026-10-07');
+for(const date of ['2026-02-30','2026-10-06','invalid'])assert.throws(()=>C.validerDemande('Réparer une fuite',{nom:'Koki'},date,'2026-10-07'));
+assert.throws(()=>C.validerDemande('Court',{nom:'Koki'},'2026-10-08','2026-10-07'));
+assert.equal(C.metiers.length,19);
+const fs=require('node:fs');const html=fs.readFileSync('index.html','utf8');
+assert.equal((html.match(/navigator\.geolocation\.getCurrentPosition/g)||[]).length,1);
+assert.ok(html.includes('afficherCommerce()'));assert.ok(html.includes('vue-transport'));
+console.log('Commerce : stock, panier, montants, statuts, dates et GPS partagé validés.');

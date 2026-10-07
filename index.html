@@ -6,6 +6,7 @@
   <title>KOKI CONNECT</title>
   <link rel="stylesheet" href="assets/leaflet/leaflet.css">
   <link rel="stylesheet" href="assets/transport/style.css">
+  <link rel="stylesheet" href="assets/commerce/style.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
@@ -229,7 +230,7 @@
       <button type="button" class="raccourci" data-recherche="Actualités" style="background:#087dff;" onclick="afficherRubrique('Actualités')"><span aria-hidden="true">📰</span><strong>Actualités</strong></button>
       <button type="button" class="raccourci" data-recherche="Sports / ASC" style="background:#008444;" onclick="afficherRubrique('Sports / ASC')"><span aria-hidden="true">⚽</span><strong>Sports / ASC</strong></button>
       <button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b;" onclick="afficherRubrique('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
-      <button type="button" class="raccourci" data-recherche="Commerces & services" style="background:#c76a00;" onclick="afficherRubrique('Commerces et services')"><span aria-hidden="true">🏪</span><strong>Commerces & services</strong></button>
+      <button type="button" class="raccourci" data-recherche="Commerces & services" style="background:#c76a00;" onclick="afficherCommerce()"><span aria-hidden="true">🏪</span><strong>Commerces & services</strong></button>
       <button type="button" class="raccourci" data-recherche="Petites annonces" style="background:#820ed8;" onclick="afficherRubrique('Petites annonces')"><span aria-hidden="true">📢</span><strong>Petites annonces</strong></button>
       <button type="button" class="raccourci" data-recherche="Opportunités jeunes" style="background:#008397;" onclick="afficherOpportunites()"><span aria-hidden="true">💼</span><strong>Opportunités jeunes</strong></button>
       <button type="button" class="raccourci" data-recherche="Numéros utiles" style="background:#d8004f;" onclick="afficherRubrique('Numéros utiles')"><span aria-hidden="true">📞</span><strong>Numéros utiles</strong></button>
@@ -291,6 +292,83 @@
       <div class="card" data-rubrique="Concours"><span>🏆</span><strong>Concours</strong><p>Aucune offre publiée pour le moment.</p></div>
       <div class="card" data-rubrique="Bourses"><span>📚</span><strong>Bourses</strong><p>Aucune offre publiée pour le moment.</p></div>
       <div class="card" data-rubrique="Financements"><span>🌱</span><strong>Financements</strong><p>Aucune offre publiée pour le moment.</p></div>
+    </div>
+  </section>
+
+  <section id="vue-commerce" class="section" hidden aria-labelledby="titre-commerce">
+    <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
+    <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2>
+    <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
+    <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Catalogue fictif et brouillons enregistrés sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
+    <p id="market-message" role="status"></p>
+    <div class="market-tabs" role="group" aria-label="Espaces de Commerces et Services">
+      <button type="button" data-market-tab="produits" aria-pressed="true" onclick="KokiCommerce.onglet('produits')">Produits</button>
+      <button type="button" data-market-tab="services" aria-pressed="false" onclick="KokiCommerce.onglet('services')">Services</button>
+      <button type="button" data-market-tab="panier" aria-pressed="false" onclick="KokiCommerce.onglet('panier')">Panier</button>
+      <button type="button" data-market-tab="suivi" aria-pressed="false" onclick="KokiCommerce.onglet('suivi')">Mes commandes et demandes</button>
+      <button type="button" data-market-tab="pro" aria-pressed="false" onclick="KokiCommerce.onglet('pro')">Espace professionnel</button>
+    </div>
+    <div id="market-catalogue" class="market-panel">
+      <div class="market-filter">
+        <div><label for="market-recherche">Rechercher</label><input id="market-recherche" type="search" placeholder="Produit, boutique, métier…" oninput="KokiCommerce.catalogue()"></div>
+        <div><label for="market-categorie">Catégorie</label><select id="market-categorie" onchange="KokiCommerce.catalogue()"><option value="">Toutes</option></select></div>
+        <div><label for="market-tri">Trier</label><select id="market-tri" onchange="KokiCommerce.catalogue()"><option value="nom">Nom</option><option value="prix">Prix croissant</option></select></div>
+      </div>
+      <label><input id="market-disponible" type="checkbox" onchange="KokiCommerce.catalogue()"> Disponibles uniquement</label>
+      <label><input id="market-promotions" type="checkbox" onchange="KokiCommerce.catalogue()"> Promotions uniquement (produits)</label>
+      <div id="market-resultats" class="market-grid" style="margin-top:16px;"></div>
+    </div>
+    <div id="market-fiche" class="market-panel" hidden></div>
+    <div id="market-panier" class="market-panel" hidden>
+      <h3>Votre panier</h3><div id="market-lignes"></div><p id="market-total" class="market-price"></p>
+      <label for="market-reception">Réception</label><select id="market-reception" onchange="KokiCommerce.panier()"><option value="retrait">Retrait en boutique</option><option value="livraison">Livraison</option></select>
+      <label for="market-livraison-lieu">Lieu de livraison</label><select id="market-livraison-lieu"></select>
+      <button type="button" onclick="KokiCommerce.position('livraison')">📍 Utiliser ma position</button>
+      <p class="market-small">Total des produits uniquement. Frais de livraison à confirmer ; aucun paiement en ligne pour le moment.</p>
+      <button id="market-commander" type="button" class="market-primary" onclick="KokiCommerce.commander()" disabled>Commander</button>
+    </div>
+    <form id="market-demande" class="market-panel" hidden onsubmit="event.preventDefault(); KokiCommerce.envoyerDemande()">
+      <h3 id="market-demande-titre">Demander un devis</h3>
+      <label for="market-besoin">Décrivez votre besoin</label><textarea id="market-besoin" minlength="10" maxlength="2000" required></textarea>
+      <label for="market-service-lieu">Lieu d’intervention</label><select id="market-service-lieu" required></select>
+      <button type="button" onclick="KokiCommerce.position('service')">📍 Utiliser ma position</button>
+      <label for="market-date">Date souhaitée</label><input id="market-date" type="date" required>
+      <label for="market-besoin-photo">Photo du besoin (facultative, JPEG/PNG/WebP, 1 Mo maximum)</label><input id="market-besoin-photo" type="file" accept="image/jpeg,image/png,image/webp">
+      <p class="market-small">La photo sera conservée localement avec la demande démo, sans transmission.</p>
+      <button type="submit" class="market-primary">Demander un devis</button>
+    </form>
+    <div id="market-suivi" class="market-panel" hidden><h3>Mes commandes et demandes</h3><div id="market-historique"></div></div>
+    <div id="market-pro" class="market-panel" hidden>
+      <h3>Espace professionnel — démonstration locale</h3>
+      <p class="market-small">Ce profil n’est pas un compte connecté. Vos modifications restent sur cet appareil et ne sont pas publiées aux autres utilisateurs.</p>
+      <form onsubmit="event.preventDefault(); KokiCommerce.sauverProfil()">
+        <label for="market-pro-type">Profil</label><select id="market-pro-type"><option>Commerçant</option><option>Prestataire de services</option><option>Les deux</option></select>
+        <label for="market-pro-nom">Nom de la boutique ou entreprise</label><input id="market-pro-nom" maxlength="100" required>
+        <label for="market-pro-description">Présentation</label><textarea id="market-pro-description" maxlength="1000" required></textarea>
+        <label for="market-pro-zone">Zone d’intervention</label><input id="market-pro-zone" maxlength="150" value="Koki et environs" required>
+        <label for="market-pro-lieu">Localisation</label><select id="market-pro-lieu" required></select>
+        <label for="market-pro-tel">Téléphone international (ex. +221…)</label><input id="market-pro-tel" type="tel" maxlength="20">
+        <label for="market-pro-logo">Photo ou logo (1 Mo maximum)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp">
+        <button type="submit">Enregistrer mon profil démo</button>
+      </form>
+      <hr style="margin:22px 0;">
+      <h3 id="market-editeur-titre">Ajouter un produit ou service</h3>
+      <form id="market-editeur" onsubmit="event.preventDefault(); KokiCommerce.sauverOffre()">
+        <input id="market-offre-id" type="hidden">
+        <label for="market-offre-type">Type d’offre</label><select id="market-offre-type" onchange="KokiCommerce.categoriesOffre()"><option value="produit">Produit</option><option value="service">Service</option></select>
+        <label for="market-offre-nom">Nom</label><input id="market-offre-nom" maxlength="100" required>
+        <label for="market-offre-categorie">Catégorie</label><select id="market-offre-categorie"></select>
+        <label for="market-offre-description">Description</label><textarea id="market-offre-description" maxlength="1000" required></textarea>
+        <label for="market-offre-prix">Prix en FCFA (laisser vide pour un service sur devis)</label><input id="market-offre-prix" type="number" min="0" max="100000000" step="1">
+        <label for="market-offre-stock">Stock (produits)</label><input id="market-offre-stock" type="number" min="0" max="10000" step="1" value="1">
+        <label for="market-offre-ancien">Ancien prix en FCFA (promotion produits, facultatif)</label><input id="market-offre-ancien" type="number" min="0" max="100000000" step="1">
+        <label><input id="market-offre-dispo" type="checkbox" checked> Disponible</label>
+        <label for="market-offre-photo">Photo du produit ou de la réalisation (1 Mo maximum)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp">
+        <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" onclick="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
+      </form>
+      <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
+      <h3 style="margin-top:22px;">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
+      <button type="button" onclick="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
     </div>
   </section>
 
@@ -382,7 +460,7 @@
       <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sports / ASC</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Commerces et services')"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherCommerce()"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherOpportunites()"><span>💼 Opportunités jeunes</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
@@ -506,7 +584,7 @@ function afficherOpportunites() {
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
   document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport'].includes(section.id);
+    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce'].includes(section.id);
   });
   document.querySelector('[onclick="afficherOpportunites()"]').focus();
   window.scrollTo(0, 0);
@@ -645,5 +723,7 @@ function filtrerCarte() {
 </script>
   <script src="assets/transport/core.js"></script>
   <script src="assets/transport/app.js"></script>
+  <script src="assets/commerce/core.js"></script>
+  <script src="assets/commerce/app.js"></script>
 </body>
 </html>
