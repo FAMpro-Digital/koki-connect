@@ -208,7 +208,7 @@ function activerGeolocalisation() {
     const serviceProche = servicesValides.reduce((a, b) => distance(a) < distance(b) ? a : b);  
 
      document.getElementById("service-proche").innerHTML = "📍 " + serviceProche.nom + " — " + serviceProche.categorie;
-    window.location.href = "https://www.google.com/maps?q=" + serviceProche.latitude + "," + serviceProche.longitude;
+    
     },
     function(error) {
       alert("Impossible d'obtenir votre position. Autorisez la localisation dans Safari.");
