@@ -560,7 +560,9 @@ function filtrerCarte() {
     const titre = document.createElement('strong'); titre.textContent = lieu.nom;
     const details = document.createElement('p'); details.textContent = lieu.categorie + ' · ' + lieu.position;
     const lien = document.createElement('a'); lien.textContent = 'Itinéraire'; lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude; lien.target='_blank'; lien.rel='noopener';
-    popup.append(titre,details,lien);
+    const coordonnees = document.createElement('p');
+    coordonnees.textContent = 'Latitude : ' + lieu.latitude.toFixed(6) + ' · Longitude : ' + lieu.longitude.toFixed(6);
+    popup.append(titre,details,coordonnees,lien);
     const marker = L.circleMarker([lieu.latitude,lieu.longitude],{radius:7,color:lieu.categorie==='Villages et quartiers'?'#245d88':'#087a3d',fillOpacity:0.9}).bindPopup(popup).addTo(marqueursKoki);
     const bouton = document.createElement('button'); bouton.type='button'; bouton.textContent=lieu.nom + ' — ' + lieu.categorie;
     bouton.onclick=()=>{carteKoki.setView([lieu.latitude,lieu.longitude],16);marker.openPopup();document.getElementById('carte-koki').scrollIntoView({block:'center'});}; liste.append(bouton);
