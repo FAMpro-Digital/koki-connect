@@ -362,54 +362,6 @@
     <button type="button" onclick="afficherMenu()"><span>☰</span>Menu</button>
   </nav>
   <script src="assets/leaflet/leaflet.js">
-let carteKoki = null;
-let marqueursKoki = null;
-let limiteKoki = null;
-async function afficherCarte() {
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => { section.hidden = section.id !== 'vue-carte'; });
-  document.getElementById('titre-carte').focus();
-  window.scrollTo(0,0);
-  const statut = document.getElementById('statut-carte');
-  statut.textContent = 'Chargement de la carte…';
-  try {
-    await chargerDonneesCarte();
-    if (!window.L) throw new Error('Carte indisponible');
-    if (!carteKoki) {
-      carteKoki = L.map('carte-koki').setView(CENTRE_KOKI,12);
-      const fond = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(carteKoki);
-      fond.on('tileerror', () => { statut.textContent = 'Fond de carte indisponible. La liste des lieux reste accessible.'; });
-      limiteKoki = L.geoJSON(donneesCarte.limite,{style:{color:'#087a3d',weight:2,fillOpacity:0.06}}).addTo(carteKoki);
-      marqueursKoki = L.layerGroup().addTo(carteKoki);
-    }
-    carteKoki.invalidateSize();
-    recentrerCarte();
-    filtrerCarte();
-  } catch (erreur) { statut.textContent = 'Impossible de charger la carte. Cliquez sur Carte pour réessayer.'; }
-}
-function recentrerCarte() {
-  if (carteKoki && limiteKoki) carteKoki.fitBounds(limiteKoki.getBounds(),{padding:[12,12]});
-}
-function filtrerCarte() {
-  if (!donneesCarte || !marqueursKoki) return;
-  const normaliser = valeur => valeur.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const recherche = normaliser(document.getElementById('recherche-carte').value.trim());
-  const categorie = document.getElementById('categorie-carte').value;
-  const lieux = donneesCarte.lieux.filter(lieu => (!categorie || lieu.categorie===categorie) && normaliser(lieu.nom).includes(recherche));
-  marqueursKoki.clearLayers();
-  const liste = document.getElementById('liste-carte'); liste.replaceChildren();
-  document.getElementById('statut-carte').textContent = lieux.length + ' lieu(x) référencé(s).';
-  lieux.forEach(lieu => {
-    const popup = document.createElement('div');
-    const titre = document.createElement('strong'); titre.textContent = lieu.nom;
-    const details = document.createElement('p'); details.textContent = lieu.categorie + ' · ' + lieu.position;
-    const lien = document.createElement('a'); lien.textContent = 'Itinéraire'; lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude; lien.target='_blank'; lien.rel='noopener';
-    popup.append(titre,details,lien);
-    const marker = L.circleMarker([lieu.latitude,lieu.longitude],{radius:7,color:lieu.categorie==='Villages et quartiers'?'#245d88':'#087a3d',fillOpacity:0.9}).bindPopup(popup).addTo(marqueursKoki);
-    const bouton = document.createElement('button'); bouton.type='button'; bouton.textContent=lieu.nom + ' — ' + lieu.categorie;
-    bouton.onclick=()=>{carteKoki.setView([lieu.latitude,lieu.longitude],16);marker.openPopup();document.getElementById('carte-koki').scrollIntoView({block:'center'});}; liste.append(bouton);
-  });
-}
 </script>
   <script>
     document.getElementById('date-entete').textContent = new Intl.DateTimeFormat('fr-SN', {
@@ -566,6 +518,54 @@ async function chargerMeteo() {
 }
 chargerMeteo();
 setInterval(chargerMeteo, 15 * 60 * 1000);
+let carteKoki = null;
+let marqueursKoki = null;
+let limiteKoki = null;
+async function afficherCarte() {
+  document.querySelector('.search').hidden = true;
+  document.querySelectorAll('body > .section').forEach(section => { section.hidden = section.id !== 'vue-carte'; });
+  document.getElementById('titre-carte').focus();
+  window.scrollTo(0,0);
+  const statut = document.getElementById('statut-carte');
+  statut.textContent = 'Chargement de la carte…';
+  try {
+    await chargerDonneesCarte();
+    if (!window.L) throw new Error('Carte indisponible');
+    if (!carteKoki) {
+      carteKoki = L.map('carte-koki').setView(CENTRE_KOKI,12);
+      const fond = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(carteKoki);
+      fond.on('tileerror', () => { statut.textContent = 'Fond de carte indisponible. La liste des lieux reste accessible.'; });
+      limiteKoki = L.geoJSON(donneesCarte.limite,{style:{color:'#087a3d',weight:2,fillOpacity:0.06}}).addTo(carteKoki);
+      marqueursKoki = L.layerGroup().addTo(carteKoki);
+    }
+    carteKoki.invalidateSize();
+    recentrerCarte();
+    filtrerCarte();
+  } catch (erreur) { statut.textContent = 'Impossible de charger la carte. Cliquez sur Carte pour réessayer.'; }
+}
+function recentrerCarte() {
+  if (carteKoki && limiteKoki) carteKoki.fitBounds(limiteKoki.getBounds(),{padding:[12,12]});
+}
+function filtrerCarte() {
+  if (!donneesCarte || !marqueursKoki) return;
+  const normaliser = valeur => valeur.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const recherche = normaliser(document.getElementById('recherche-carte').value.trim());
+  const categorie = document.getElementById('categorie-carte').value;
+  const lieux = donneesCarte.lieux.filter(lieu => (!categorie || lieu.categorie===categorie) && normaliser(lieu.nom).includes(recherche));
+  marqueursKoki.clearLayers();
+  const liste = document.getElementById('liste-carte'); liste.replaceChildren();
+  document.getElementById('statut-carte').textContent = lieux.length + ' lieu(x) référencé(s).';
+  lieux.forEach(lieu => {
+    const popup = document.createElement('div');
+    const titre = document.createElement('strong'); titre.textContent = lieu.nom;
+    const details = document.createElement('p'); details.textContent = lieu.categorie + ' · ' + lieu.position;
+    const lien = document.createElement('a'); lien.textContent = 'Itinéraire'; lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude; lien.target='_blank'; lien.rel='noopener';
+    popup.append(titre,details,lien);
+    const marker = L.circleMarker([lieu.latitude,lieu.longitude],{radius:7,color:lieu.categorie==='Villages et quartiers'?'#245d88':'#087a3d',fillOpacity:0.9}).bindPopup(popup).addTo(marqueursKoki);
+    const bouton = document.createElement('button'); bouton.type='button'; bouton.textContent=lieu.nom + ' — ' + lieu.categorie;
+    bouton.onclick=()=>{carteKoki.setView([lieu.latitude,lieu.longitude],16);marker.openPopup();document.getElementById('carte-koki').scrollIntoView({block:'center'});}; liste.append(bouton);
+  });
+}
 </script>
 </body>
 </html>
