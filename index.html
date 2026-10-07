@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KOKI CONNECT</title>
+  <link rel="preload" as="image" href="assets/entete-koki.webp">
 
   <style>
     * {
@@ -166,14 +167,20 @@
     nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
     [hidden] { display: none !important; }
     @media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-    .entete-koki { display: flex; align-items: center; gap: 28px; }
-    .logo-koki { display: block; width: 190px; height: auto; flex-shrink: 0; border-radius: 28px; box-shadow: 0 8px 24px #00291e40; }
-    .identite-koki { min-width: 0; }
+    .entete-koki { position: relative; height: clamp(240px,32vw,340px); padding: 18px 20px; border-radius: 0 0 24px 24px; background: #dbe9e9 url('assets/entete-koki.webp') center center / cover no-repeat; }
+    .entete-commandes { display: flex; justify-content: space-between; }
+    .entete-commandes button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffffffb8; color: #172b26; cursor: pointer; }
+    .entete-commandes svg { width: 24px; height: 24px; }
+    .entete-infos { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 34px 20px 28px; background: linear-gradient(transparent,#003e2fdd); border-radius: 0 0 24px 24px; }
+    .entete-infos strong { font-size: 17px; }
+    .entete-infos p { font-size: 12px; margin-top: 4px; }
+    .meteo-entete { border: 0; color: white; background: transparent; cursor: pointer; text-align: right; font: inherit; }
+    .meteo-entete span { font-size: 22px; }
+    .search { position: relative; margin-top: -16px; z-index: 1; }
+    .visuellement-cache { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
     @media (max-width: 600px) {
-      .entete-koki { flex-direction: column; gap: 16px; text-align: center; padding: 22px 20px; }
-      .logo-koki { width: 170px; max-width: 100%; }
-      .entete-koki h1 { font-size: 24px; }
-      .entete-koki .localite { margin-top: 14px; line-height: 1.5; }
+      .entete-koki { height: 240px; }
+      .entete-infos { padding-left: 18px; padding-right: 18px; }
     }
   </style>
 </head>
@@ -181,11 +188,14 @@
 <body>
 
   <header class="entete-koki">
-    <img class="logo-koki" src="assets/koki-connect.webp" alt="KOKI CONNECT — Tout Koki, dans votre poche." width="480" height="480" fetchpriority="high" decoding="async">
-    <div class="identite-koki">
-      <h1>KOKI CONNECT</h1>
-      <p>Tout Koki, dans votre poche.</p>
-      <div class="localite">📍 Koki, Louga · Votre ville, vos services</div>
+    <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
+    <div class="entete-commandes">
+      <button type="button" aria-label="Ouvrir le menu" onclick="afficherRubrique('Menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" aria-label="Notifications" onclick="afficherRubrique('Notifications')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
+    </div>
+    <div class="entete-infos">
+      <div><strong>📍 Koki, Louga</strong><p id="date-entete"></p></div>
+      <button type="button" class="meteo-entete" onclick="afficherRubrique('Météo de Koki')" aria-label="Météo de Koki, données à venir"><span aria-hidden="true">☀️</span> Météo<p>Données à venir</p></button>
     </div>
   </header>
 
@@ -279,6 +289,9 @@
     <button type="button" onclick="afficherRubrique('Menu')"><span>☰</span>Menu</button>
   </nav>
   <script>
+    document.getElementById('date-entete').textContent = new Intl.DateTimeFormat('fr-SN', {
+      timeZone: 'Africa/Dakar', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }).format(new Date());
     const servicesKoki = [
   { nom: "Centre de santé de Koki", categorie: "Santé", latitude: 15.509675, longitude: -15.992162 },
   { nom: "Lycée de Koki", categorie: "Éducation", latitude: 15.511638, longitude: -15.980637 },
