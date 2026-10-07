@@ -140,6 +140,7 @@
         <strong>Autour de moi</strong>
       </div>
 <button onclick="activerGeolocalisation()">📍 Voir les services autour de moi</button>
+<div id="service-proche"></div>
       <div class="card highlight">
         <span>🚀</span>
         <strong>Opportunités jeunes</strong>
@@ -206,7 +207,7 @@ function activerGeolocalisation() {
       const distance = (service) => Math.sqrt(Math.pow(service.latitude - latitude, 2) + Math.pow(service.longitude - longitude, 2));
     const serviceProche = servicesValides.reduce((a, b) => distance(a) < distance(b) ? a : b);  
 
-     alert("Service le plus proche : " + serviceProche.nom);
+     document.getElementById("service-proche").innerHTML = "📍 " + serviceProche.nom + " — " + serviceProche.categorie;
     window.location.href = "https://www.google.com/maps?q=" + serviceProche.latitude + "," + serviceProche.longitude;
     },
     function(error) {
