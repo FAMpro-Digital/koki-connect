@@ -199,6 +199,7 @@
     #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
   </style>
   <link rel="stylesheet" href="assets/portail/style.css">
+<link rel="stylesheet" href="assets/business/style.css">
 </head>
 
 <body>
@@ -290,6 +291,7 @@
     <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
     <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Catalogue fictif et brouillons enregistrés sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
+    <div id="market-demo-interface">
     <p id="market-message" role="status"></p>
     <div class="market-tabs" role="group" aria-label="Espaces de Commerces et Services">
       <button type="button" data-market-tab="produits" aria-pressed="true" onclick="KokiCommerce.onglet('produits')">Produits</button>
@@ -359,6 +361,7 @@
       <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
       <h3 style="margin-top:22px;">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
       <button type="button" onclick="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
+    </div>
     </div>
   </section>
 
@@ -712,7 +715,8 @@ function filtrerCarte() {
   });
 }
 </script>
-  <script src="assets/transport/core.js"></script>
+  <script type="module" src="assets/business/runtime.mjs"></script>
+<script src="assets/transport/core.js"></script>
   <script src="assets/transport/app.js"></script>
   <script src="assets/commerce/core.js"></script>
   <script src="assets/commerce/app.js"></script>
