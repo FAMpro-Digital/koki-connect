@@ -20,3 +20,6 @@ storageState*.json
 *.dump
 *.backup
 .DS_Store
+
+# Sorties de la collecte (données réelles à relire avant publication)
+collecte/sortie/
