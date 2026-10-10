@@ -233,7 +233,7 @@
     <div class="quick">
 <button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" onclick="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
 <button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" onclick="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
-<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" onclick="KokiPortail.lieux('Éducation')"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
+<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" onclick="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
 <button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" onclick="KokiPortail.liste('Opportunités')"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
 <button type="button" class="raccourci" data-recherche="Sports & ASC" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sports & ASC</strong></button>
 <button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" onclick="KokiPortail.lieux('Santé')"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
@@ -251,7 +251,7 @@
 <section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Opportunités')">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
 <section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sports & ASC</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
 <section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
-<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.lieux('Éducation')">🎓 Écoles</button><button onclick="KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
+<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
 <section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
@@ -722,6 +722,7 @@ function filtrerCarte() {
   <script src="assets/commerce/app.js"></script>
 <script src="assets/portail/core.js"></script>
 <script src="assets/portail/feed.js"></script>
+<script src="assets/portail/education-contract.js"></script>
 <script src="assets/portail/app.js"></script>
 </body>
 </html>
