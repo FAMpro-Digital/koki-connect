@@ -102,3 +102,4 @@
 #vue-commerce .cat-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
 #vue-commerce .business-panel .cat-tab{white-space:normal;padding:8px 6px;font-size:.95rem}
 @media (max-width:480px){#vue-commerce .cat-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.position-gps{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #cfe0d6;border-radius:12px;background:#f6faf7;margin:10px 0}.position-gps .position-etat{margin:0;font-weight:600}.position-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.position-actions a{color:#087a3d;font-weight:600;padding:10px 4px}.position-gps small{color:#5c6c60}@media(max-width:760px){.position-actions button{width:100%}}
