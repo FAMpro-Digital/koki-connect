@@ -325,7 +325,7 @@
       <label for="market-service-lieu">Lieu d’intervention</label><select id="market-service-lieu" required></select>
       <button type="button" onclick="KokiCommerce.position('service')">📍 Utiliser ma position</button>
       <label for="market-date">Date souhaitée</label><input id="market-date" type="date" required>
-      <label for="market-besoin-photo">Photo du besoin (facultative, JPEG/PNG/WebP, 1 Mo maximum)</label><input id="market-besoin-photo" type="file" accept="image/jpeg,image/png,image/webp">
+      <label for="market-besoin-photo">Photo du besoin (facultative, JPEG/PNG/WebP/HEIC, 10 Mo maximum, réduite automatiquement)</label><input id="market-besoin-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
       <p class="market-small">La photo sera conservée localement avec la demande démo, sans transmission.</p>
       <button type="submit" class="market-primary">Demander un devis</button>
     </form>
@@ -340,7 +340,7 @@
         <label for="market-pro-zone">Zone d’intervention</label><input id="market-pro-zone" maxlength="150" value="Koki et environs" required>
         <label for="market-pro-lieu">Localisation</label><select id="market-pro-lieu" required></select>
         <label for="market-pro-tel">Téléphone international (ex. +221…)</label><input id="market-pro-tel" type="tel" maxlength="20">
-        <label for="market-pro-logo">Photo ou logo (1 Mo maximum)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp">
+        <label for="market-pro-logo">Photo ou logo (10 Mo maximum, réduite automatiquement)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
         <button type="submit">Enregistrer mon profil démo</button>
       </form>
       <hr style="margin:22px 0;">
@@ -355,7 +355,7 @@
         <label for="market-offre-stock">Stock (produits)</label><input id="market-offre-stock" type="number" min="0" max="10000" step="1" value="1">
         <label for="market-offre-ancien">Ancien prix en FCFA (promotion produits, facultatif)</label><input id="market-offre-ancien" type="number" min="0" max="100000000" step="1">
         <label><input id="market-offre-dispo" type="checkbox" checked> Disponible</label>
-        <label for="market-offre-photo">Photo du produit ou de la réalisation (1 Mo maximum)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp">
+        <label for="market-offre-photo">Photo du produit ou de la réalisation (10 Mo maximum, réduite automatiquement)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
         <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" onclick="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
       </form>
       <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
@@ -476,7 +476,8 @@
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
     <p style="margin-bottom:18px; line-height:1.5;">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
-    <div class="card" style="text-align:center; padding:32px 20px;" role="status">
+    <div id="portail-notifications" class="portail-grid"></div>
+      <div class="card" style="text-align:center; padding:32px 20px;" id="notifications-vide" role="status">
       <span aria-hidden="true">🔔</span>
       <h3>Aucune notification pour le moment</h3>
       <p style="margin-top:12px; color:#526359; line-height:1.5;">Vous êtes à jour. Revenez ici pour consulter vos prochaines notifications.</p>
@@ -723,6 +724,7 @@ function filtrerCarte() {
 <script src="assets/portail/core.js"></script>
 <script src="assets/portail/feed.js"></script>
 <script src="assets/portail/education-contract.js"></script>
+<script src="assets/portail/numeros-contract.js"></script>
 <script src="assets/portail/app.js"></script>
 </body>
 </html>

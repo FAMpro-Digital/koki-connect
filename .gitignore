@@ -6,6 +6,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.supabase-local.example
 node_modules/
 artifacts/
 coverage/
@@ -20,3 +21,6 @@ storageState*.json
 *.dump
 *.backup
 .DS_Store
+
+# Sorties de la collecte (données réelles à relire avant publication)
+collecte/sortie/

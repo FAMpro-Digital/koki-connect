@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "groupes": [
+    {
+      "titre": "Urgences nationales",
+      "numeros": [
+        {
+          "nom": "Police secours",
+          "telephone": "17",
+          "description": "Appel gratuit, urgences de police.",
+          "source": "Senego.com, liste « Numéros d'urgence au Sénégal » (consultée le 2026-10-10)",
+          "verifie_le": "2026-10-10"
+        },
+        {
+          "nom": "Sapeurs-pompiers",
+          "telephone": "18",
+          "description": "Incendies, accidents, secours.",
+          "source": "Senego.com, liste « Numéros d'urgence au Sénégal » (consultée le 2026-10-10)",
+          "verifie_le": "2026-10-10"
+        },
+        {
+          "nom": "SAMU national",
+          "telephone": "1515",
+          "description": "Urgences médicales.",
+          "source": "Senego.com, liste « Numéros d'urgence au Sénégal » (consultée le 2026-10-10)",
+          "verifie_le": "2026-10-10"
+        },
+        {
+          "nom": "Numéro vert violences basées sur le genre",
+          "telephone": "800 00 20 20",
+          "description": "Gratuit et confidentiel.",
+          "source": "Senego.com, liste « Numéros d'urgence au Sénégal » (consultée le 2026-10-10)",
+          "verifie_le": "2026-10-10"
+        }
+      ]
+    }
+  ]
+}
