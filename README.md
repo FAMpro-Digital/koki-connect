@@ -8,6 +8,13 @@ Application communautaire et plateforme numérique locale de Koki – Tout Koki,
 - `collecte/` : classeur de collecte des données réelles et convertisseur (voir `collecte/README.md`).
 - `docs/` : documentation par module.
 
+## Développement avec Supabase local
+Le serveur Supabase local (Docker, données fictives) se démarre depuis Koki Connect Admin (`supabase start`, voir `docs/supabase-local.md` de l'admin). Ensuite :
+```bash
+node scripts/serve-local.mjs          # http://127.0.0.1:8080, relié à http://127.0.0.1:54321
+```
+Les fichiers publiés ne changent pas : la configuration locale est servie à la volée, uniquement sur 127.0.0.1. Détails : `docs/BACKEND-SUPABASE.md`.
+
 ## Tests
 ```bash
 node --test tests/*.test.cjs          # application
