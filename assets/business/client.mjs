@@ -1,15 +1,18 @@
-const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts']);
+import './commerce-contract.js';
+const C=globalThis.KokiCommerceContract;
+const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder']);
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
-export function normalizePhone(value){let v=String(value??'').replace(/[\s().-]/g,'');if(/^7[05-8]\d{7}$/.test(v))v='+221'+v;if(!/^\+[1-9]\d{7,14}$/.test(v))throw Error('Numéro invalide : utilisez le format international (+221…).');return v;}
+// Numéros sénégalais (77 123 45 67, 33 …) complétés en +221 ; autres pays au format international. Règle du contrat partagé.
+export function normalizePhone(value){const v=C.normaliserTelephone(value);if(!v)throw Error('Numéro invalide : utilisez le format international (+221…).');return v;}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
 export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{}}={}){
  let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}});
- let user=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
+ let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
  const scope=()=>`koki.business.pending.${user?.id}`;
  function restore(){pending.clear();try{for(const [k,v] of JSON.parse(storage?.getItem(scope())||'[]'))pending.set(k,v);}catch{}}
  function persist(){try{storage?.setItem(scope(),JSON.stringify([...pending]));}catch{/* Retry remains available in memory. */}}
- async function identity(){requireReady();const {data,error}=await db.auth.getUser();if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;restore();}return user;}
+ async function identity(){requireReady();const {data,error}=await db.auth.getUser();if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}return user;}
  async function run(command,input={},operation=command){requireReady();const mutation=!reads.has(command);if(command!=='catalog')await identity();while(busy){if(mutation)throw Error('Une opération est déjà en cours.');await new Promise(resolve=>waiters.push(resolve));}
  const body=structuredClone(input);let item;
  if(mutation){const fingerprint=JSON.stringify(body);item=pending.get(operation);if(item&&(item.command!==command||item.fingerprint!==fingerprint))throw Error('Une demande attend confirmation. Reprenez-la avec les mêmes informations avant de les modifier.');if(!item){item={command,fingerprint,input:structuredClone(body),request_id:uuid()};pending.set(operation,item);persist();}body.request_id=item.request_id;}
@@ -34,6 +37,15 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  transition:(row,next)=>run('transition',{id:row.id,revision:row.revision,next},'transition:'+row.id),
  async mine(kind){requireReady();await identity();const {data,error}=await db.from('koki_records').select('*').eq('kind',kind).eq('owner_id',user.id).order('updated_at',{ascending:false}).limit(100);if(error)throw Error('Chargement de votre espace impossible.');return data||[];},
  async rates(){requireReady();const {data,error}=await db.from('koki_transport_rates').select('*').order('category');if(error)throw Error('Tarifs indisponibles.');return data||[];},
- async image(path){requireReady();const {data,error}=await db.storage.from('koki-media').createSignedUrl(path,120);if(error)throw Error('Image inaccessible.');const url=new URL(data.signedUrl);if(url.origin!==new URL(db.supabaseUrl).origin||url.protocol!=='https:'||!url.pathname.startsWith('/storage/v1/object/'))throw Error('Image invalide.');return url.href;}
+ async image(path){requireReady();const {data,error}=await db.storage.from('koki-media').createSignedUrl(path,120);if(error)throw Error('Image inaccessible.');const url=new URL(data.signedUrl),base=new URL(db.supabaseUrl);const local=base.protocol==='http:'&&['127.0.0.1','localhost'].includes(base.hostname);if(url.origin!==base.origin||!(url.protocol==='https:'||(local&&url.protocol==='http:'))||!url.pathname.startsWith('/storage/v1/object/'))throw Error('Image invalide.');return url.href;},
+ // Espace professionnel (Commerces & Services) : identifiants techniques jamais saisis, fournis par l'état chargé.
+ async localites(){try{const rows=await run('localites');if(Array.isArray(rows)&&rows.length)return rows.map(x=>x.nom);}catch{}return [...C.localitesParDefaut];},
+ async mediaFolder(){if(!mediaFolder){const {folder}=await run('media_folder');if(!/^[0-9a-f-]{36}$/.test(folder||''))throw Error('Dossier photo indisponible.');mediaFolder=folder;}return mediaFolder;},
+ saveProfile:(values,row)=>run('save_profile',{...values,...(row?{id:row.id,revision:row.revision}:{})},'pro:profile'),
+ saveShop:(values,row)=>run('save_shop',{...values,...(row?{id:row.id,revision:row.revision,parent_id:row.parent_id}:{})},'pro:boutiques:'+(row?.id||'nouvelle')),
+ saveProduct:(values,row)=>run('save_product',{...values,...(row?{id:row.id,revision:row.revision,parent_id:row.parent_id}:{})},'pro:produits:'+(row?.id||'nouveau')),
+ saveService:(values,row)=>run('save_service',{...values,...(row?{id:row.id,revision:row.revision,parent_id:row.parent_id}:{})},'pro:services:'+(row?.id||'nouveau')),
+ setAvailability:(row,statut)=>run('set_availability',{id:row.id,revision:row.revision,status:statut},'pro:dispo:'+row.id),
+ archive:row=>run('archive',{id:row.id,revision:row.revision},'pro:archive:'+row.id)
  };
 }

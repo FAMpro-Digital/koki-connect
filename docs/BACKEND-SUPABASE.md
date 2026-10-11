@@ -29,6 +29,10 @@ Pour l'activer sur le projet Supabase :
 
 Garde-fous : `feed.js` et `runtime.mjs` n'acceptent `http://127.0.0.1:54321` que si la page est servie depuis 127.0.0.1/localhost **et** que la configuration est marquée `"local": true` (servie uniquement par `scripts/serve-local.mjs`, qui refuse toute autre adresse). `backend.json` et `config.json` (`enabled:false`) du dépôt restent ceux de la production ; `scripts/prepare-preview.mjs` refuse une configuration locale. Tests : `tests/supabase-local.test.cjs`.
 
+## Commerces & Services (branche `dev/commerces-services`, phase 1)
+
+Contrat partagé `assets/business/commerce-contract.js` (identique à `src/commerce-contract.js` de l'admin, empreinte vérifiée par `tests/commerce-contract.test.cjs`) : numéros sénégalais (+221), liens Appeler et WhatsApp, message « Commander sur WhatsApp » prérempli, prix FCFA, statuts et décisions. Règles serveur : `supabase/proposals/commerce-modernisation.sql` et `docs/commerce-modernisation.md` de l'admin. L'interface publique sera branchée en phase 2–3.
+
 ## Revue de sécurité des propositions de l'admin (10 octobre 2026)
 
 Vérifiée sur PostgreSQL 16 avec `schema.sql` + les trois propositions :

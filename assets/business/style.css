@@ -1,3 +1,104 @@
 .business-panel{background:#fff;border:1px solid #d8e7df;border-radius:16px;padding:16px;margin:14px 0;color:#173d2c}.business-panel [hidden]{display:none!important}.business-panel button,.business-panel a{display:inline-block;background:#087a3d;color:#fff;border:0;border-radius:10px;padding:12px;margin:5px;min-height:44px;cursor:pointer;font:inherit}.business-panel button:disabled{opacity:.55;cursor:wait}.business-panel label{display:block;margin:12px 0}.business-panel input,.business-panel select,.business-panel textarea{display:block;width:100%;max-width:100%;box-sizing:border-box;min-height:44px;padding:10px;border:1px solid #a9c5b7;border-radius:8px;font:inherit}.business-form,.business-card{padding:14px;margin:12px 0;border:1px solid #d8e7df;border-radius:12px;background:#f7fbf8;overflow-wrap:anywhere}.business-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}.business-image{display:block;max-width:100%;height:160px;object-fit:contain}.business-panel [role=status]{border-left:4px solid #ff9500;padding:10px;overflow-wrap:anywhere}.business-panel [aria-busy=true]{opacity:.8}
 .business-timeline{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;font-size:.88rem}.business-timeline li{padding:8px;border-radius:8px;background:#e7eee9}.business-timeline [aria-current=step]{background:#087a3d;color:white;font-weight:bold}.business-card h4{margin-top:0}.business-panel button:focus-visible,.business-panel a:focus-visible{outline:3px solid #ff9500;outline-offset:2px}@media(max-width:480px){.business-panel{padding:10px}.business-panel button{max-width:100%;white-space:normal}.business-timeline{display:grid;grid-template-columns:1fr 1fr}.business-image{width:100%;height:auto;max-height:240px}}
 .business-panel input,.business-panel select,.business-panel textarea{font-size:16px}.business-panel textarea{min-height:100px;resize:vertical}.business-panel{scroll-margin-top:16px}.business-panel [role=status]{line-height:1.5}.business-card a{min-height:44px;box-sizing:border-box}.business-panel input:focus-visible,.business-panel select:focus-visible,.business-panel textarea:focus-visible{outline:3px solid #ff9500;outline-offset:2px}@media(max-width:480px){.business-panel{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}.business-panel button,.business-panel a{min-height:44px;touch-action:manipulation}.business-form button[type=submit]{width:100%;margin:8px 0}}
+/* Espace professionnel (téléphone d'abord : cibles de 48 px, texte 16 px pour éviter le zoom iOS, aucune largeur fixe). */
+#vue-commerce .business-panel .pro-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;padding:6px 0;border-bottom:1px solid #d8e7df}
+#vue-commerce .business-panel .pro-title{margin:6px 0;font-size:1.15rem;outline:none}
+#vue-commerce .business-panel .pro-body{display:flex;flex-direction:column;gap:12px;padding-top:8px}
+#vue-commerce .business-panel .pro-btn{min-height:48px;font-size:1rem;border-radius:12px;padding:12px 16px;margin:4px 0;max-width:100%}
+#vue-commerce .business-panel .pro-btn-secondary,#vue-commerce .business-panel .pro-btn-back{background:#e7f2ec;color:#0b5a30;border:1px solid #a9c5b7}
+#vue-commerce .business-panel .pro-btn-back{min-height:44px;padding:10px 12px}
+#vue-commerce .business-panel .pro-btn-danger{background:#fff;color:#a02020;border:1px solid #d9a3a3}
+#vue-commerce .business-panel .pro-btn-tile{width:100%;text-align:left;background:#f3f8f5;color:#173d2c;border:1px solid #cfe1d6}
+#vue-commerce .business-panel .pro-btn-tile:disabled{opacity:.6;cursor:not-allowed}
+#vue-commerce .business-panel .pro-menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:8px}
+#vue-commerce .business-panel .pro-card{padding:14px;border:1px solid #d8e7df;border-radius:14px;background:#f7fbf8;overflow-wrap:anywhere}
+#vue-commerce .business-panel .pro-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+#vue-commerce .business-panel .pro-card-head h4{margin:0;font-size:1.05rem}
+#vue-commerce .business-panel .pro-badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:700;white-space:nowrap}
+#vue-commerce .pro-badge-ok{background:#d9f2e3;color:#0b5a30}#vue-commerce .pro-badge-attente{background:#fff1cc;color:#6b4a00}#vue-commerce .pro-badge-alerte,#vue-commerce .pro-badge-bloque{background:#fbdcdc;color:#8a1c1c}#vue-commerce .pro-badge-info{background:#e3ecf7;color:#1f3f66}#vue-commerce .pro-badge-neutre{background:#ececec;color:#444}
+#vue-commerce .business-panel .pro-explain p{margin:6px 0;font-size:.95rem}#vue-commerce .business-panel .pro-note{font-style:italic}
+#vue-commerce .business-panel .pro-hint{color:#4b6457;font-size:.9rem;margin:4px 0}
+#vue-commerce .business-panel .pro-progress{font-weight:700;color:#0b5a30;margin:4px 0}
+#vue-commerce .business-panel .pro-form{display:flex;flex-direction:column;gap:4px}
+#vue-commerce .business-panel .pro-field label{display:block;margin:10px 0 4px;font-weight:600}
+#vue-commerce .business-panel .pro-field input,#vue-commerce .business-panel .pro-field select,#vue-commerce .business-panel .pro-field textarea{font-size:16px;min-height:48px}
+#vue-commerce .business-panel .pro-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#vue-commerce .business-panel .pro-inline label{margin:0}#vue-commerce .business-panel .pro-inline select{width:auto;min-width:10em}
+#vue-commerce .business-panel .pro-choice{border:1px solid #cfe1d6;border-radius:12px;padding:8px 12px;margin:10px 0}
+#vue-commerce .business-panel .pro-choice label,#vue-commerce .business-panel .pro-check{display:flex;align-items:center;gap:10px;min-height:44px;margin:2px 0}
+#vue-commerce .business-panel .pro-choice input,#vue-commerce .business-panel .pro-check input{width:22px;height:22px;min-height:0;flex:none;margin:0}
+#vue-commerce .business-panel .pro-nav,#vue-commerce .business-panel .pro-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#vue-commerce .business-panel .pro-nav .pro-btn{flex:1 1 140px}
+#vue-commerce .business-panel .pro-photos{border:1px dashed #a9c5b7;border-radius:12px;padding:10px;margin:10px 0}
+#vue-commerce .business-panel .pro-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+#vue-commerce .business-panel .pro-thumb{margin:0}#vue-commerce .business-panel .pro-thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#eef3f0}
+#vue-commerce .business-panel .pro-thumb label{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:.9rem}
+#vue-commerce .business-panel .pro-thumb input{width:20px;height:20px;min-height:0}
+#vue-commerce .business-panel .pro-recap{display:grid;grid-template-columns:minmax(0,40%) 1fr;gap:4px 10px;margin:10px 0}#vue-commerce .business-panel .pro-recap dt{font-weight:600}#vue-commerce .business-panel .pro-recap dd{margin:0}
+#vue-commerce .business-panel .pro-steps{padding-left:1.4em}#vue-commerce .business-panel .pro-steps li{margin:4px 0}
+#vue-commerce .business-panel .pro-price strong{font-size:1.1rem}#vue-commerce .business-panel .pro-price s{color:#6b6b6b}
+#vue-commerce .business-panel .pro-archives{margin-top:8px}#vue-commerce .business-panel .pro-archives summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+#vue-commerce .business-panel .pro-gps{margin:10px 0}#vue-commerce .business-panel .pro-label{font-weight:600;margin:10px 0 4px}
+#vue-commerce .business-panel .pro-btn-primary{background:#087a3d;color:#fff;border:1px solid #087a3d}
+#vue-commerce .business-panel .pro-choice input[type=radio],#vue-commerce .business-panel .pro-check input[type=checkbox],#vue-commerce .business-panel .pro-thumb input[type=checkbox]{width:22px;height:22px;min-height:0;padding:0;margin:0;flex:none;display:inline-block}
+#vue-commerce .business-panel .pro-choice legend{font-weight:600;padding:0 4px}
+#vue-commerce .business-panel .pro-field label{font-size:15px}
+#vue-commerce .business-panel .pro-message:empty{display:none}#vue-commerce .business-panel .pro-message{margin:8px 0;font-weight:600}
+#vue-commerce .business-panel .pro-pending{border-left:4px solid #c98a00;background:#fff8e1;padding:8px 10px;border-radius:8px;margin-top:6px}#vue-commerce .business-panel .pro-pending p{margin:4px 0 0}
+/* Catalogue public (téléphone d'abord). */
+#vue-commerce .cat-root{display:flex;flex-direction:column;gap:10px}
+#vue-commerce .cat-account{border-top:2px solid #d8e7df;margin-top:18px;padding-top:8px}
+#vue-commerce .cat-bar{background:#fff;padding:6px 0 8px;border-bottom:1px solid #d8e7df;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end}
+#vue-commerce .cat-search{flex:1 1 100%}
+#vue-commerce .cat-search label,#vue-commerce .cat-field label{display:block;margin:4px 0;font-size:14px;font-weight:600}
+#vue-commerce .cat-search input{font-size:16px;min-height:48px;border-radius:24px;padding:10px 16px}
+#vue-commerce .cat-shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+#vue-commerce .business-panel .cat-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 14px;margin:0;border-radius:12px;font-size:1rem;text-decoration:none;text-align:center;max-width:100%}
+#vue-commerce .business-panel .cat-btn-back,#vue-commerce .business-panel .cat-btn-secondary,#vue-commerce .business-panel .cat-btn-link{background:#e7f2ec;color:#0b5a30;border:1px solid #a9c5b7;min-height:44px}
+#vue-commerce .business-panel .cat-btn-link{background:#fff}
+#vue-commerce .business-panel .cat-btn-whatsapp{background:#1b8f4c;color:#fff;border:1px solid #1b8f4c;font-weight:700}
+#vue-commerce .business-panel .cat-btn-whatsapp-light{background:#fff;color:#126b39;border:1px solid #1b8f4c}
+#vue-commerce .business-panel .cat-btn-call{background:#245d88;color:#fff;border:1px solid #245d88;font-weight:700}
+#vue-commerce .business-panel .cat-btn-cart{background:#087a3d;color:#fff;border:1px solid #087a3d;width:100%;margin-top:8px}
+#vue-commerce .cat-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0;-webkit-overflow-scrolling:touch}
+#vue-commerce .business-panel .cat-tab{flex:none;min-height:44px;margin:0;border-radius:22px;padding:8px 14px;background:#fff;color:#0b5a30;border:1px solid #a9c5b7;white-space:nowrap}
+#vue-commerce .business-panel .cat-tab[aria-selected=true]{background:#087a3d;color:#fff;border-color:#087a3d;font-weight:700}
+#vue-commerce .cat-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:8px;align-items:end}
+#vue-commerce .cat-field select{font-size:16px;min-height:44px}
+#vue-commerce .cat-toggle{display:flex;align-items:center;gap:8px;min-height:44px;margin:0}
+#vue-commerce .cat-toggle input{width:22px;height:22px;min-height:0}
+#vue-commerce .cat-count{font-weight:600;color:#4b6457;margin:4px 0}
+#vue-commerce .cat-message:empty{display:none}#vue-commerce .cat-message{font-weight:600;margin:6px 0}
+#vue-commerce .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(160px,46%),1fr));gap:10px}
+#vue-commerce .business-panel .cat-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;margin:0;background:#fff;color:#173d2c;border:1px solid #d8e7df;border-radius:14px;overflow:hidden;min-height:0;width:100%}
+#vue-commerce .cat-card img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef3f0}
+#vue-commerce .cat-photo-vide{object-fit:contain!important;padding:12px;box-sizing:border-box}
+#vue-commerce .cat-card-body{display:flex;flex-direction:column;gap:4px;padding:8px 10px 10px}
+#vue-commerce .cat-card-title{font-weight:700;font-size:.98rem;line-height:1.25}
+#vue-commerce .cat-meta{font-size:.85rem;color:#4b6457}
+#vue-commerce .cat-price{margin:0}#vue-commerce .cat-price strong{font-size:1.05rem;color:#0b5a30}#vue-commerce .cat-price s{color:#777;font-size:.85rem}
+#vue-commerce .cat-promo{background:#ffe2c4;color:#7a3b00;border-radius:8px;padding:1px 6px;font-size:.8rem;font-weight:700}
+#vue-commerce .cat-badge{align-self:flex-start;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700}
+#vue-commerce .cat-ok{background:#d9f2e3;color:#0b5a30}#vue-commerce .cat-off{background:#fbdcdc;color:#8a1c1c}
+#vue-commerce .cat-empty{grid-column:1/-1;padding:16px;text-align:center;color:#4b6457}
+#vue-commerce .cat-detail{display:flex;flex-direction:column;gap:10px}
+#vue-commerce .cat-title{margin:4px 0 0;font-size:1.3rem;outline:none}
+#vue-commerce .cat-gallery{position:relative}
+#vue-commerce .cat-rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#vue-commerce .cat-rail figure{flex:0 0 100%;margin:0;scroll-snap-align:start}
+#vue-commerce .cat-gallery img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef3f0;border-radius:14px}
+#vue-commerce .cat-gallery-count{position:absolute;right:10px;bottom:10px;margin:0;background:rgba(0,0,0,.6);color:#fff;border-radius:12px;padding:2px 10px;font-size:.85rem}
+#vue-commerce .cat-infos{display:grid;grid-template-columns:minmax(0,38%) 1fr;gap:4px 10px;margin:0}#vue-commerce .cat-infos dt{font-weight:600;color:#4b6457}#vue-commerce .cat-infos dd{margin:0}
+#vue-commerce .cat-description{white-space:pre-line}
+#vue-commerce .cat-qty{display:flex;align-items:center;gap:10px}#vue-commerce .cat-qty label{margin:0;font-weight:600}
+#vue-commerce .business-panel .cat-qty button{min-width:48px;min-height:48px;margin:0;font-size:1.3rem;background:#e7f2ec;color:#0b5a30;border:1px solid #a9c5b7}
+#vue-commerce .cat-qty output{min-width:2ch;text-align:center;font-size:1.2rem;font-weight:700}
+#vue-commerce .cat-contact{background:#f3f8f5;border:1px solid #d8e7df;border-radius:14px;padding:10px}
+#vue-commerce .cat-seller{font-weight:700;margin:0 0 6px}
+#vue-commerce .cat-actions{display:flex;flex-direction:column;gap:8px}
+#vue-commerce .cat-related{display:flex;flex-direction:column;gap:8px;border-top:1px solid #d8e7df;padding-top:10px}
+#vue-commerce .cat-related h4{margin:8px 0 0}
+#vue-commerce .cat-bar-detail{position:sticky;top:0;z-index:3}
+#vue-commerce .cat-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
+#vue-commerce .business-panel .cat-tab{white-space:normal;padding:8px 6px;font-size:.95rem}
+@media (max-width:480px){#vue-commerce .cat-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}

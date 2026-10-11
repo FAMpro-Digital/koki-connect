@@ -1,0 +1,272 @@
+// Espace professionnel « Commerces & Services » (téléphone d'abord).
+// Fiche en plusieurs étapes, boutique(s), produits et services, prix, stocks et disponibilités.
+// Toutes les règles sont vérifiées par le serveur (koki_business) ; cette interface ne demande
+// jamais d'identifiant technique : ils viennent de l'état chargé depuis le compte connecté.
+import './commerce-contract.js';
+const C=globalThis.KokiCommerceContract;
+const node=(tag,text,className)=>{const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(className)e.className=className;return e;};
+let uid=0;const nextId=prefix=>'pro-'+prefix+'-'+(++uid);
+
+function button(label,onClick,{kind='primary',type='button'}={}){const b=node('button',label,'pro-btn pro-btn-'+kind);b.type=type;if(onClick)b.onclick=onClick;return b;}
+// Champ avec étiquette, aide et message d'erreur reliés (lisibles par les lecteurs d'écran).
+function input(host,{label,type='text',value='',required=false,hint,options,list,attrs={}}){
+ const id=nextId('f'),wrap=node('div',null,'pro-field');const l=node('label',label+(required?'':' (facultatif)'));l.htmlFor=id;wrap.append(l);
+ let el;
+ if(options){el=node('select');for(const o of options){const opt=node('option',typeof o==='string'?o:o.label);opt.value=typeof o==='string'?o:o.value;el.append(opt);}}
+ else if(type==='textarea'){el=node('textarea');el.rows=3;}
+ else{el=node('input');el.type=type;}
+ el.id=id;el.required=required;if(value!==undefined&&value!==null)el.value=value;
+ for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);
+ if(type==='number'){el.inputMode='numeric';el.min='0';el.step='1';}
+ if(list){const dl=node('datalist');dl.id=nextId('l');for(const v of list){const o=node('option');o.value=v;dl.append(o);}el.setAttribute('list',dl.id);wrap.append(dl);}
+ wrap.append(el);
+ if(hint){const h=node('p',hint,'pro-hint');h.id=id+'-aide';el.setAttribute('aria-describedby',h.id);wrap.append(h);}
+ host.append(wrap);return el;
+}
+function choice(host,{legend,name,values,value}){
+ const fs=node('fieldset',null,'pro-choice');fs.append(node('legend',legend));const n=nextId(name);
+ for(const v of values){const l=node('label'),r=node('input');r.type='radio';r.name=n;r.value=typeof v==='string'?v:v.value;r.checked=r.value===value;l.append(r,' '+(typeof v==='string'?v:v.label));fs.append(l);}
+ host.append(fs);return {get value(){return fs.querySelector('input:checked')?.value||'';},set onchange(fn){for(const r of fs.querySelectorAll('input'))r.onchange=fn;}};
+}
+function badge(kind,statut,row){
+ const locked=row?.payload?.moderation_lock===true;const b=node('span',locked?'Suspendu par l’administration':statut,'pro-badge pro-badge-'+(locked?'bloque':({'Actif':'ok','Disponible':'ok','À valider':'attente','En attente':'attente','Épuisé':'info','Indisponible':'info','Masqué':'info','Refusé':'alerte','Suspendu':'alerte','Fermé':'alerte','Archivé':'neutre'})[statut]||'neutre'));return b;
+}
+function explanation(kind,row){const box=node('div',null,'pro-explain');box.append(node('p',row.payload?.moderation_lock?'Suspendu par l’administration : contactez Koki Connect pour le remettre en ligne.':C.explicationStatut(kind,row.statut)));const m=row.payload?.moderation;if(m?.note&&(['Refusé','Suspendu','Fermé','Archivé','Masqué'].includes(row.statut)||m.decision==='reject_changes'))box.append(node('p',(m.decision==='reject_changes'?'Modifications refusées. ':'')+'Motif indiqué : '+m.note,'pro-note'));
+ if(row.payload?.modification){const w=node('div',null,'pro-pending');w.append(node('strong','Modifications en attente de validation'),node('p','Votre fiche reste visible avec les informations déjà validées. Les changements de nom, d’activité, de numéros ou de photos seront publiés après validation.'));box.append(w);}return box;}
+function prixTexte(p){if(p.tarif==='devis')return 'Sur devis';return C.formaterPrix(p.prix);}
+
+// Photos : celles déjà enregistrées (à conserver ou retirer) + nouvelles, compressées avant envoi, 5 au total.
+function photosField(host,{existing=[],api,upload,imageSelection,status}){
+ const fs=node('fieldset',null,'pro-photos');fs.append(node('legend','Photos (facultatives, '+C.maxPhotos+' maximum)'),node('p','Les photos sont compressées sur votre téléphone avant l’envoi.','pro-hint'));
+ const kept=[];const grid=node('div',null,'pro-thumbs');fs.append(grid);
+ for(const path of existing){const fig=node('figure',null,'pro-thumb'),img=node('img');img.alt='Photo enregistrée';img.loading='lazy';api.image(path).then(u=>{img.src=u;}).catch(()=>{img.alt='Photo indisponible';});const l=node('label'),c=node('input');c.type='checkbox';c.checked=true;l.append(c,' Conserver');fig.append(img,l);grid.append(fig);kept.push({path,keep:c});}
+ const selections=[];const slots=node('div');fs.append(slots);
+ const addSlot=()=>{if(selections.length+existing.length>=C.maxPhotos)return;selections.push(imageSelection(slots,status,{label:'Nouvelle photo '+(selections.length+1)}));more.hidden=selections.length+existing.length>=C.maxPhotos;};
+ const more=button('Ajouter une autre photo',addSlot,{kind:'secondary'});fs.append(more);host.append(fs);addSlot();
+ const uploaded=new Map();
+ return {
+  count(){return kept.filter(k=>k.keep.checked).length+selections.filter(s=>s.input.files.length).length;},
+  async collect(){
+   if(this.count()>C.maxPhotos)throw Error('Cinq photos maximum : retirez-en une.');
+   const paths=kept.filter(k=>k.keep.checked).map(k=>k.path);
+   for(const s of selections){const file=await s.get();if(!file)continue;if(!upload)throw Error('Envoi de photos indisponible.');if(!uploaded.has(file))uploaded.set(file,await upload(file));paths.push(uploaded.get(file));}
+   return paths;
+  }
+ };
+}
+async function gps(host,initial,status){
+ let value=initial||null;const box=node('div',null,'pro-gps');const info=node('p',null,'pro-hint');info.setAttribute('role','status');
+ const show=()=>{info.textContent=value?'Position enregistrée : '+value.latitude.toFixed(5)+', '+value.longitude.toFixed(5):'Aucune position : seul votre village ou quartier sera affiché.';remove.hidden=!value;};
+ const take=button('Ajouter ma position actuelle',async()=>{take.disabled=true;try{if(typeof window.obtenirPositionActuelle!=='function')throw Error('Localisation indisponible sur cet appareil.');const p=await window.obtenirPositionActuelle();value={latitude:Number(p.coords.latitude.toFixed(6)),longitude:Number(p.coords.longitude.toFixed(6))};show();status.textContent='Position ajoutée. Vérifiez qu’elle correspond bien à votre activité.';}catch(e){status.textContent=e.message||'Position indisponible.';}finally{take.disabled=false;}},{kind:'secondary'});
+ const remove=button('Retirer la position',()=>{value=null;show();},{kind:'secondary'});
+ box.append(node('p','Localisation GPS (facultative)','pro-label'),info,take,remove);host.append(box);show();
+ return {get value(){return value;}};
+}
+
+export async function proSpace(host,api,outer,{upload,imageSelection}={}){
+ // Messages affichés au plus près de l'écran en cours (et repris dans la zone de statut générale).
+ const local=node('p',null,'pro-message');local.setAttribute('role','status');
+ const status={get textContent(){return local.textContent;},set textContent(v){local.textContent=v;outer.textContent=v;}};
+ const state={profile:null,boutiques:[],produits:[],services:[],localites:[]};
+ const stack=[{view:'accueil'}];let open=false;
+ async function load(){
+  const [profiles,boutiques,produits,services]=await Promise.all(['professionnels','boutiques','produits','services'].map(k=>api.mine(k)));
+  state.profile=profiles[0]||null;state.boutiques=boutiques;state.produits=produits;state.services=services;
+  if(!state.localites.length)state.localites=await api.localites();
+ }
+ const has=t=>state.profile&&(state.profile.payload.type===t||state.profile.payload.type==='Les deux');
+ const activeShops=()=>state.boutiques.filter(b=>b.statut==='Actif');
+ // Navigation : chaque écran est une entrée d'historique, le bouton retour du téléphone revient à l'écran précédent.
+ function go(view,params={}){local.textContent='';stack.push({view,params});try{history.pushState({...(history.state||{}),kokiPro:stack.length},'');}catch{}render();host.scrollIntoView({block:'start'});}
+ function back(){if(stack.length>1){try{if(history.state?.kokiPro===stack.length){history.back();return;}}catch{}stack.pop();render();}}
+ const onPop=e=>{if(!host.isConnected){window.removeEventListener('popstate',onPop);return;}const depth=e.state?.kokiPro||1;if(depth<stack.length){stack.length=Math.max(1,depth);render();}};
+ window.addEventListener('popstate',onPop);
+ async function done(message,steps=1){status.textContent=message;await load();const target=Math.max(1,stack.length-steps);if(target<stack.length){try{if(history.state?.kokiPro===stack.length){history.go(target-stack.length);stack.length=target;render();return;}}catch{}stack.length=target;}render();}
+ function frame(title){
+  host.replaceChildren();const bar=node('div',null,'pro-bar');
+  if(stack.length>1)bar.append(button('← Retour',back,{kind:'back'}));
+  else bar.append(button('← Retour au catalogue',()=>document.getElementById('business-catalogue')?.scrollIntoView({block:'start'}),{kind:'back'}));
+  const h=node('h3',title,'pro-title');h.tabIndex=-1;bar.append(h);host.append(bar,local);queueMicrotask(()=>{if(stack.length>1)h.focus({preventScroll:true});});
+  const body=node('div',null,'pro-body');host.append(body);return body;
+ }
+ async function guarded(btn,fn){if(btn.disabled)return;btn.disabled=true;host.setAttribute('aria-busy','true');try{await fn();}catch(e){status.textContent=e.message||'Opération impossible.';}finally{btn.disabled=false;host.setAttribute('aria-busy','false');}}
+
+ function render(){const {view,params}=stack.at(-1);({accueil,fiche,boutiques,boutique:boutiqueForm,produits,produit:produitForm,services,service:serviceForm})[view](params||{});}
+
+ function accueil(){
+  host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3','Espace professionnel','pro-title'));host.append(head,local);
+  if(!open&&!state.profile){head.append(node('p','Vous êtes commerçant ou prestataire à Koki ? Présentez votre activité, vos produits et vos services.'),button('Ouvrir mon espace professionnel',()=>{open=true;render();}));return;}
+  const body=node('div',null,'pro-body');host.append(body);
+  if(!state.profile){
+   body.append(node('p','Créez votre fiche en 5 étapes. Elle sera vérifiée par l’administration de Koki Connect avant d’apparaître dans le catalogue.'));
+   const steps=node('ol',null,'pro-steps');for(const s of ['Votre activité','Vos numéros','Où vous trouver','Horaires et présentation','Photos et envoi'])steps.append(node('li',s));body.append(steps,button('Créer ma fiche professionnelle',()=>go('fiche')));return;
+  }
+  const p=state.profile,card=node('article',null,'pro-card');
+  const title=node('div',null,'pro-card-head');title.append(node('h4',p.payload.nom),badge('professionnels',p.statut,p));card.append(title,node('p',p.payload.type+(p.payload.village?' · '+p.payload.village:'')),explanation('professionnels',p));
+  if(!['Suspendu','Archivé'].includes(p.statut))card.append(button('Modifier ma fiche',()=>go('fiche',{edit:true}),{kind:'secondary'}));
+  body.append(card);
+  const actif=p.statut==='Actif',menu=node('div',null,'pro-menu');
+  const entry=(label,count,view,enabled,reason)=>{const b=button(label+' ('+count+')',()=>go(view),{kind:'tile'});if(!enabled){b.disabled=true;b.title=reason;}menu.append(b);};
+  const wait='Disponible après la validation de votre fiche.';
+  if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',actif,wait);entry('Mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
+  if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',actif,wait);
+  body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
+ }
+
+ function fiche({edit}){
+  // Les valeurs en attente de validation sont reprises pour continuer la saisie.
+ const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:{};const row=edit?state.profile:null;
+  const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
+  const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
+  let step=0;const total=5;let photos=null,where=null;
+  const body=frame(edit?'Modifier ma fiche':'Créer ma fiche');
+  const progress=node('p',null,'pro-progress');progress.setAttribute('aria-live','polite');const panel=node('form',null,'pro-form');panel.noValidate=true;body.append(progress,panel);
+  const nav=node('div',null,'pro-nav');body.append(nav);
+  function show(){
+   progress.textContent='Étape '+(step+1)+' sur '+total;panel.replaceChildren();nav.replaceChildren();
+   const fields={};
+   if(step===0){panel.append(node('h4','Votre activité'));fields.name=input(panel,{label:'Nom de votre commerce ou activité',value:v.name,required:true,attrs:{maxlength:'180',autocomplete:'organization'}});
+    const c=choice(panel,{legend:'Vous proposez',name:'type',value:v.profile,values:[{value:'Commerçant',label:'Des produits (commerce)'},{value:'Prestataire de services',label:'Des services (métier)'},{value:'Les deux',label:'Les deux'}]});fields.profile=c;
+    fields.category=input(panel,{label:'Catégorie ou métier principal',value:v.category,required:true,list:[...C.categoriesCommerce,...C.metiers],hint:'Exemple : Alimentation, Couture, Plomberie.',attrs:{maxlength:'100'}});}
+   if(step===1){panel.append(node('h4','Vos numéros'));fields.phone=input(panel,{label:'Téléphone',type:'tel',value:v.phone,required:true,hint:'Exemple : 77 123 45 67. Le +221 est ajouté automatiquement.',attrs:{autocomplete:'tel'}});
+    const same=node('label',null,'pro-check'),cb=node('input');cb.type='checkbox';cb.checked=v.sameWhatsapp;same.append(cb,' Mon WhatsApp est ce même numéro');panel.append(same);
+    const wa=node('div');panel.append(wa);fields.same=cb;const draw=()=>{wa.replaceChildren();if(!cb.checked)fields.whatsapp=input(wa,{label:'Numéro WhatsApp',type:'tel',value:v.whatsapp,required:true});else fields.whatsapp=null;};cb.onchange=draw;draw();}
+   if(step===2){panel.append(node('h4','Où vous trouver'));fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,options:[{value:'',label:'Choisissez…'},...state.localites]});
+    fields.address=input(panel,{label:'Adresse ou repère',value:v.address,hint:'Exemple : près du marché central.',attrs:{maxlength:'500'}});
+    if(v.profile!=='Commerçant')fields.zone=input(panel,{label:'Zone d’intervention',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
+    gps(panel,v.location,status).then(g=>{where=g;});}
+   if(step===3){panel.append(node('h4','Horaires et présentation'));fields.hours=input(panel,{label:'Horaires d’ouverture',value:v.hours,hint:'Exemple : lundi–samedi 8 h–20 h.',attrs:{maxlength:'500'}});fields.description=input(panel,{label:'Présentation de votre activité',type:'textarea',value:v.description,attrs:{maxlength:'2000'}});}
+   if(step===4){panel.append(node('h4','Photos et envoi'));photos=photosField(panel,{existing:p.photos||[],api,upload,imageSelection,status});
+    const recap=node('dl',null,'pro-recap');for(const [k,val] of [['Nom',v.name],['Activité',v.profile],['Catégorie',v.category],['Téléphone',C.afficherTelephone(v.phone)],['WhatsApp',C.afficherTelephone(v.sameWhatsapp?v.phone:v.whatsapp)],['Village ou quartier',v.village],['Horaires',v.hours||'—'],['Position GPS',v.location?'Renseignée':'Non renseignée']]){recap.append(node('dt',k),node('dd',val));}panel.append(recap);
+    if(row?.statut==='Actif')panel.append(node('p','Si vous changez le nom, l’activité, un numéro ou les photos, ces changements seront vérifiés avant publication. En attendant, votre fiche reste visible avec les informations déjà validées.','pro-hint'));}
+   const read=()=>{
+    if(step===0){v.name=fields.name.value.trim();v.profile=fields.profile.value;v.category=fields.category.value.trim();if(!v.name||!v.category)throw Error('Indiquez le nom et la catégorie de votre activité.');}
+    if(step===1){const t=C.normaliserTelephone(fields.phone.value);if(!t)throw Error('Téléphone invalide. Exemple : 77 123 45 67.');v.phone=t;v.sameWhatsapp=fields.same.checked;if(!v.sameWhatsapp){const w=C.normaliserTelephone(fields.whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');v.whatsapp=w;}}
+    if(step===2){v.village=fields.village.value;if(!v.village)throw Error('Choisissez votre village ou quartier.');v.address=fields.address.value.trim();if(fields.zone)v.zone=fields.zone.value.trim();v.location=where?.value||null;if(v.address&&v.address.length<3)throw Error('Adresse trop courte.');}
+    if(step===3){v.hours=fields.hours.value.trim();v.description=fields.description.value.trim();if(v.hours&&v.hours.length<3)throw Error('Horaires trop courts.');}
+   };
+   if(step>0)nav.append(button('Étape précédente',()=>{try{read();}catch{}step--;show();},{kind:'secondary'}));
+   if(step<total-1){const next=button('Continuer',()=>{try{read();step++;status.textContent='';show();}catch(err){status.textContent=err.message;}});nav.append(next);}
+   else{const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
+     const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
+     if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
+     const saved=await api.saveProfile(values,row);
+     await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
+    });nav.append(send);}
+   panel.onsubmit=e=>e.preventDefault();
+   queueMicrotask(()=>panel.querySelector('input,select,textarea')?.focus({preventScroll:true}));
+  }
+  show();
+ }
+
+ function listCard(kind,row,{details=[],actions=[]}){
+  const card=node('article',null,'pro-card'),head=node('div',null,'pro-card-head');head.append(node('h4',row.payload.nom),badge(kind,row.statut,row));card.append(head);
+  for(const d of details.filter(Boolean))card.append(node('p',d));card.append(explanation(kind,row));
+  if(actions.length){const a=node('div',null,'pro-actions');a.append(...actions);card.append(a);}return card;
+ }
+ function archiveButton(kind,row,label){const b=button('Archiver',()=>guarded(b,async()=>{if(!confirm('Archiver « '+row.payload.nom+' » ? '+label))return;await api.archive(row);await done('« '+row.payload.nom+' » est archivé.',0);}),{kind:'danger'});return b;}
+ function availability(kind,row){
+  if(row.statut==='Archivé'||row.payload.moderation_lock)return null;
+  const wrap=node('div',null,'pro-field pro-inline');const id=nextId('d'),l=node('label','Disponibilité');l.htmlFor=id;const sel=node('select');sel.id=id;sel.setAttribute('aria-label','Disponibilité de '+row.payload.nom);
+  for(const s of C.disponibilites[kind]){const o=node('option',s);o.value=s;sel.append(o);}sel.value=row.statut;
+  sel.onchange=()=>guarded(sel,async()=>{const target=sel.value;try{await api.setAvailability(row,target);await done('« '+row.payload.nom+' » : '+target+'.',0);}catch(e){sel.value=row.statut;throw e;}});
+  wrap.append(l,sel);return wrap;
+ }
+
+ function boutiques(){
+  const body=frame('Mes boutiques');const rows=state.boutiques.filter(b=>b.statut!=='Archivé');
+  body.append(node('p','Chaque nouvelle boutique est vérifiée par l’administration avant d’apparaître dans le catalogue.','pro-hint'),button('Ajouter une boutique',()=>go('boutique')));
+  if(!rows.length)body.append(node('p','Aucune boutique pour le moment.'));
+  for(const b of rows)body.append(listCard('boutiques',b,{details:[[b.payload.categorie,b.payload.village].filter(Boolean).join(' · '),b.payload.adresse,b.payload.horaires&&'Horaires : '+b.payload.horaires],actions:[...(['Fermé'].includes(b.statut)?[]:[button('Modifier',()=>go('boutique',{id:b.id}),{kind:'secondary'})]),archiveButton('boutiques',b,'Ses produits ne seront plus visibles.')]}));
+  archived(body,state.boutiques);
+ }
+ function archived(body,rows){const old=rows.filter(r=>r.statut==='Archivé');if(!old.length)return;const d=node('details',null,'pro-archives');d.append(node('summary','Éléments archivés ('+old.length+')'));for(const r of old)d.append(node('p',r.payload.nom));body.append(d);}
+
+ function boutiqueForm({id}){
+  const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
+  const body=frame(row?'Modifier la boutique':'Nouvelle boutique');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
+  const name=input(f,{label:'Nom de la boutique',value:p.nom||'',required:true,attrs:{maxlength:'180'}});
+  const category=input(f,{label:'Catégorie',value:p.categorie||pro.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
+  const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',options:[{value:'',label:'Choisissez…'},...state.localites]});
+  const address=input(f,{label:'Adresse ou repère',value:p.adresse||'',attrs:{maxlength:'500'}});
+  const hours=input(f,{label:'Horaires d’ouverture',value:p.horaires||pro.horaires||'',hint:'Exemple : tous les jours 9 h–19 h.',attrs:{maxlength:'500'}});
+  const whatsapp=input(f,{label:'WhatsApp de la boutique',type:'tel',value:p.whatsapp||'',hint:'Laissez vide pour utiliser le numéro de votre fiche.'});
+  const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
+  let where=null;gps(f,p.localisation,status).then(g=>{where=g;});const photos=photosField(f,{existing:p.photos||[],api,upload,imageSelection,status});
+  const send=button(row?'Enregistrer la boutique':'Envoyer pour validation');body.append(send);
+  send.onclick=()=>guarded(send,async()=>{
+   const values={name:name.value.trim(),village:village.value,photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Choisissez le village ou quartier.');
+   if(category.value.trim())values.category=category.value.trim();if(address.value.trim())values.address=address.value.trim();if(hours.value.trim())values.hours=hours.value.trim();if(description.value.trim())values.description=description.value.trim();
+   if(whatsapp.value.trim()){const w=C.normaliserTelephone(whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');values.whatsapp=w;}
+   if(where?.value)values.location=where.value;
+   const saved=await api.saveShop(values,row);await done(saved.statut==='Actif'?'Boutique enregistrée.':'Boutique envoyée : en attente de validation par l’administration.');
+  });
+ }
+
+ function produits(){
+  const body=frame('Mes produits');const shops=activeShops();const rows=state.produits.filter(x=>x.statut!=='Archivé');
+  body.append(button('Ajouter un produit',()=>go('produit')));
+  if(!rows.length)body.append(node('p','Aucun produit pour le moment.'));
+  for(const x of rows){const shop=state.boutiques.find(b=>b.id===x.parent_id);
+   const price=node('p',null,'pro-price');price.append(node('strong',C.formaterPrix(x.payload.prix)));if(x.payload.ancien_prix){const s=node('s',C.formaterPrix(x.payload.ancien_prix));s.setAttribute('aria-label','Ancien prix '+C.formaterPrix(x.payload.ancien_prix));price.append(' ',s);}
+   const card=listCard('produits',x,{details:[shops.length>1||shop?.statut!=='Actif'?'Boutique : '+(shop?.payload.nom||'—')+(shop&&shop.statut!=='Actif'?' ('+shop.statut+')':''):null,'Stock : '+x.payload.stock],actions:[button('Modifier le prix ou le stock',()=>go('produit',{id:x.id}),{kind:'secondary'}),archiveButton('produits',x,'Il disparaîtra du catalogue.')]});
+   card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);body.append(card);}
+  archived(body,state.produits);
+ }
+ function produitForm({id}){
+  const row=state.produits.find(x=>x.id===id)||null,p=row?.payload||{};const shops=activeShops();
+  const body=frame(row?'Modifier le produit':'Nouveau produit');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
+  let shop=null;
+  if(row)f.append(node('p','Boutique : '+(state.boutiques.find(b=>b.id===row.parent_id)?.payload.nom||'—'),'pro-hint'));
+  else if(shops.length>1)shop=input(f,{label:'Boutique',required:true,options:shops.map(b=>({value:b.id,label:b.payload.nom}))});
+  else f.append(node('p','Boutique : '+shops[0]?.payload.nom,'pro-hint'));
+  const name=input(f,{label:'Nom du produit',value:p.nom||'',required:true,attrs:{maxlength:'180'}});
+  const category=input(f,{label:'Catégorie',value:p.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
+  const price=input(f,{label:'Prix (FCFA)',type:'number',value:p.prix??'',required:true});
+  const old=input(f,{label:'Ancien prix (FCFA)',type:'number',value:p.ancien_prix??'',hint:'Pour afficher une promotion : doit être supérieur au prix.'});
+  const stock=input(f,{label:'Stock disponible',type:'number',value:p.stock??1,required:true,hint:'À 0, le produit s’affiche « Épuisé ».'});
+  const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
+  const photos=photosField(f,{existing:p.photos||(p.image_path?[p.image_path]:[]),api,upload,imageSelection,status});
+  const send=button(row?'Enregistrer le produit':'Publier le produit');body.append(send);
+  send.onclick=()=>guarded(send,async()=>{
+   const num=el=>el.value.trim()===''?null:Number(el.value);
+   const values={name:name.value.trim(),price:num(price),stock:num(stock)};if(num(old)!==null)values.old_price=num(old);
+   const errors=C.verifierOffre('produits',{nom:values.name,prix:values.price,ancien_prix:values.old_price,stock:values.stock});if(errors.length)throw Error(errors.join(' '));
+   if(category.value.trim())values.category=category.value.trim();if(description.value.trim())values.description=description.value.trim();
+   values.photos=await photos.collect();if(shop)values.parent_id=shop.value;
+   if(state.produits.some(x=>x.id!==row?.id&&x.statut!=='Archivé'&&x.parent_id===(row?.parent_id||shop?.value||shops[0]?.id)&&C.cleNom(x.payload.nom)===C.cleNom(values.name)))throw Error('Un produit porte déjà ce nom dans cette boutique.');
+   await api.saveProduct(values,row);await done(row?'Produit mis à jour.':'Produit publié dans le catalogue.');
+  });
+ }
+
+ function services(){
+  const body=frame('Mes services');const rows=state.services.filter(x=>x.statut!=='Archivé');
+  body.append(button('Ajouter un service',()=>go('service')));
+  if(!rows.length)body.append(node('p','Aucun service pour le moment.'));
+  for(const x of rows){const card=listCard('services',x,{details:[prixTexte(x.payload),x.payload.categorie&&'Métier : '+x.payload.categorie,x.payload.zone&&'Zone : '+x.payload.zone],actions:[button('Modifier',()=>go('service',{id:x.id}),{kind:'secondary'}),archiveButton('services',x,'Il disparaîtra du catalogue.')]});const d=availability('services',x);if(d)card.querySelector('.pro-actions').before(d);body.append(card);}
+  archived(body,state.services);
+ }
+ function serviceForm({id}){
+  const row=state.services.find(x=>x.id===id)||null,p=row?.payload||{};
+  const body=frame(row?'Modifier le service':'Nouveau service');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
+  const name=input(f,{label:'Nom du service',value:p.nom||'',required:true,hint:'Exemple : Réparation de fuite d’eau.',attrs:{maxlength:'180'}});
+  const category=input(f,{label:'Métier',value:p.categorie||state.profile.payload.categorie||'',list:C.metiers,attrs:{maxlength:'100'}});
+  const tarif=choice(f,{legend:'Tarif',name:'tarif',value:p.tarif||(p.prix==null?'devis':'fixe'),values:[{value:'fixe',label:'Prix fixe'},{value:'devis',label:'Sur devis'}]});
+  const priceBox=node('div');f.append(priceBox);let price=null;const drawPrice=()=>{priceBox.replaceChildren();price=tarif.value==='fixe'?input(priceBox,{label:'Prix (FCFA)',type:'number',value:p.prix??'',required:true}):null;};tarif.onchange=drawPrice;drawPrice();
+  const zone=input(f,{label:'Zone d’intervention',value:p.zone||state.profile.payload.zone||'',attrs:{maxlength:'180'}});
+  const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
+  const photos=photosField(f,{existing:p.photos||(p.image_path?[p.image_path]:[]),api,upload,imageSelection,status});
+  const send=button(row?'Enregistrer le service':'Publier le service');body.append(send);
+  send.onclick=()=>guarded(send,async()=>{
+   const values={name:name.value.trim(),pricing:tarif.value};if(values.pricing==='fixe')values.price=price.value.trim()===''?null:Number(price.value);
+   const errors=C.verifierOffre('services',{nom:values.name,tarif:values.pricing,prix:values.price});if(errors.length)throw Error(errors.join(' '));
+   if(category.value.trim())values.category=category.value.trim();if(zone.value.trim().length>=2)values.zone=zone.value.trim();if(description.value.trim())values.description=description.value.trim();
+   values.photos=await photos.collect();
+   if(state.services.some(x=>x.id!==row?.id&&x.statut!=='Archivé'&&C.cleNom(x.payload.nom)===C.cleNom(values.name)))throw Error('Un service porte déjà ce nom.');
+   await api.saveService(values,row);await done(row?'Service mis à jour.':'Service publié dans le catalogue.');
+  });
+ }
+
+ await load();open=!!state.profile;render();
+ return state.profile?[state.profile.id]:[];
+}
