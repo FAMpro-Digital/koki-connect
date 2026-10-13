@@ -1,0 +1,26 @@
+work/
+dist/
+
+# Local credentials, generated evidence and build outputs are not source backups.
+.vercel/
+.env
+.env.*
+!.env.example
+!.env.supabase-local.example
+node_modules/
+artifacts/
+coverage/
+test-results/
+playwright-report/
+playwright/.auth/
+.auth/
+storageState*.json
+*.log
+*.pem
+*.key
+*.dump
+*.backup
+.DS_Store
+
+# Sorties de la collecte (données réelles à relire avant publication)
+collecte/sortie/

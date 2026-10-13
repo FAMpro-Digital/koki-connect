@@ -119,7 +119,7 @@
     const active=!!courseActive();
     ['depart','destination','position','point-depart','point-destination'].forEach(id=>$(id).disabled=active);
     document.querySelectorAll('[data-vehicule]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.vehicule===etat.categorie));b.disabled=active;});
-    $('mode-info').textContent=etat.demo?'Démonstration : chauffeurs et tarifs fictifs. Aucun appel, message ou réservation n’est envoyé.':'Service en préparation : les chauffeurs et tarifs réels seront ajoutés après validation.';
+    $('mode-info').textContent=etat.demo?'Démonstration : chauffeurs et tarifs fictifs. Aucun appel, message ou réservation n’est envoyé.':window.KokiBusiness?.enabled?'Réservation connectée : les tarifs et chauffeurs sont vérifiés par le serveur.':'Réservation connectée en préparation : activation après validation.';
     $('reservation-info').textContent=etat.demo?'Ce bouton crée uniquement une course de démonstration sur cet appareil.':'Les réservations réelles ne sont pas encore ouvertes.';
     etat.estimation=null;
     if (etat.depart && etat.destination) {
@@ -133,6 +133,8 @@
     if (etat.choisi) etat.choisi=etat.chauffeurs.find(c=>c.id===etat.choisi.id) || null;
     $('demander').disabled=!etat.demo || !etat.estimation || !etat.choisi || active;
     rendreChauffeurs(); rendreCourse(); dessinerPoints();
+    $('chauffeurs').closest('.transport-bloc').hidden=!etat.demo;
+    $('estimation').closest('.transport-bloc').hidden=!etat.demo;
   }
   async function afficher() {
     document.querySelector('.search').hidden=true;
@@ -140,7 +142,7 @@
     document.getElementById('titre-transport').focus();
     document.getElementById('vue-transport').scrollIntoView({block:'start'});
     message('Chargement de Transport…');
-    try { await initialiser(); carteInitialiser(); actualiser(); message('Choisissez votre trajet.'); }
+    try { await initialiser(); carteInitialiser(); actualiser(); await window.KokiBusiness?.show('transport',etat.demo); actualiser(); message('Choisissez votre trajet.'); }
     catch(e) { message(e.message); }
   }
   function changerLieu(type) {
@@ -170,7 +172,7 @@
       etat.depart={...etat.course.depart};etat.destination={...etat.course.destination};etat.categorie=etat.course.categorie;
       pointOption('depart',etat.depart);pointOption('destination',etat.destination);
     }
-    cibleBoutons();actualiser();
+    cibleBoutons();actualiser();window.KokiBusiness?.show('transport',etat.demo);
   }
   function categorie(valeur) { if(courseActive() || !core.categories.includes(valeur))return;etat.categorie=valeur;etat.choisi=null;actualiser(); }
   function choisirPoint(type) { if(!carte){message('Carte indisponible. Choisissez un lieu dans les listes.');return;}cible=type;cibleBoutons();message('Touchez la carte pour placer ' + (type==='depart'?'le départ.':'la destination.')); }
@@ -193,6 +195,6 @@
     if (carte) carte.fitBounds([[etat.depart.latitude,etat.depart.longitude],[etat.destination.latitude,etat.destination.longitude]],{padding:[20,20],maxZoom:15});
     message('Trajet préparé depuis Commerces & Services. Aucun chauffeur ni livreur n’est réservé.');
   }
-  window.KokiTransport=Object.freeze({afficher,changerLieu,utiliserPosition,changerMode,categorie,choisirPoint,demander,avancer,reinitialiserCourse,preparerTrajet});
+  window.KokiTransport=Object.freeze({connectedTrip:()=>({depart:etat.depart,destination:etat.destination,categorie:etat.categorie}),afficher,changerLieu,utiliserPosition,changerMode,categorie,choisirPoint,demander,avancer,reinitialiserCourse,preparerTrajet});
   window.afficherTransport=afficher;
 })();
