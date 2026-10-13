@@ -44,7 +44,10 @@ jobs:
           node --input-type=module - <<'JS'
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
-          assert.equal(JSON.parse(fs.readFileSync('assets/business/config.json', 'utf8')).enabled, false);
+          // Commerces & Services activé sur autorisation de Mourtada (13/10/2026) ; Transport doit rester fermé.
+          const business = JSON.parse(fs.readFileSync('assets/business/config.json', 'utf8'));
+          assert.equal(business.modules?.transport, false);
+          assert.ok(business.enabled === false || business.modules?.commerce === true);
           JS
       - name: Test and build with loopback-only networking
         run: |
