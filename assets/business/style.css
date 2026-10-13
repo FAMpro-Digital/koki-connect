@@ -45,61 +45,129 @@
 #vue-commerce .business-panel .pro-field label{font-size:15px}
 #vue-commerce .business-panel .pro-message:empty{display:none}#vue-commerce .business-panel .pro-message{margin:8px 0;font-weight:600}
 #vue-commerce .business-panel .pro-pending{border-left:4px solid #c98a00;background:#fff8e1;padding:8px 10px;border-radius:8px;margin-top:6px}#vue-commerce .business-panel .pro-pending p{margin:4px 0 0}
-/* Catalogue public (téléphone d'abord). */
-#vue-commerce .cat-root{display:flex;flex-direction:column;gap:10px}
-#vue-commerce .cat-account{border-top:2px solid #d8e7df;margin-top:18px;padding-top:8px}
-#vue-commerce .cat-bar{background:#fff;padding:6px 0 8px;border-bottom:1px solid #d8e7df;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end}
-#vue-commerce .cat-search{flex:1 1 100%}
-#vue-commerce .cat-search label,#vue-commerce .cat-field label{display:block;margin:4px 0;font-size:14px;font-weight:600}
-#vue-commerce .cat-search input{font-size:16px;min-height:48px;border-radius:24px;padding:10px 16px}
-#vue-commerce .cat-shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
-#vue-commerce .business-panel .cat-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 14px;margin:0;border-radius:12px;font-size:1rem;text-decoration:none;text-align:center;max-width:100%}
-#vue-commerce .business-panel .cat-btn-back,#vue-commerce .business-panel .cat-btn-secondary,#vue-commerce .business-panel .cat-btn-link{background:#e7f2ec;color:#0b5a30;border:1px solid #a9c5b7;min-height:44px}
-#vue-commerce .business-panel .cat-btn-link{background:#fff}
-#vue-commerce .business-panel .cat-btn-whatsapp{background:#1b8f4c;color:#fff;border:1px solid #1b8f4c;font-weight:700}
-#vue-commerce .business-panel .cat-btn-whatsapp-light{background:#fff;color:#126b39;border:1px solid #1b8f4c}
-#vue-commerce .business-panel .cat-btn-call{background:#245d88;color:#fff;border:1px solid #245d88;font-weight:700}
-#vue-commerce .business-panel .cat-btn-cart{background:#087a3d;color:#fff;border:1px solid #087a3d;width:100%;margin-top:8px}
-#vue-commerce .cat-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0;-webkit-overflow-scrolling:touch}
-#vue-commerce .business-panel .cat-tab{flex:none;min-height:44px;margin:0;border-radius:22px;padding:8px 14px;background:#fff;color:#0b5a30;border:1px solid #a9c5b7;white-space:nowrap}
-#vue-commerce .business-panel .cat-tab[aria-selected=true]{background:#087a3d;color:#fff;border-color:#087a3d;font-weight:700}
-#vue-commerce .cat-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:8px;align-items:end}
-#vue-commerce .cat-field select{font-size:16px;min-height:44px}
-#vue-commerce .cat-toggle{display:flex;align-items:center;gap:8px;min-height:44px;margin:0}
-#vue-commerce .cat-toggle input{width:22px;height:22px;min-height:0}
-#vue-commerce .cat-count{font-weight:600;color:#4b6457;margin:4px 0}
-#vue-commerce .cat-message:empty{display:none}#vue-commerce .cat-message{font-weight:600;margin:6px 0}
-#vue-commerce .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(160px,46%),1fr));gap:10px}
-#vue-commerce .business-panel .cat-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;margin:0;background:#fff;color:#173d2c;border:1px solid #d8e7df;border-radius:14px;overflow:hidden;min-height:0;width:100%}
-#vue-commerce .cat-card img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef3f0}
-#vue-commerce .cat-photo-vide{object-fit:contain!important;padding:12px;box-sizing:border-box}
-#vue-commerce .cat-card-body{display:flex;flex-direction:column;gap:4px;padding:8px 10px 10px}
-#vue-commerce .cat-card-title{font-weight:700;font-size:.98rem;line-height:1.25}
-#vue-commerce .cat-meta{font-size:.85rem;color:#4b6457}
-#vue-commerce .cat-price{margin:0}#vue-commerce .cat-price strong{font-size:1.05rem;color:#0b5a30}#vue-commerce .cat-price s{color:#777;font-size:.85rem}
-#vue-commerce .cat-promo{background:#ffe2c4;color:#7a3b00;border-radius:8px;padding:1px 6px;font-size:.8rem;font-weight:700}
-#vue-commerce .cat-badge{align-self:flex-start;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700}
+/* Boutique en ligne Commerces & Services — adaptative : une colonne au téléphone, catalogue + panier latéral sur grand écran. */
+#vue-commerce .cat-root{--cat-encre:#16181b;--cat-doux:#4b525a;--cat-fond:#f4f5f7;--cat-ligne:#e2e5e9;--cat-orange:#e06a00;--cat-orange-fonce:#a64b00;--cat-vert:#1b8f4c;display:flex;flex-direction:column;gap:12px;max-width:1240px;margin:0 auto;color:var(--cat-encre)}
+#vue-commerce #business-commerce{background:var(--cat-fond,#f4f5f7);border:0;padding:12px}
+#vue-commerce .cat-account{border-top:2px solid #e2e5e9;margin-top:22px;padding-top:8px;max-width:1240px;margin-left:auto;margin-right:auto}
+#vue-commerce .cat-shell{display:flex;flex-direction:column;gap:14px}
+#vue-commerce .cat-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0!important}
+#vue-commerce .cat-bar{display:flex;gap:10px;align-items:center}
+#vue-commerce .cat-search{flex:1 1 auto;min-width:0}
+#vue-commerce .business-panel .cat-search input{min-height:52px;border-radius:14px;border:1px solid #d8dce1;padding:12px 16px;font-size:16px;background:#fff;margin:0}
+#vue-commerce .business-panel .cat-cartbtn{position:relative;flex:0 0 auto;width:52px;height:52px;min-height:52px;margin:0;padding:0;border-radius:14px;background:var(--cat-encre);color:#fff;border:0;display:flex;align-items:center;justify-content:center}
+#vue-commerce .cat-cartbtn-n{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:var(--cat-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+#vue-commerce .cat-cartbtn-n[hidden]{display:none}
+#vue-commerce .cat-shortcuts{display:flex;gap:8px;flex-wrap:wrap}#vue-commerce .business-panel .cat-shortcuts .cat-btn{min-height:44px;font-size:14px;padding:8px 12px}
+#vue-commerce .business-panel .cat-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:10px 14px;margin:0;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;text-align:center;line-height:1.2;box-sizing:border-box;border:1.5px solid transparent;cursor:pointer}
+#vue-commerce .business-panel .cat-btn-back,#vue-commerce .business-panel .cat-btn-secondary,#vue-commerce .business-panel .cat-btn-link{background:#fff;color:var(--cat-encre);border-color:#d8dce1}
+#vue-commerce .business-panel .cat-btn-link{min-height:44px;font-weight:600}
+#vue-commerce .business-panel .cat-btn-primary,#vue-commerce .business-panel .cat-btn-cart{background:var(--cat-orange);color:#1a0e00;border-color:var(--cat-orange);width:100%}
+#vue-commerce .business-panel .cat-btn-dark{background:var(--cat-encre);color:#fff;width:100%}
+#vue-commerce .business-panel .cat-btn-whatsapp{background:var(--cat-vert);color:#fff;border-color:var(--cat-vert)}
+#vue-commerce .business-panel .cat-btn-whatsapp-light{background:#fff;color:#126b39;border-color:var(--cat-vert);width:100%}
+#vue-commerce .business-panel .cat-btn-call{background:#245d88;color:#fff;border-color:#245d88}
+#vue-commerce .cat-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:#e6e8ec;border-radius:16px;max-width:640px}
+#vue-commerce .business-panel .cat-tab{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;margin:0;padding:6px 8px;border:0;border-radius:12px;background:transparent;color:var(--cat-doux);font-weight:700;font-size:15px}
+#vue-commerce .business-panel .cat-tab[aria-selected=true]{background:#fff;color:var(--cat-encre);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#vue-commerce .cat-tab-n{font-size:12px;font-weight:700;background:#d8dce1;color:var(--cat-encre);border-radius:999px;padding:1px 7px}
+#vue-commerce .cat-tab[aria-selected=true] .cat-tab-n{background:#ffe2c4;color:#7a3b00}
+#vue-commerce .cat-section-title{margin:0 0 8px;font-size:17px}
+#vue-commerce .cat-promos[hidden]{display:none}
+#vue-commerce .cat-rail-promos{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(170px,210px);gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+#vue-commerce .cat-rail-promos .cat-card{scroll-snap-align:start}
+#vue-commerce .cat-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#vue-commerce .cat-chips::-webkit-scrollbar{display:none}
+#vue-commerce .cat-chips[hidden]{display:none}
+#vue-commerce .business-panel .cat-btn-chip{flex:0 0 auto;min-height:44px;border-radius:999px;padding:0 16px;background:#fff;color:#2c3238;border-color:#d8dce1;white-space:nowrap}
+#vue-commerce .business-panel .cat-btn-chip[aria-pressed=true]{background:var(--cat-encre);color:#fff;border-color:var(--cat-encre)}
+#vue-commerce .cat-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+#vue-commerce .cat-filters:empty{display:none}
+#vue-commerce .cat-field{flex:1 1 170px;max-width:260px}
+#vue-commerce .business-panel .cat-field label,#vue-commerce .cat-field label{display:block;margin:0 0 4px;font-size:13px;font-weight:700;color:var(--cat-doux)}
+#vue-commerce .business-panel .cat-field select,#vue-commerce .business-panel .cat-field input{min-height:46px;margin:0;border-radius:12px;border:1px solid #d8dce1;background:#fff;font-size:16px}
+#vue-commerce .business-panel .cat-toggle{display:flex;align-items:center;gap:8px;min-height:46px;margin:0;font-size:15px}
+#vue-commerce .business-panel .cat-toggle input{width:22px;height:22px;min-height:0;margin:0;display:inline-block}
+#vue-commerce .cat-layout{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+#vue-commerce .cat-main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px}
+#vue-commerce .cat-count{font-weight:600;color:var(--cat-doux);margin:0}
+#vue-commerce .cat-message:empty{display:none}#vue-commerce .cat-message{font-weight:700;margin:0;padding:10px 14px;border-radius:12px;background:#fff1e3;color:#5c2d00;border-left:4px solid var(--cat-orange)}
+#vue-commerce .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:14px}
+#vue-commerce .cat-grid[data-kind=services]{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
+@media (max-width:520px){#vue-commerce .cat-grid[data-kind=produits]{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+#vue-commerce .cat-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--cat-ligne);border-radius:18px;overflow:hidden;min-width:0}
+#vue-commerce .business-panel .cat-card-open{display:flex;flex-direction:column;align-items:stretch;flex:1;text-align:left;padding:0;margin:0;background:transparent;color:inherit;border:0;border-radius:0;min-height:0;font:inherit}
+#vue-commerce .cat-card[data-kind=services] .cat-card-open,#vue-commerce .cat-card[data-kind=professionnels] .cat-card-open{flex-direction:row;align-items:center;gap:12px;padding:14px 14px 0}
+#vue-commerce .cat-media{position:relative;display:block}
+#vue-commerce .cat-media img,#vue-commerce .cat-media .cat-tile{display:flex;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef0f2}
+#vue-commerce .cat-card[data-kind=services] .cat-media,#vue-commerce .cat-card[data-kind=professionnels] .cat-media{flex:0 0 56px;width:56px}
+#vue-commerce .cat-card[data-kind=services] .cat-media .cat-tile,#vue-commerce .cat-card[data-kind=services] .cat-media img,#vue-commerce .cat-card[data-kind=professionnels] .cat-media .cat-tile,#vue-commerce .cat-card[data-kind=professionnels] .cat-media img{aspect-ratio:1;border-radius:14px}
+#vue-commerce .cat-card[data-kind=services] .cat-tile svg,#vue-commerce .cat-card[data-kind=professionnels] .cat-tile svg{width:26px;height:26px}
+#vue-commerce .cat-tile{align-items:center;justify-content:center;box-sizing:border-box}
+#vue-commerce .cat-teinte-1{background:#fff1e3!important;color:#8a3d00}#vue-commerce .cat-teinte-2{background:#eaf0fb!important;color:#1e3e8a}#vue-commerce .cat-teinte-3{background:#fbeaf3!important;color:#8a1e58}#vue-commerce .cat-teinte-4{background:#edeff2!important;color:#2b3138}#vue-commerce .cat-teinte-5{background:#e6f4ea!important;color:#1d5f33}#vue-commerce .cat-teinte-s{background:#eaf0fb!important;color:#1e3e8a}#vue-commerce .cat-teinte-n{background:#fff1e3!important;color:#8a3d00}
+#vue-commerce .cat-promo{position:absolute;top:10px;left:10px;padding:4px 9px;border-radius:999px;background:#c23a00;color:#fff;font-size:12px;font-weight:700}
+#vue-commerce .cat-card-body{display:flex;flex-direction:column;gap:5px;padding:12px 14px 10px;min-width:0}
+#vue-commerce .cat-card[data-kind=services] .cat-card-body,#vue-commerce .cat-card[data-kind=professionnels] .cat-card-body{padding:0}
+#vue-commerce .cat-card-title{font-weight:700;font-size:16px;line-height:1.3}
+#vue-commerce .cat-meta{font-size:12.5px;color:#5a6169}
+#vue-commerce .cat-meta-fort{font-weight:700;color:#1e3e8a;font-size:13px}
+#vue-commerce .business-panel .cat-price,#vue-commerce .cat-price{margin:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+#vue-commerce .cat-price strong{font-size:18px;color:var(--cat-encre)}#vue-commerce .cat-price s{color:#6b7178;font-size:13px}
+#vue-commerce .cat-badge{align-self:flex-start;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
 #vue-commerce .cat-ok{background:#d9f2e3;color:#0b5a30}#vue-commerce .cat-off{background:#fbdcdc;color:#8a1c1c}
-#vue-commerce .cat-empty{grid-column:1/-1;padding:16px;text-align:center;color:#4b6457}
-#vue-commerce .cat-detail{display:flex;flex-direction:column;gap:10px}
-#vue-commerce .cat-title{margin:4px 0 0;font-size:1.3rem;outline:none}
+#vue-commerce .cat-card-actions{padding:0 14px 14px;margin-top:auto}
+#vue-commerce .cat-card[data-kind=services] .cat-card-actions{padding-top:12px}
+#vue-commerce .cat-pill{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:12px;background:#eef0f2;color:#5a6169;font-weight:700;font-size:14px}
+#vue-commerce .cat-stepper{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;min-height:44px;border-radius:12px;border:1.5px solid var(--cat-encre);overflow:hidden;background:#fff}
+#vue-commerce .business-panel .cat-btn-step{min-height:44px;width:44px;padding:0;border:0;border-radius:0;background:transparent;color:var(--cat-encre);font-size:20px}
+#vue-commerce .cat-stepper-n{text-align:center;font-size:17px;white-space:nowrap}
+#vue-commerce .cat-stepper-mini{grid-template-columns:44px 1fr 44px;min-height:44px;flex:0 1 150px}
+
+
+#vue-commerce .cat-card-mini .cat-card-title{font-size:14.5px}
+#vue-commerce .cat-empty{grid-column:1/-1;padding:28px;text-align:center;color:var(--cat-doux);background:#fff;border:1px dashed #c8cdd3;border-radius:18px}
+/* Panier : à droite sur grand écran, sous la liste sur téléphone. */
+#vue-commerce .cat-cart{flex:1 1 300px;min-width:0;box-sizing:border-box;background:#fff;border:1px solid var(--cat-ligne);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}
+@media (min-width:900px){#vue-commerce .cat-cart{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}}
+#vue-commerce .cat-cart-title{margin:0;font-size:20px;outline:none}
+#vue-commerce .business-panel .cat-hint,#vue-commerce .cat-hint{margin:0;font-size:13.5px;color:#5a6169;line-height:1.45}
+#vue-commerce .cat-lines{display:flex;flex-direction:column;gap:12px}
+#vue-commerce .cat-line{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid #eef0f2}
+#vue-commerce .cat-line-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 140px}
+#vue-commerce .cat-line-actions{flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:10px}
+#vue-commerce .cat-line-total{white-space:nowrap}
+#vue-commerce .cat-segment{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;background:#eef0f2;border-radius:12px}
+#vue-commerce .business-panel .cat-btn-seg{min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--cat-doux);font-size:14px}
+#vue-commerce .business-panel .cat-btn-seg[aria-pressed=true]{background:#fff;color:var(--cat-encre);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#vue-commerce .cat-cart .cat-field{max-width:none}
+#vue-commerce .cat-totals{display:grid;grid-template-columns:1fr auto;gap:6px 10px;margin:0;font-size:15px}
+#vue-commerce .cat-totals dt{color:var(--cat-doux)}#vue-commerce .cat-totals dd{margin:0;text-align:right;font-weight:700}
+#vue-commerce .business-panel .cat-cartbar{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:4;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;margin:4px 0 0;padding:0 18px;border:0;border-radius:16px;background:var(--cat-encre);color:#fff;font-weight:700;box-shadow:0 8px 24px rgba(22,24,27,.25)}
+#vue-commerce .business-panel .cat-cartbar[hidden]{display:none}
+#vue-commerce .cat-cartbar-go{color:#ffb46b}#vue-commerce .cat-cartbar span{white-space:nowrap}
+@media (min-width:900px){#vue-commerce .business-panel .cat-cartbar{display:none}}
+/* Fiche détaillée. */
+#vue-commerce .cat-bar-detail{position:sticky;top:0;z-index:3;background:var(--cat-fond);padding:6px 0}
+#vue-commerce .cat-detail{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;background:#fff;border:1px solid var(--cat-ligne);border-radius:20px;padding:16px}
+#vue-commerce .cat-detail-media{position:relative;flex:1 1 300px;min-width:0;max-width:560px}
+#vue-commerce .cat-detail-body{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:12px}
+#vue-commerce .cat-detail-media .cat-tile{display:flex;width:100%;aspect-ratio:4/3;border-radius:16px}
+#vue-commerce .cat-detail-media .cat-tile svg{width:72px;height:72px}
+#vue-commerce .cat-title{margin:0;font-size:24px;line-height:1.2;outline:none}
 #vue-commerce .cat-gallery{position:relative}
-#vue-commerce .cat-rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#vue-commerce .cat-rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #vue-commerce .cat-rail figure{flex:0 0 100%;margin:0;scroll-snap-align:start}
-#vue-commerce .cat-gallery img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef3f0;border-radius:14px}
+#vue-commerce .cat-gallery img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef0f2;border-radius:16px}
 #vue-commerce .cat-gallery-count{position:absolute;right:10px;bottom:10px;margin:0;background:rgba(0,0,0,.6);color:#fff;border-radius:12px;padding:2px 10px;font-size:.85rem}
-#vue-commerce .cat-infos{display:grid;grid-template-columns:minmax(0,38%) 1fr;gap:4px 10px;margin:0}#vue-commerce .cat-infos dt{font-weight:600;color:#4b6457}#vue-commerce .cat-infos dd{margin:0}
+#vue-commerce .cat-infos{display:grid;grid-template-columns:minmax(0,38%) 1fr;gap:6px 12px;margin:0}#vue-commerce .cat-infos dt{font-weight:600;color:var(--cat-doux)}#vue-commerce .cat-infos dd{margin:0}
 #vue-commerce .cat-description{white-space:pre-line}
-#vue-commerce .cat-qty{display:flex;align-items:center;gap:10px}#vue-commerce .cat-qty label{margin:0;font-weight:600}
-#vue-commerce .business-panel .cat-qty button{min-width:48px;min-height:48px;margin:0;font-size:1.3rem;background:#e7f2ec;color:#0b5a30;border:1px solid #a9c5b7}
+#vue-commerce .cat-qty{display:flex;align-items:center;gap:10px}#vue-commerce .business-panel .cat-qty label{margin:0;font-weight:700}
+#vue-commerce .business-panel .cat-qty .cat-btn-step{width:48px;min-height:48px;border:1.5px solid var(--cat-encre);border-radius:12px}
 #vue-commerce .cat-qty output{min-width:2ch;text-align:center;font-size:1.2rem;font-weight:700}
-#vue-commerce .cat-contact{background:#f3f8f5;border:1px solid #d8e7df;border-radius:14px;padding:10px}
-#vue-commerce .cat-seller{font-weight:700;margin:0 0 6px}
+#vue-commerce .cat-contact{background:var(--cat-fond);border:1px solid var(--cat-ligne);border-radius:16px;padding:12px}
+#vue-commerce .cat-seller{font-weight:700;margin:0 0 8px}
 #vue-commerce .cat-actions{display:flex;flex-direction:column;gap:8px}
-#vue-commerce .cat-related{display:flex;flex-direction:column;gap:8px;border-top:1px solid #d8e7df;padding-top:10px}
+#vue-commerce .cat-related{flex:1 1 100%;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--cat-ligne);padding-top:12px}
 #vue-commerce .cat-related h4{margin:8px 0 0}
-#vue-commerce .cat-bar-detail{position:sticky;top:0;z-index:3}
-#vue-commerce .cat-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
-#vue-commerce .business-panel .cat-tab{white-space:normal;padding:8px 6px;font-size:.95rem}
-@media (max-width:480px){#vue-commerce .cat-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){#vue-commerce #business-commerce{padding:8px}#vue-commerce .business-panel .cat-tab{font-size:14px;padding:6px 4px;flex-direction:column;gap:2px}#vue-commerce .cat-detail{padding:12px}#vue-commerce .cat-title{font-size:21px}}
+@media (prefers-reduced-motion:reduce){#vue-commerce .cat-root *{scroll-behavior:auto!important}}
 .position-gps{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #cfe0d6;border-radius:12px;background:#f6faf7;margin:10px 0}.position-gps .position-etat{margin:0;font-weight:600}.position-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.position-actions a{color:#087a3d;font-weight:600;padding:10px 4px}.position-gps small{color:#5c6c60}@media(max-width:760px){.position-actions button{width:100%}}

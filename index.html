@@ -290,34 +290,12 @@
     <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
     <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
-    <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Catalogue fictif et brouillons enregistrés sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
-    <div id="market-demo-interface">
+    <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
     <p id="market-message" role="status"></p>
-    <div class="market-tabs" role="group" aria-label="Espaces de Commerces et Services">
-      <button type="button" data-market-tab="produits" aria-pressed="true" onclick="KokiCommerce.onglet('produits')">Produits</button>
-      <button type="button" data-market-tab="services" aria-pressed="false" onclick="KokiCommerce.onglet('services')">Services</button>
-      <button type="button" data-market-tab="panier" aria-pressed="false" onclick="KokiCommerce.onglet('panier')">Panier</button>
-      <button type="button" data-market-tab="suivi" aria-pressed="false" onclick="KokiCommerce.onglet('suivi')">Mes commandes et demandes</button>
-      <button type="button" data-market-tab="pro" aria-pressed="false" onclick="KokiCommerce.onglet('pro')">Espace professionnel</button>
-    </div>
-    <div id="market-catalogue" class="market-panel">
-      <div class="market-filter">
-        <div><label for="market-recherche">Rechercher</label><input id="market-recherche" type="search" placeholder="Produit, boutique, métier…" oninput="KokiCommerce.catalogue()"></div>
-        <div><label for="market-categorie">Catégorie</label><select id="market-categorie" onchange="KokiCommerce.catalogue()"><option value="">Toutes</option></select></div>
-        <div><label for="market-tri">Trier</label><select id="market-tri" onchange="KokiCommerce.catalogue()"><option value="nom">Nom</option><option value="prix">Prix croissant</option></select></div>
-      </div>
-      <label><input id="market-disponible" type="checkbox" onchange="KokiCommerce.catalogue()"> Disponibles uniquement</label>
-      <label><input id="market-promotions" type="checkbox" onchange="KokiCommerce.catalogue()"> Promotions uniquement (produits)</label>
-      <div id="market-resultats" class="market-grid" style="margin-top:16px;"></div>
-    </div>
-    <div id="market-fiche" class="market-panel" hidden></div>
-    <div id="market-panier" class="market-panel" hidden>
-      <h3>Votre panier</h3><div id="market-lignes"></div><p id="market-total" class="market-price"></p>
-      <label for="market-reception">Réception</label><select id="market-reception" onchange="KokiCommerce.panier()"><option value="retrait">Retrait en boutique</option><option value="livraison">Livraison</option></select>
-      <label for="market-livraison-lieu">Lieu de livraison</label><select id="market-livraison-lieu"></select>
-      <button type="button" onclick="KokiCommerce.position('livraison')">📍 Utiliser ma position</button>
-      <p class="market-small">Total des produits uniquement. Frais de livraison à confirmer ; aucun paiement en ligne pour le moment.</p>
-      <button id="market-commander" type="button" class="market-primary" onclick="KokiCommerce.commander()" disabled>Commander</button>
+    <div id="market-demo-interface" hidden>
+    <div class="market-tabs" role="group" aria-label="Démonstration : suivi et espace professionnel">
+      <button type="button" data-market-tab="suivi" aria-pressed="true" onclick="KokiCommerce.onglet('suivi')">Mes commandes et demandes (démo)</button>
+      <button type="button" data-market-tab="pro" aria-pressed="false" onclick="KokiCommerce.onglet('pro')">Espace professionnel (démo)</button>
     </div>
     <form id="market-demande" class="market-panel" hidden onsubmit="event.preventDefault(); KokiCommerce.envoyerDemande()">
       <h3 id="market-demande-titre">Demander un devis</h3>
