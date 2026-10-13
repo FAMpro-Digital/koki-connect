@@ -6,7 +6,8 @@
       "develop/bibliotheque-education": false,
       "develop/bibliotheque-supabase": false,
       "develop/sante": false,
-      "develop/commerce": false
+      "develop/commerce": false,
+      "develop/activation-commerce": false
     }
   }
 }

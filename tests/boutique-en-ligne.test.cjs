@@ -34,12 +34,12 @@ test('interface : panier latéral, barre panier, puces, Ajouter au panier, aucun
  assert.match(css,/@media \(min-width:900px\)\{#vue-commerce \.business-panel \.cat-cartbar\{display:none\}\}/,'barre panier réservée aux petits écrans');
  assert.doesNotMatch(css.slice(css.indexOf('/* Boutique en ligne')),/(^|[;{])width:\s*\d{3,}px/m,'aucune largeur fixe');
 });
-test('service réel : panier invité sans connexion, commande interne et WhatsApp conservées, rien activé',()=>{
+test('service réel : panier invité sans connexion, commande interne et WhatsApp conservées, Commerce seul activé',()=>{
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
  assert.match(rt,/async function addToCart\(p,quantity=1\)\{let u=null;try\{u=await api\.identity\(\);\}catch\{\}/,'panier possible avant connexion');
  assert.match(rt,/api\.order\(cart\[0\]\.parent_id/,'commande interne vérifiée par le serveur');
  assert.match(rt,/Connectez-vous dans « Mon compte »/);
- assert.equal(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).enabled,false,'les commandes réelles restent désactivées');
+ const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules.commerce,true,'commandes Commerce activées (autorisation du 13/10/2026)');assert.equal(c.modules.transport,false);
 });
 test('démonstration : même boutique, données fictives locales, aucun contact réel',()=>{
  const app=fs.readFileSync('assets/commerce/app.js','utf8'),html=fs.readFileSync('index.html','utf8');
@@ -47,4 +47,11 @@ test('démonstration : même boutique, données fictives locales, aucun contact 
  assert.doesNotMatch(app.slice(app.indexOf('function lignesDemo')),/telephone:p\.telephone/,'aucun numéro réel en démonstration');
  assert.doesNotMatch(html,/KokiCommerce\.(catalogue|panier|commander)\(/,'ancien catalogue démo retiré');
  assert.match(html,/<div id="market-demo-interface" hidden>/);
+});
+test('activation par rubrique : Commerce ouvert, Transport fermé',async()=>{
+ const g=globalThis;g.window=g.window||{};g.location=g.location||{search:'',hostname:'127.0.0.1'};
+ const {moduleActif}=await import('../assets/business/runtime.mjs');
+ const c={enabled:true,modules:{commerce:true,transport:false}};
+ assert.equal(moduleActif(c,'commerce'),true);assert.equal(moduleActif(c,'transport'),false);
+ assert.equal(moduleActif({enabled:true},'transport'),true,'sans « modules » : suit enabled');assert.equal(moduleActif({enabled:false,modules:{commerce:true}},'commerce'),false,'interrupteur général prioritaire');
 });

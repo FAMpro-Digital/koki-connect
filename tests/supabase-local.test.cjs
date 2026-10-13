@@ -4,7 +4,7 @@ function feedFor(backend,hostname){const calls=[];const ctx={URL,AbortSignal,fet
 test('version publiée : configuration de production intacte, mode métier désactivé',()=>{
  const backend=JSON.parse(fs.readFileSync('assets/portail/backend.json','utf8'));
  assert.match(backend.url,/^https:\/\/[a-z0-9]+\.supabase\.co$/);assert.ok(backend.publishableKey.startsWith('sb_publishable_'));assert.equal(backend.local,undefined);
- assert.equal(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).enabled,false);
+ assert.equal(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).modules.transport,false,'Transport reste fermé en production');
  assert.equal(JSON.parse(fs.readFileSync('assets/portail/environment.json','utf8')).local,undefined);
 });
 test('flux public : Supabase local accepté uniquement sur une page servie en local',async()=>{
