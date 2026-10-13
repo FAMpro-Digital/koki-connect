@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "develop/phases-2-6": false,
-      "develop/bibliotheque-education": false
+      "develop/bibliotheque-education": false,
+      "develop/bibliotheque-supabase": false
     }
   }
 }

@@ -10,7 +10,7 @@ test('Contrat livre : gratuit, payant et refus',()=>{
   assert.equal(paye.prix,2000);assert.equal(paye.fichier,'','un livre payant ne publie jamais son fichier');assert.equal(L.telechargeable(paye),false);
   assert.throws(()=>L.encode({...base,acces:'Payant',prix:0}),/prix/);
   assert.throws(()=>L.encode({...base,fichier:'../secret.pdf'}),/Fichier invalide/);
-  assert.throws(()=>L.encode({...base,taille_mo:500}),/trop lourd/);
+  assert.throws(()=>L.encode({...base,taille_mo:60}),/50 Mo/);
   // Un JSON modifié à la main pour exposer le fichier d'un livre payant est ignoré.
   assert.equal(L.decode(row(JSON.stringify({schema:L.marker,version:1,...base,acces:'Payant',prix:1500}))),null);
   assert.equal(L.decode({...row(L.encode(base)),categorie:'Sport'}),null);
@@ -42,7 +42,7 @@ test('Hors ligne : refus du type, de la taille et des identifiants',async()=>{
   const {env}=fakeEnv();
   H._env({...env,fetch:async()=>new Response('<html>',{headers:{'content-type':'text/html'}})});
   await assert.rejects(H.telecharger('2222',{},'u'),/Type de fichier/);
-  H._env({...env,fetch:async()=>new Response(new Uint8Array(10),{headers:{'content-type':'application/pdf','content-length':String(300*1024*1024)}})});
+  H._env({...env,fetch:async()=>new Response(new Uint8Array(10),{headers:{'content-type':'application/pdf','content-length':String(100*1024*1024)}})});
   await assert.rejects(H.telecharger('2222',{},'u'),/trop lourd/);
   H._env({...env,fetch:async()=>new Response(new Uint8Array(2*1024*1024),{headers:{'content-type':'audio/mpeg'}})});
   await assert.rejects(H.telecharger('2222',{},'u',{limiteMo:1}),/trop lourd/);
@@ -50,11 +50,11 @@ test('Hors ligne : refus du type, de la taille et des identifiants',async()=>{
   assert.equal(H.present('2222'),false);
 });
 
-test('Flux : lien de livre signé seulement pour koki-media et les formats autorisés',async()=>{
-  const calls=[];const ctx={URL,AbortSignal,fetch:async(url,o)=>{calls.push(url);return {ok:true,json:async()=>url.endsWith('backend.json')?{url:'https://qsbmzzbiztfqysstepxm.supabase.co',publishableKey:'sb_publishable_test'}:{signedURL:'/object/sign/koki-media/1111/2222.pdf?token=t'}};}};
+test('Flux : lien de livre signé seulement pour koki-livres et les formats autorisés',async()=>{
+  const calls=[];const ctx={URL,AbortSignal,fetch:async(url,o)=>{calls.push(url);return {ok:true,json:async()=>url.endsWith('backend.json')?{url:'https://qsbmzzbiztfqysstepxm.supabase.co',publishableKey:'sb_publishable_test'}:{signedURL:'/object/sign/koki-livres/1111/2222.pdf?token=t'}};}};
   vm.runInNewContext(fs.readFileSync('assets/portail/feed.js','utf8'),ctx);
-  assert.equal(await ctx.KokiPublicFeed.signerFichier('1111/2222.pdf'),'https://qsbmzzbiztfqysstepxm.supabase.co/storage/v1/object/sign/koki-media/1111/2222.pdf?token=t');
-  assert.match(calls.at(-1),/\/storage\/v1\/object\/sign\/koki-media\/1111\/2222\.pdf$/);
+  assert.equal(await ctx.KokiPublicFeed.signerFichier('1111/2222.pdf'),'https://qsbmzzbiztfqysstepxm.supabase.co/storage/v1/object/sign/koki-livres/1111/2222.pdf?token=t');
+  assert.match(calls.at(-1),/\/storage\/v1\/object\/sign\/koki-livres\/1111\/2222\.pdf$/);
   await assert.rejects(ctx.KokiPublicFeed.signerFichier('../autre/x.pdf'),/non disponible/);
   await assert.rejects(ctx.KokiPublicFeed.signerFichier('1111/2222.exe'),/non disponible/);
 });

@@ -8,7 +8,7 @@ const formats=['PDF','EPUB','Audio','Audio + PDF','Livre papier'];
 const acces=['Gratuit','Payant'];
 const fichierRe=/^[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/;
 const telRe=/^\+?[0-9 ()-]{6,24}$/;
-const tailleMax=200; // Mo, limite de téléchargement sur téléphone
+const tailleMax=50; // Mo : limite d'envoi Supabase Free et taille raisonnable sur téléphone
 function str(v,max){return typeof v==='string'&&v.length<=max;}
 function check(v){
  if(!v||v.schema!==marker||v.version!==version)return false;
@@ -31,8 +31,8 @@ function encode(v){
  if(!check(s)){
   if(s.acces==='Payant'&&!(Number.isInteger(s.prix)&&s.prix>0))throw Error('Indiquez un prix en FCFA pour un livre payant.');
   if(s.whatsapp&&!telRe.test(s.whatsapp))throw Error('Numéro WhatsApp invalide.');
-  if(s.fichier&&!fichierRe.test(s.fichier))throw Error('Fichier invalide (PDF, EPUB, MP3 ou M4A téléversé dans koki-media).');
-  if(s.taille_mo>tailleMax)throw Error('Fichier trop lourd pour un téléphone (200 Mo maximum).');
+  if(s.fichier&&!fichierRe.test(s.fichier))throw Error('Fichier invalide (PDF, EPUB, MP3 ou M4A téléversé dans koki-livres).');
+  if(s.taille_mo>tailleMax)throw Error('Fichier trop lourd (50 Mo maximum).');
   throw Error('Fiche livre invalide.');
  }
  return JSON.stringify(s);
