@@ -10,5 +10,7 @@ async function charger(){const c=await settings();const headers={apikey:c.publis
 // Les images ont une URL temporaire ; chaque actualisation renouvelle leur accès.
 const queue=rows.filter(x=>x.image_path&&/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(x.image_path));let i=0;
 await Promise.all(Array.from({length:Math.min(4,queue.length)},async()=>{while(i<queue.length){const row=queue[i++];try{const signed=await request(c.url+'/storage/v1/object/sign/koki-media/'+row.image_path,{method:'POST',headers,body:JSON.stringify({expiresIn:120})});const url=c.url+'/storage/v1'+signed.signedURL;if(imagePermise(url))row.image=url;}catch(_){row.image=null;}}}));return {version:1,contenus:rows};}
-root.KokiPublicFeed={charger,imagePermise,cibleAutorisee};
+// Livres gratuits : lien temporaire (5 min) vers un fichier de koki-media ; jamais d'autre origine ni d'autre dossier.
+async function signerFichier(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(String(path)))throw Error('Fichier non disponible');const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const signed=await request(c.url+'/storage/v1/object/sign/koki-media/'+path,{method:'POST',headers,body:JSON.stringify({expiresIn:300})});const url=c.url+'/storage/v1'+signed.signedURL;if(!imagePermise(url))throw Error('Lien de téléchargement refusé');return url;}
+root.KokiPublicFeed={charger,imagePermise,cibleAutorisee,signerFichier};
 })(globalThis);
