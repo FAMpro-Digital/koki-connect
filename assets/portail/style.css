@@ -8,3 +8,33 @@
 .biblio-ligne{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}.biblio-badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}.biblio-gratuit{background:#1f7a4d;color:#fff}.biblio-payant{background:#f7d9a0;color:#6b3f00}.biblio-hors-ligne{color:#1f7a4d;font-size:13px;font-weight:700}
 .biblio-infos{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:12px 0}.biblio-infos dt{color:#526455}.biblio-infos dd{margin:0;font-weight:700}
 .biblio-zone{display:grid;gap:10px;margin-top:12px}.biblio-zone progress{width:100%;height:12px}.biblio-principal{background:#087a3d!important;color:#fff!important;border-color:#087a3d!important;font-weight:700}.biblio-ok{color:#1f7a4d;font-weight:700}.biblio-prix{font-size:20px;font-weight:700}.biblio-action{text-align:center}.biblio-lecteur{display:grid;gap:10px}
+
+/* Rubrique Santé — mise en page adaptative (grilles auto-ajustées, aucune largeur fixe) */
+.sante-page{display:flex;flex-direction:column;gap:20px;color:#14171a}
+.sante-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}.sante-sous-titre{margin:0;color:#4a535c;flex:1 1 240px}
+.sante-recherche{flex:1 1 280px;max-width:440px}.sante-recherche input{width:100%;box-sizing:border-box;min-height:50px;padding:12px 16px;border:1px solid #d9dee3;border-radius:14px;font:inherit;font-size:16px;background:#fff}
+.sante-urgences{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.sante-urgence{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;text-decoration:none;min-height:84px;box-sizing:border-box}
+.sante-urgence.rouge{background:#a3123e;color:#fff}.sante-urgence.sombre{background:#1e2731;color:#fff}.sante-urgence.clair{background:#fff;color:#14171a;border:1px solid #d9dee3}
+.sante-urgence-icone{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);flex:0 0 auto}.sante-urgence.clair .sante-urgence-icone{background:#eef1f4}
+.sante-urgence>span:last-child{display:flex;flex-direction:column;gap:2px}.sante-urgence-libelle{font-size:14px}.sante-urgence-numero{font-size:28px;font-weight:700;line-height:1}
+.sante-corps{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}.sante-principal{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px}.sante-cote{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.sante-filtres{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.sante-chips{display:flex;flex-wrap:wrap;gap:8px}
+.sante-chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #d9dee3;background:#fff;color:#2a3138;font:inherit;font-weight:700;cursor:pointer}.sante-chip[aria-pressed=true]{background:#14171a;color:#fff;border-color:#14171a}.sante-chip-ouvert[aria-pressed=true]{background:#e3f4ec;color:#0b5a3c;border-color:#0f5f45}
+.sante-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}
+.sante-carte{background:#fff;border:1px solid #e1e5e9;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;overflow-wrap:anywhere}.sante-carte img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px}.sante-carte h3{margin:0;font-size:19px}
+.sante-carte-haut{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center}
+.sante-type{font-size:13px;font-weight:700;padding:5px 10px;border-radius:999px;background:#f1f3f5;color:#333b43}.sante-type.centre{background:#e8f0fe;color:#1d3fa8}.sante-type.pharmacie{background:#e3f4ec;color:#0b5a3c}.sante-type.maternite{background:#fceaf0;color:#8f0f37}
+.sante-statut{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#5b6570}.sante-statut::before{content:"";width:8px;height:8px;border-radius:50%;background:#9aa3ac}.sante-statut.ouvert{color:#0b5a3c}.sante-statut.ouvert::before{background:#16a06a}
+.sante-lieu{margin:0;color:#4a535c;font-size:14px}.sante-services{display:flex;flex-wrap:wrap;gap:6px}.sante-services span{font-size:13px;padding:4px 10px;border-radius:999px;background:#f1f3f5;color:#333b43}
+.sante-garde-mention{margin:0;font-weight:700;color:#0b5a3c}
+.sante-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:auto}
+.sante-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 14px;border-radius:12px;border:1.5px solid #14171a;background:#fff;color:#14171a;text-decoration:none;font:inherit;font-weight:700;cursor:pointer;box-sizing:border-box}.sante-btn-plein{background:#14171a;color:#fff}.sante-btn-blanc{background:#fff;color:#0f5f45;border-color:#fff}
+.sante-lien{background:none;border:0;color:#a3123e;font:inherit;font-weight:700;text-align:left;min-height:44px;padding:0;cursor:pointer}
+.sante-bloc{background:#fff;border:1px solid #e1e5e9;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px}.sante-bloc h3{margin:0;font-size:18px}
+.sante-bloc-garde{background:#0f5f45;color:#fff;border-color:#0f5f45}.sante-bloc-garde .sante-lieu{color:#ddf2e9}.sante-surtitre{margin:0;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#bfe6d6}
+.sante-alerte{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#f7f8fa;border:0;border-radius:12px;padding:10px 12px;font:inherit;font-weight:700;color:#14171a;cursor:pointer;min-height:44px}.sante-alerte-date{font-size:12px;font-weight:400;color:#4a535c}
+.sante-numero{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #eef1f4;color:#14171a;text-decoration:none;min-height:44px;align-items:center}
+.sante-rappel{margin:0;padding:12px 14px;border-radius:14px;background:#fff3f6;color:#7a0d2e;font-size:14px;line-height:1.45}
+.sante-vide{padding:24px;text-align:center;background:#fff;border:1px dashed #c9d0d6;border-radius:18px;color:#4a535c}
+.sante-fiche{max-width:720px}
