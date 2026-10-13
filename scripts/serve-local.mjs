@@ -27,7 +27,7 @@ export function localSettings(env={}){
  };
 }
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon','.jpg':'image/jpeg','.woff2':'font/woff2'};
-const served=['/index.html','/favicon.ico','/manifest.webmanifest','/assets/'];
+const served=['/index.html','/favicon.ico','/manifest.webmanifest','/sw.js','/assets/'];
 export function createLocalServer(settings){
  return createServer(async(req,res)=>{
   try{
