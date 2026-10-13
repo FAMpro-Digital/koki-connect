@@ -4,6 +4,15 @@ const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_co
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
 // Numéros sénégalais (77 123 45 67, 33 …) complétés en +221 ; autres pays au format international. Règle du contrat partagé.
 export function normalizePhone(value){const v=C.normaliserTelephone(value);if(!v)throw Error('Numéro invalide : utilisez le format international (+221…).');return v;}
+// Messages d'inscription selon le code renvoyé par Supabase Auth (aucun détail technique ni secret affiché).
+export function messageInscription(error){const code=String(error?.code||''),status=error?.status;
+ if(code==='signup_disabled'||code==='email_provider_disabled')return 'Les inscriptions ne sont pas encore ouvertes sur Koki Connect. Réessayez plus tard ou contactez Koki Connect.';
+ if(code==='over_email_send_rate_limit'||code==='over_request_rate_limit'||status===429)return 'Trop de demandes d’inscription pour le moment. Patientez quelques minutes puis réessayez.';
+ if(code==='weak_password')return 'Mot de passe jugé trop faible : choisissez au moins 12 caractères en mélangeant lettres, chiffres et symboles.';
+ if(code==='user_already_exists'||code==='email_exists')return 'Un compte existe déjà avec cette adresse : connectez-vous ou utilisez « Mot de passe oublié ».';
+ if(code==='email_address_invalid'||code==='validation_failed')return 'Adresse e-mail refusée : vérifiez-la et réessayez.';
+ if(code==='email_address_not_authorized')return 'L’e-mail de confirmation ne peut pas être envoyé à cette adresse pour le moment. Contactez Koki Connect.';
+ return 'Inscription impossible. Réessayez ou contactez Koki Connect.';}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
 export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{}}={}){
  let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}});
@@ -25,7 +34,8 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async login(email,password){requireReady();const {error}=await db.auth.signInWithPassword({email:email.trim(),password});if(error)throw Error('Connexion refusée. Vérifiez vos identifiants.');return identity();},
  async sendCode(phone){requireReady();const number=normalizePhone(phone);const {error}=await db.auth.signInWithOtp({phone:number,options:{shouldCreateUser:true,channel:'sms'}});if(error)throw Error(error.status===429||/rate|second/i.test(error.message||'')?'Trop de demandes. Patientez avant de redemander un code.':'Envoi du code impossible. Vérifiez le numéro et réessayez.');return number;},
  async verifyCode(phone,code){requireReady();const number=normalizePhone(phone);const token=String(code??'').replace(/\s/g,'');if(!/^\d{6}$/.test(token))throw Error('Saisissez le code à 6 chiffres reçu par SMS.');const {error}=await db.auth.verifyOtp({phone:number,token,type:'sms'});if(error)throw Error('Code invalide ou expiré. Redemandez un code.');return identity();},
- async signup(email,password){requireReady();const {error}=await db.auth.signUp({email:email.trim(),password});if(error)throw Error('Inscription impossible. Réessayez ou contactez Koki Connect.');},
+ // Lien de confirmation : retour sur la page publique (si elle figure dans les « Redirect URLs » de Supabase ; sinon l'URL du site est utilisée).
+ async signup(email,password){requireReady();const options={};try{const url=new URL(location.origin+location.pathname);if(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost')options.emailRedirectTo=url.href;}catch{}const {error}=await db.auth.signUp({email:email.trim(),password,options});if(error)throw Error(messageInscription(error));},
  async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');const {error}=await db.auth.signOut({scope:'local'});if(error)throw Error('Déconnexion impossible.');try{storage?.removeItem(scope());}catch{}user=null;pending.clear();},
  pending(){return [...pending.entries()].map(([operation,v])=>({operation,...structuredClone(v)}));},
  retry(operation){const v=pending.get(operation);if(!v)throw Error('Aucune demande à reprendre.');return run(v.command,v.input,operation);},
