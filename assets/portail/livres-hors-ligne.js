@@ -12,7 +12,7 @@ function ecrireIndex(v){try{E.storage.setItem(INDEX,JSON.stringify(v));}catch(_)
 function liste(){return Object.entries(lireIndex()).map(([id,m])=>({id,...m})).sort((a,b)=>String(b.date).localeCompare(String(a.date)));}
 function present(id){return Object.prototype.hasOwnProperty.call(lireIndex(),id);}
 function disponible(){return !!(E.caches&&E.storage&&E.fetch);}
-async function telecharger(id,meta,url,{onProgress,signal,limiteMo=200}={}){
+async function telecharger(id,meta,url,{onProgress,signal,limiteMo=60}={}){
  if(!disponible())throw Error('Le téléchargement n’est pas pris en charge par ce navigateur.');
  const key=cle(id);
  try{await E.navigator?.storage?.persist?.();}catch(_){}
