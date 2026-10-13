@@ -8,7 +8,8 @@
       "develop/sante": false,
       "develop/commerce": false,
       "develop/activation-commerce": false,
-      "fix/inscription-formulaire": false
+      "fix/inscription-formulaire": false,
+      "fix/inscription-diagnostic": false
     }
   }
 }
