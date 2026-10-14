@@ -32,3 +32,10 @@ test('« Placer sur la carte » amène la carte à l’écran avec une consigne 
   assert.match(css, /\.tr-consigne \{/);
   assert.match(css, /tr-mode-placement/);
 });
+
+test('tous les lieux proposés sont à l’intérieur de la limite de Koki', () => {
+  const poly = carte.limite.coordinates[0];
+  const dedans = (lon, lat) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [x1, y1] = poly[i], [x2, y2] = poly[j]; if ((y1 > lat) !== (y2 > lat) && lon < (x2 - x1) * (lat - y1) / (y2 - y1) + x1) c = !c; } return c; };
+  for (const l of carte.lieux) assert.ok(dedans(l.longitude, l.latitude), l.nom + ' est hors de Koki');
+  assert.ok(!carte.lieux.some(l => / à \d+(,\d)? km au /.test(l.nom)));
+});

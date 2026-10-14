@@ -547,16 +547,6 @@
    "position": "Point cartographié"
   },
   {
-   "id": "node/2409889859",
-   "nom": "Château d’eau à 4,6 km au nord-ouest de Ndiobene Belal",
-   "categorie": "Eau",
-   "latitude": 15.5845829,
-   "longitude": -16.0724096,
-   "position": "Point cartographié",
-   "nomOSM": "Château d’eau (nom non renseigné)",
-   "nomCalcule": true
-  },
-  {
    "id": "node/3213024805",
    "nom": "Coki",
    "categorie": "Villages et quartiers",
@@ -722,36 +712,6 @@
    "categorie": "Lieux religieux",
    "latitude": 15.5450334,
    "longitude": -16.0278983,
-   "position": "Centre approximatif du bâtiment ou terrain",
-   "nomOSM": "Lieu de culte (nom non renseigné)",
-   "nomCalcule": true
-  },
-  {
-   "id": "way/234105129",
-   "nom": "Lieu de culte à 5,8 km au nord-est de Ndiobene Belal",
-   "categorie": "Lieux religieux",
-   "latitude": 15.5878528,
-   "longitude": -15.992076,
-   "position": "Centre approximatif du bâtiment ou terrain",
-   "nomOSM": "Lieu de culte (nom non renseigné)",
-   "nomCalcule": true
-  },
-  {
-   "id": "way/235301037",
-   "nom": "Lieu de culte à 5,2 km au nord-est de Ndiobene Belal",
-   "categorie": "Lieux religieux",
-   "latitude": 15.5813231,
-   "longitude": -15.994577,
-   "position": "Centre approximatif du bâtiment ou terrain",
-   "nomOSM": "Lieu de culte (nom non renseigné)",
-   "nomCalcule": true
-  },
-  {
-   "id": "way/235467077",
-   "nom": "Lieu de culte à 4,1 km au nord-est de Ndiobene Belal",
-   "categorie": "Lieux religieux",
-   "latitude": 15.5883241,
-   "longitude": -16.0135322,
    "position": "Centre approximatif du bâtiment ou terrain",
    "nomOSM": "Lieu de culte (nom non renseigné)",
    "nomCalcule": true
