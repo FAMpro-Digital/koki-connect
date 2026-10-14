@@ -232,5 +232,5 @@ export async function catalogue(host,{api,addToCart,requestService,raccourcis=[]
 
  async function charger(){host.replaceChildren(node('p','Chargement du catalogue…','cat-count'));idx=indexCatalogue(await api.catalog());if(stack.at(-1).view==='fiche'&&!idx.get(stack.at(-1).params.id))stack.length=1;render();}
  await charger();
- return {recharger:charger,get index(){return idx;}};
+ return {recharger:charger,ouvrir:id=>{if(idx?.get(id))go('fiche',{id});},get index(){return idx;}};
 }

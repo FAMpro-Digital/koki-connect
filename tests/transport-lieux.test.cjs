@@ -16,12 +16,13 @@ test('lieux de transport : noms uniques, sans faute, avec coordonnées dans la z
   }
 });
 
-test('listes regroupées par catégorie et triées, structures de santé publiées ajoutées', () => {
+test('listes regroupées par catégorie et triées, lieux publiés et structures de santé fournis par la carte', () => {
   assert.match(app, /document\.createElement\('optgroup'\)/);
   assert.match(app, /localeCompare\(b\.nom, 'fr'\)/);
   assert.match(app, /lieuxTransport\.get\(valeur\)/);
-  assert.match(app, /KokiSanteContract\.decode\(row\)/);
-  assert.match(app, /v\.latitude == null \|\| v\.longitude == null/);
+  const html = fs.readFileSync('index.html', 'utf8');
+  assert.match(html, /const v = S\.decode\(row\);\n\s+if \(v && !v\.archive && v\.latitude !== null && v\.longitude !== null\)/);
+  assert.doesNotMatch(app, /ajouterStructuresSante/, 'structures de santé déjà fournies par chargerDonneesCarte');
 });
 
 test('« Placer sur la carte » amène la carte à l’écran avec une consigne annulable', () => {
