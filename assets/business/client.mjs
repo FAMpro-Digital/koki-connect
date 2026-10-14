@@ -1,6 +1,7 @@
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
-const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder']);
+// Lectures et actions uniques sans clé de reprise (le serveur refuse le doublon : note, signalement).
+const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder','ride_code','ride_tracking','rate_ride','report_ride','driver_stats']);
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
 // Numéros sénégalais (77 123 45 67, 33 …) complétés en +221 ; autres pays au format international. Règle du contrat partagé.
 export function normalizePhone(value){const v=C.normaliserTelephone(value);if(!v)throw Error('Numéro invalide : utilisez le format international (+221…).');return v;}
