@@ -29,7 +29,7 @@ function choice(host,{legend,name,values,value}){
  host.append(fs);return {get value(){return fs.querySelector('input:checked')?.value||'';},set onchange(fn){for(const r of fs.querySelectorAll('input'))r.onchange=fn;}};
 }
 function badge(kind,statut,row){
- const locked=row?.payload?.moderation_lock===true;const b=node('span',locked?'Suspendu par l’administration':statut,'pro-badge pro-badge-'+(locked?'bloque':({'Actif':'ok','Disponible':'ok','À valider':'attente','En attente':'attente','Épuisé':'info','Indisponible':'info','Masqué':'info','Refusé':'alerte','Suspendu':'alerte','Fermé':'alerte','Archivé':'neutre'})[statut]||'neutre'));return b;
+ const locked=row?.payload?.moderation_lock===true;const b=node('span',locked?'Suspendu par l’administration':(['En attente','À valider'].includes(statut)?'En attente de validation':statut),'pro-badge pro-badge-'+(locked?'bloque':({'Actif':'ok','Disponible':'ok','À valider':'attente','En attente':'attente','Épuisé':'info','Indisponible':'info','Masqué':'info','Refusé':'alerte','Suspendu':'alerte','Fermé':'alerte','Archivé':'neutre'})[statut]||'neutre'));return b;
 }
 function explanation(kind,row){const box=node('div',null,'pro-explain');box.append(node('p',row.payload?.moderation_lock?'Suspendu par l’administration : contactez Koki Connect pour le remettre en ligne.':C.explicationStatut(kind,row.statut)));const m=row.payload?.moderation;if(m?.note&&(['Refusé','Suspendu','Fermé','Archivé','Masqué'].includes(row.statut)||m.decision==='reject_changes'))box.append(node('p',(m.decision==='reject_changes'?'Modifications refusées. ':'')+'Motif indiqué : '+m.note,'pro-note'));
  if(row.payload?.modification){const w=node('div',null,'pro-pending');w.append(node('strong','Modifications en attente de validation'),node('p','Votre fiche reste visible avec les informations déjà validées. Les changements de nom, d’activité, de numéros ou de photos seront publiés après validation.'));box.append(w);}return box;}
@@ -63,12 +63,15 @@ async function gps(host,initial,status){
  return {get value(){return value;}};
 }
 
-export async function proSpace(host,api,outer,{upload,imageSelection}={}){
+// intention : profil choisi avant l'inscription (« Commerçant » ou « Prestataire de services ») → formulaire ouvert directement.
+// brouillon : {lire(), ecrire(valeurs,etape), effacer()} — sauvegarde locale de la fiche en cours (par compte).
+// fin() : appelé quand le parcours d'inscription est terminé (fiche envoyée ou déjà existante).
+export async function proSpace(host,api,outer,{upload,imageSelection,intention=null,brouillon=null,fin=()=>{}}={}){
  // Messages affichés au plus près de l'écran en cours (et repris dans la zone de statut générale).
  const local=node('p',null,'pro-message');local.setAttribute('role','status');
  const status={get textContent(){return local.textContent;},set textContent(v){local.textContent=v;outer.textContent=v;}};
  const state={profile:null,boutiques:[],produits:[],services:[],localites:[]};
- const stack=[{view:'accueil'}];let open=false;
+ const stack=[{view:'accueil'}];let open=false,intentionVue=false;
  async function load(){
   const [profiles,boutiques,produits,services]=await Promise.all(['professionnels','boutiques','produits','services'].map(k=>api.mine(k)));
   state.profile=profiles[0]||null;state.boutiques=boutiques;state.produits=produits;state.services=services;
@@ -95,11 +98,15 @@ export async function proSpace(host,api,outer,{upload,imageSelection}={}){
 
  function accueil(){
   host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3','Espace professionnel','pro-title'));host.append(head,local);
+  if(state.profile)fin();
+  if(!state.profile&&intention&&!intentionVue){intentionVue=true;open=true;queueMicrotask(()=>go('fiche',{profil:intention}));}
+  const reprise=!state.profile&&brouillon?.lire();
   if(!open&&!state.profile){head.append(node('p','Vous êtes commerçant ou prestataire à Koki ? Présentez votre activité, vos produits et vos services.'),button('Ouvrir mon espace professionnel',()=>{open=true;render();}));return;}
   const body=node('div',null,'pro-body');host.append(body);
   if(!state.profile){
    body.append(node('p','Créez votre fiche en 5 étapes. Elle sera vérifiée par l’administration de Koki Connect avant d’apparaître dans le catalogue.'));
-   const steps=node('ol',null,'pro-steps');for(const s of ['Votre activité','Vos numéros','Où vous trouver','Horaires et présentation','Photos et envoi'])steps.append(node('li',s));body.append(steps,button('Créer ma fiche professionnelle',()=>go('fiche')));return;
+   const steps=node('ol',null,'pro-steps');for(const s of ['Votre activité','Vos numéros','Où vous trouver','Horaires et présentation','Photos et envoi'])steps.append(node('li',s));body.append(steps,button(reprise?'Reprendre ma fiche (brouillon)':'Créer ma fiche professionnelle',()=>go('fiche')));
+   if(reprise)body.append(node('p','Brouillon enregistré sur cet appareil le '+new Date(reprise.at).toLocaleString('fr-FR')+'. Les photos sont à ajouter au moment de l’envoi.','pro-hint'));return;
   }
   const p=state.profile,card=node('article',null,'pro-card');
   const title=node('div',null,'pro-card-head');title.append(node('h4',p.payload.nom),badge('professionnels',p.statut,p));card.append(title,node('p',p.payload.type+(p.payload.village?' · '+p.payload.village:'')),explanation('professionnels',p));
@@ -113,12 +120,15 @@ export async function proSpace(host,api,outer,{upload,imageSelection}={}){
   body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
  }
 
- function fiche({edit}){
+ function fiche({edit,profil}){
   // Les valeurs en attente de validation sont reprises pour continuer la saisie.
  const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:{};const row=edit?state.profile:null;
   const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
   const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
   let step=0;const total=5;let photos=null,where=null;
+  // Brouillon (nouvelle fiche seulement) : reprise des valeurs et de l'étape ; le profil choisi avant l'inscription est proposé.
+  if(!edit){if(profil)v.profile=profil;const d=brouillon?.lire();if(d){Object.assign(v,d.valeurs);step=Math.min(Math.max(0,d.etape|0),total-2);}}
+  const garder=()=>{if(!edit)brouillon?.ecrire({...v},step);};
   const body=frame(edit?'Modifier ma fiche':'Créer ma fiche');
   const progress=node('p',null,'pro-progress');progress.setAttribute('aria-live','polite');const panel=node('form',null,'pro-form');panel.noValidate=true;body.append(progress,panel);
   const nav=node('div',null,'pro-nav');body.append(nav);
@@ -145,14 +155,15 @@ export async function proSpace(host,api,outer,{upload,imageSelection}={}){
     if(step===2){v.village=fields.village.value;if(!v.village)throw Error('Choisissez votre village ou quartier.');v.address=fields.address.value.trim();if(fields.zone)v.zone=fields.zone.value.trim();v.location=where?.value||null;if(v.address&&v.address.length<3)throw Error('Adresse trop courte.');}
     if(step===3){v.hours=fields.hours.value.trim();v.description=fields.description.value.trim();if(v.hours&&v.hours.length<3)throw Error('Horaires trop courts.');}
    };
-   if(step>0)nav.append(button('Étape précédente',()=>{try{read();}catch{}step--;show();},{kind:'secondary'}));
-   if(step<total-1){const next=button('Continuer',()=>{try{read();step++;status.textContent='';show();}catch(err){status.textContent=err.message;}});nav.append(next);}
+   if(step>0)nav.append(button('Étape précédente',()=>{try{read();}catch{}step--;garder();show();},{kind:'secondary'}));
+   if(step<total-1){const next=button('Continuer',()=>{try{read();step++;status.textContent='';garder();show();}catch(err){status.textContent=err.message;}});nav.append(next);}
    else{const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
      const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
      if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
-     const saved=await api.saveProfile(values,row);
+     const saved=await api.saveProfile(values,row);if(!row){brouillon?.effacer();fin();}
      await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
     });nav.append(send);}
+   if(!edit&&brouillon){const save=button('Enregistrer le brouillon',()=>{try{read();}catch{}garder();status.textContent='Brouillon enregistré sur cet appareil : vous pourrez reprendre votre fiche plus tard depuis l’Espace professionnel.';},{kind:'secondary'});nav.append(save);}
    panel.onsubmit=e=>e.preventDefault();
    queueMicrotask(()=>panel.querySelector('input,select,textarea')?.focus({preventScroll:true}));
   }
