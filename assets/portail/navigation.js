@@ -46,6 +46,7 @@
     const ouverte = courante !== null;
     document.body.classList.toggle('page-pleine', ouverte); barre.hidden = !ouverte; titreBarre.textContent = titrePage();
   }
+  let ongletCourant = '';
   function marquerNavigation() {
     pleinEcran();
     // Onglet actif de la barre du bas : Accueil, Transport, Boutique, Activité (et ce qu'elle regroupe), Profil.
@@ -53,6 +54,7 @@
     const onglet = courante === null ? 'accueil' : courante === 'vue-transport' ? 'transport' : courante === 'vue-commerce' ? 'boutique'
       : courante === 'vue-notifications' || (courante === 'vue-portail' && /^(Activité|Favoris|📥 Mes livres)/.test(t)) ? 'activite'
       : courante === 'vue-portail' && /^Profil/.test(t) ? 'profil' : '';
+    ongletCourant = onglet;
     document.querySelectorAll('nav[aria-label="Navigation principale"] button').forEach(b => {
       const actif = b.dataset.nav === onglet;
       if (actif) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
@@ -123,6 +125,41 @@
     }
     marquerNavigation();
   });
+
+  // Glisser le doigt à gauche ou à droite passe à l'onglet voisin de la barre du bas (Accueil → Transport → Boutique
+  // → Activité → Profil). Seulement sur les pages des onglets ; jamais sur la carte, un rayon ou une liste qui
+  // défile sur le côté, un champ de saisie, ni depuis les bords de l'écran (geste retour du téléphone).
+  const ORDRE_ONGLETS = ['accueil', 'transport', 'boutique', 'activite', 'profil'];
+  function defileSurLeCote(e) {
+    for (let x = e; x && x !== document.body; x = x.parentElement) {
+      if (x.matches && x.matches('input, select, textarea, .leaflet-container, [data-sans-glisser], .tr-carte-zone')) return true;
+      const st = getComputedStyle(x);
+      if (/(auto|scroll)/.test(st.overflowX) && x.scrollWidth > x.clientWidth + 4) return true;
+    }
+    return false;
+  }
+  let depart = null;
+  document.addEventListener('touchstart', e => {
+    depart = null;
+    if (e.touches.length !== 1 || !ongletCourant) return;
+    const t = e.touches[0];
+    if (t.clientX < 24 || t.clientX > window.innerWidth - 24 || defileSurLeCote(e.target)) return;
+    depart = { x: t.clientX, y: t.clientY, temps: Date.now() };
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (!depart || !e.changedTouches.length) return;
+    const t = e.changedTouches[0], dx = t.clientX - depart.x, dy = t.clientY - depart.y, duree = Date.now() - depart.temps;
+    depart = null;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || duree > 700) return;
+    const i = ORDRE_ONGLETS.indexOf(ongletCourant), j = i + (dx < 0 ? 1 : -1);
+    if (i < 0 || j < 0 || j >= ORDRE_ONGLETS.length) return;
+    const bouton = document.querySelector('nav[aria-label="Navigation principale"] [data-nav="' + ORDRE_ONGLETS[j] + '"]');
+    if (!bouton) return;
+    document.body.dataset.glisse = dx < 0 ? 'gauche' : 'droite';
+    bouton.click();
+    setTimeout(() => { delete document.body.dataset.glisse; }, 400);
+  }, { passive: true });
+  document.addEventListener('touchcancel', () => { depart = null; }, { passive: true });
 
   try { history.replaceState({ ...(history.state || {}), kokiVue: 0, kokiPas: 0 }, ''); } catch (_) {}
   marquerNavigation();

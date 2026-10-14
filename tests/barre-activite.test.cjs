@@ -20,3 +20,11 @@ test('Activité : course en cours, commandes, demandes du compte connecté ; rac
  assert.doesNotMatch(act,/innerHTML/);
  assert.ok(html.indexOf('assets/portail/activite.js')>html.indexOf('assets/portail/app.js"'));
 });
+test('glisser pour changer d’onglet : ordre de la barre, jamais sur la carte, les rayons, les champs ni les bords',()=>{
+ assert.match(nav,/const ORDRE_ONGLETS = \['accueil', 'transport', 'boutique', 'activite', 'profil'\];/);
+ assert.match(nav,/x\.matches\('input, select, textarea, \.leaflet-container, \[data-sans-glisser\], \.tr-carte-zone'\)/);
+ assert.match(nav,/if \(\/\(auto\|scroll\)\/\.test\(st\.overflowX\) && x\.scrollWidth > x\.clientWidth \+ 4\) return true;/);
+ assert.match(nav,/if \(t\.clientX < 24 \|\| t\.clientX > window\.innerWidth - 24/);
+ assert.match(nav,/if \(Math\.abs\(dx\) < 70 \|\| Math\.abs\(dx\) < Math\.abs\(dy\) \* 1\.8 \|\| duree > 700\) return;/);
+ assert.match(nav,/\{ passive: true \}/,'défilement vertical jamais bloqué');
+});
