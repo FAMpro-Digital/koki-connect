@@ -19,7 +19,8 @@
       "develop/transport-suivi": false,
       "develop/rubriques-signalements": false,
       "develop/navigation-fluide": false,
-      "develop/transport-lieux": false
+      "develop/transport-lieux": false,
+      "develop/icone-app": false
     }
   }
 }
