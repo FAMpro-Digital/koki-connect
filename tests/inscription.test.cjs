@@ -62,3 +62,7 @@ test('« Mot de passe oublié » ouvre son formulaire, envoie le lien de récup�
  assert.match(status.textContent,/lien de récupération/);
  bouton(host,'Retour à la connexion').onclick();await tick();assert.ok(formulaire(host,'connexion'));
 });
+test('espace chauffeur : libellés en français (« Ajouter un véhicule »)',()=>{
+ const ui=require('node:fs').readFileSync('assets/business/ui.mjs','utf8');
+ assert.doesNotMatch(ui,/'Ajouter '\+kind|'Gérer '\+kind/,'plus de « Ajouter vehicules »');assert.match(ui,/vehicules:'un véhicule'/);
+});
