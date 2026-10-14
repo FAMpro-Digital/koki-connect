@@ -79,7 +79,15 @@ async function ouvrirFiche(id){
  for(let i=0;i<80&&!catalogueHandle?.index;i++)await new Promise(r=>setTimeout(r,100));
  catalogueHandle?.ouvrir(id);
 }
-window.KokiBusiness={show,catalogueRecherche,ouvrirFiche,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
+// Activité du client : ses courses, commandes et demandes de service (null si le service n'est pas disponible).
+async function activite(){
+ try{await initialise();}catch{return null;}if(!api?.enabled)return null;
+ try{await api.identity();}catch{return {connecte:false};}
+ const uid=api.user?.id,lire=async k=>{try{return (await api.history(k)).filter(r=>r.client_id===uid);}catch{return [];}};
+ const [courses,commandes,demandes]=await Promise.all(['courses','commandes','demandes_services'].map(lire));
+ return {connecte:true,courses,commandes,demandes};
+}
+window.KokiBusiness={show,catalogueRecherche,ouvrirFiche,activite,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
 if(new URLSearchParams(location.search).get('koki-recovery')==='1')queueMicrotask(()=>window.KokiCommerce?.afficher());
 
