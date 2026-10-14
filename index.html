@@ -466,11 +466,11 @@
   </section>
 
   <nav aria-label="Navigation principale">
-<button type="button" onclick="fermerOpportunites()"><span>🏠</span>Accueil</button>
-<button type="button" onclick="afficherCarte()"><span>📍</span>Carte</button>
-<button type="button" onclick="KokiPortail.publier()"><span>➕</span>Publier</button>
-<button type="button" onclick="KokiPortail.favoris()"><span>♡</span>Favoris</button>
-<button type="button" onclick="KokiPortail.profil()"><span>👤</span>Profil</button>
+<button type="button" data-nav="accueil" onclick="fermerOpportunites()"><span>🏠</span>Accueil</button>
+<button type="button" data-nav="transport" onclick="afficherTransport()"><span>🚕</span>Transport</button>
+<button type="button" data-nav="boutique" onclick="afficherCommerce()"><span>🛍️</span>Boutique</button>
+<button type="button" data-nav="activite" onclick="KokiActivite.ouvrir()"><span>🧾</span>Activité</button>
+<button type="button" data-nav="profil" onclick="KokiPortail.profil()"><span>👤</span>Profil</button>
 </nav>
   <script src="assets/leaflet/leaflet.js">
 </script>
@@ -732,6 +732,7 @@ function filtrerCarte() {
 <script src="assets/portail/education.js"></script>
 <script src="assets/portail/sport-contract.js"></script>
 <script src="assets/portail/sport.js"></script>
+<script src="assets/portail/activite.js"></script>
 <script src="assets/portail/sante.js"></script>
 <script src="assets/portail/navigation.js"></script>
 <script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='127.0.0.1'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
