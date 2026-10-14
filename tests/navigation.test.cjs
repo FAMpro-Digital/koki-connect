@@ -30,4 +30,7 @@ test('page ouverte en plein écran : barre Retour + titre, bannière et retours 
   assert.match(css, /body\.page-pleine \.entete-koki, body\.page-pleine #portail-sync, body\.page-pleine \.search,\nbody\.page-pleine \.section > button\[onclick="fermerOpportunites\(\)"\] \{ display: none !important; \}/);
   assert.doesNotMatch(css, /body\.page-pleine button\[onclick="fermerOpportunites\(\)"\]/, 'le bouton Accueil de la barre du bas reste visible');
   assert.match(css, /\.barre-page \{ position: sticky; top: 0;/);
+  assert.match(css, /background: #0b5a3c; border-bottom: 4px solid #f28c28;/, 'vert foncé et orange Koki Connect');
+  assert.match(css, /\.barre-retour \{[^}]*background: #f28c28; color: #fff;/);
+  assert.match(css, /\.barre-titre \{[^}]*color: #fff;/);
 });
