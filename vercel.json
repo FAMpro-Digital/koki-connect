@@ -25,7 +25,8 @@
       "develop/pages-plein-ecran": false,
       "develop/education-moderne": false,
       "develop/sports-asc": false,
-      "develop/barre-activite": false
+      "develop/barre-activite": false,
+      "develop/glisser-onglets": false
     }
   }
 }

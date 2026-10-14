@@ -68,3 +68,10 @@ body.page-pleine .section:not([hidden]) { padding-top: 12px; }
 .act-liens { display: grid; gap: 8px; margin-top: 10px; }
 .act-bouton { min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; margin-top: 6px; }
 .act-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }
+
+/* Changement d'onglet par glissement : la nouvelle page arrive du côté du geste. */
+@keyframes onglet-depuis-droite { from { transform: translateX(28px); opacity: .4; } }
+@keyframes onglet-depuis-gauche { from { transform: translateX(-28px); opacity: .4; } }
+body[data-glisse="gauche"] .section:not([hidden]) { animation: onglet-depuis-droite .25s ease-out; }
+body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gauche .25s ease-out; }
+@media (prefers-reduced-motion: reduce) { body[data-glisse] .section:not([hidden]) { animation: none; } }
