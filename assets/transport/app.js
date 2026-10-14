@@ -33,10 +33,8 @@
     initialisation = Promise.all([chargerDonneesCarte(), depot.config()]).then(([donnees, config]) => {
       if (!config || !Array.isArray(config.chauffeurs) || !config.demoTarifs) throw new Error('Configuration Transport invalide.');
       configuration = config;
-      ['depart', 'destination'].forEach(type => {
-        const select = $(type);
-        donnees.lieux.forEach(lieu => { const option = cree('option', lieu.nom + ' — ' + lieu.categorie); option.value = lieu.id; select.append(option); });
-      });
+      remplirLieux(donnees.lieux);
+      ajouterStructuresSante();
       etat.course = depot.lireCourse();
       if (etat.course) {
         etat.demo = true; $('demo').checked = true;
@@ -45,6 +43,41 @@
       }
     }).catch(erreur => { initialisation = null; throw erreur; });
     return initialisation;
+  }
+  // Lieux proposés : vrais sites de la carte de Koki (OpenStreetMap, noms complétés par le village le plus proche),
+  // regroupés par catégorie, puis structures de santé publiées par Koki Connect quand leur position est connue.
+  const lieuxTransport = new Map();
+  const ORDRE = ['Villages et quartiers', 'Santé', 'Éducation', 'Commerces', 'Services publics', 'Lieux religieux', 'Sports', 'Eau'];
+  function remplirLieux(lieux) {
+    const groupes = new Map();
+    for (const l of lieux) {
+      if (!core.pointValide(l) || !l.nom) continue;
+      lieuxTransport.set(l.id, l);
+      if (!groupes.has(l.categorie)) groupes.set(l.categorie, []);
+      groupes.get(l.categorie).push(l);
+    }
+    const cats = [...groupes.keys()].sort((a, b) => (ORDRE.indexOf(a) + 1 || 99) - (ORDRE.indexOf(b) + 1 || 99) || a.localeCompare(b, 'fr'));
+    ['depart', 'destination'].forEach(type => {
+      const select = $(type);
+      for (const cat of cats) {
+        let g = select.querySelector('optgroup[label="' + cat + '"]');
+        if (!g) { g = document.createElement('optgroup'); g.label = cat; const avant = [...select.querySelectorAll('optgroup')].find(x => (ORDRE.indexOf(x.label) + 1 || 99) > (ORDRE.indexOf(cat) + 1 || 99)); select.insertBefore(g, avant || select.querySelector('option[value="personnalise"]')); }
+        groupes.get(cat).sort((a, b) => a.nom.localeCompare(b.nom, 'fr')).forEach(l => { if (g.querySelector('option[value="' + CSS.escape(l.id) + '"]')) return; const o = cree('option', l.nom); o.value = l.id; g.append(o); });
+      }
+    });
+  }
+  async function ajouterStructuresSante() {
+    try {
+      if (!window.KokiPublicFeed || !window.KokiSanteContract) return;
+      const flux = await KokiPublicFeed.charger();
+      const lieux = [];
+      for (const row of flux.contenus || []) {
+        const v = KokiSanteContract.decode(row);
+        if (!v || v.archive || v.latitude == null || v.longitude == null) continue;
+        lieux.push({ id: 'sante-' + row.id, nom: row.titre, categorie: 'Santé', latitude: Number(v.latitude), longitude: Number(v.longitude) });
+      }
+      if (lieux.length) remplirLieux(lieux);
+    } catch (_) { /* Sans le flux, les lieux de la carte restent proposés. */ }
   }
   function pointOption(type, point) {
     const select = $(type);
@@ -62,8 +95,9 @@
         if (!cible || courseActive()) return;
         const type = cible;
         etat[type] = { nom: (type === 'depart' ? 'Départ' : 'Destination') + ' sur la carte', latitude: evenement.latlng.lat, longitude: evenement.latlng.lng };
-        pointOption(type, etat[type]); cible = null; cibleBoutons();
-        message('Point enregistré.'); actualiser();
+        pointOption(type, etat[type]); cible = null; cibleBoutons(); consigneCarte(null);
+        message(type === 'depart' ? 'Départ placé sur la carte.' : 'Destination placée sur la carte.'); actualiser();
+        setTimeout(() => document.querySelector('#vue-transport .tr-ligne' + (type === 'destination' ? '-destination' : '')) ?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
       });
     }
     carte.invalidateSize();
@@ -179,7 +213,7 @@
     if (courseActive()) return;
     const valeur=$(type).value;
     if (valeur==='personnalise') return;
-    const lieu=donneesCarte && donneesCarte.lieux.find(l=>l.id===valeur);
+    const lieu=lieuxTransport.get(valeur);
     etat[type]=lieu?{nom:lieu.nom,latitude:lieu.latitude,longitude:lieu.longitude}:null;
     etat.choisi=null; actualiser();
   }
@@ -205,7 +239,22 @@
     cibleBoutons();actualiser();window.KokiBusiness?.show('transport',etat.demo);if(etat.demo)masquerSuivi();else suivre();
   }
   function categorie(valeur) { if(courseActive() || !core.categories.includes(valeur))return;etat.categorie=valeur;etat.choisi=null;etat.reel=null;actualiser(); }
-  function choisirPoint(type) { if(!carte){message('Carte indisponible. Choisissez un lieu dans les listes.');return;}cible=type;cibleBoutons();message('Touchez la carte pour placer ' + (type==='depart'?'le départ.':'la destination.')); }
+  function consigneCarte(type) {
+    const zone = document.querySelector('#vue-transport .tr-carte-zone'); if (!zone) return;
+    let c = zone.querySelector('.tr-consigne');
+    if (!type) { if (c) c.remove(); zone.classList.remove('tr-mode-placement'); return; }
+    if (!c) { c = cree('div'); c.className = 'tr-consigne'; c.setAttribute('role', 'status'); zone.append(c); }
+    c.replaceChildren(cree('span', 'Touchez la carte pour placer ' + (type === 'depart' ? 'le départ' : 'la destination')));
+    const annuler = cree('button', 'Annuler'); annuler.type = 'button'; annuler.onclick = () => { cible = null; cibleBoutons(); consigneCarte(null); };
+    c.append(annuler); zone.classList.add('tr-mode-placement');
+  }
+  function choisirPoint(type) {
+    if (!carte) { message('Carte indisponible. Choisissez un lieu dans les listes.'); return; }
+    cible = type; cibleBoutons(); consigneCarte(type); message('');
+    const zone = document.querySelector('#vue-transport .tr-carte-zone');
+    if (zone) zone.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    setTimeout(() => carte && carte.invalidateSize(), 300);
+  }
   async function demander() {
     const bouton = $('demander');
     if (etat.demo) {
