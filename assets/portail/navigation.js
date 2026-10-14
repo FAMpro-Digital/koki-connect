@@ -27,7 +27,27 @@
       e.addEventListener('animationend', () => e.classList.remove(classe), { once: true });
     }
   }
+  // Page ouverte en plein écran : la bannière de l'accueil, la recherche et la ligne d'état disparaissent ;
+  // une barre fixe en haut porte le bouton Retour et le titre de la page. La barre du bas reste affichée.
+  const TITRES = { 'vue-transport': '🚕 Transport', 'vue-carte': '📍 Carte de Koki' };
+  const barre = document.createElement('div'); barre.className = 'barre-page'; barre.hidden = true;
+  const retourBarre = document.createElement('button'); retourBarre.type = 'button'; retourBarre.className = 'barre-retour'; retourBarre.setAttribute('aria-label', 'Retour');
+  retourBarre.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+  const titreBarre = document.createElement('p'); titreBarre.className = 'barre-titre'; titreBarre.setAttribute('aria-hidden', 'true');
+  barre.append(retourBarre, titreBarre); document.body.prepend(barre);
+  retourBarre.onclick = () => { if (pile.length) history.back(); else if (typeof window.fermerOpportunites === 'function') window.fermerOpportunites(); };
+  function titrePage() {
+    if (!courante) return '';
+    if (TITRES[courante]) return TITRES[courante];
+    if (courante === 'vue-portail') return titre.textContent.trim() || 'Koki Connect';
+    const h = $(courante) && $(courante).querySelector('h2'); return (h && h.textContent.trim()) || 'Koki Connect';
+  }
+  function pleinEcran() {
+    const ouverte = courante !== null;
+    document.body.classList.toggle('page-pleine', ouverte); barre.hidden = !ouverte; titreBarre.textContent = titrePage();
+  }
   function marquerNavigation() {
+    pleinEcran();
     document.querySelectorAll('nav[aria-label="Navigation principale"] button').forEach(b => {
       const actif = (courante === null && /Accueil/.test(b.textContent)) || (courante === 'vue-carte' && /Carte/.test(b.textContent)) ||
         (courante === 'vue-portail' && /Profil|Favoris/.test(b.textContent) && titre.textContent.startsWith(b.textContent.replace(/[^A-Za-zÀ-ÿ]/g, '')));
@@ -58,6 +78,7 @@
     try { history.pushState({ ...(history.state || {}), kokiVue: pile.length }, ''); } catch (_) {}
     animer([$(maintenant)], 'page-entree');
     marquerNavigation();
+    requestAnimationFrame(() => { if (!document.querySelector('#vue-transport:not([hidden]) .tr-mode-placement')) window.scrollTo(0, 0); });
   });
   for (const id of PAGES) { const e = $(id); if (e) observateur.observe(e, { attributes: true, attributeFilter: ['hidden'] }); }
   observateur.observe(titre, { childList: true });

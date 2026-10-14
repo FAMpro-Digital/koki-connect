@@ -26,3 +26,21 @@ img { -webkit-user-drag: none; }
   .section.page-entree, .section.page-retour { animation: none; }
   button:active, a.com-btn:active, .portail-card:active, .pro-choix-carte:active, .tr-vehicule:active, .tr-outil:active, summary:active, nav[aria-label="Navigation principale"] button:active { transform: none; }
 }
+
+/* Page ouverte en plein écran : barre fixe (Retour + titre) à la place de la bannière de l'accueil.
+   Couleurs Koki Connect : vert foncé, orange, blanc. */
+.barre-page { position: sticky; top: 0; z-index: 1200; display: flex; align-items: center; gap: 10px; min-height: 58px;
+  padding: env(safe-area-inset-top, 0) 14px 0 8px; background: #0b5a3c; border-bottom: 4px solid #f28c28;
+  box-shadow: 0 3px 12px rgba(11,90,60,.25); }
+.barre-page[hidden] { display: none; }
+.barre-retour { flex: none; width: 42px; height: 42px; border: 0; border-radius: 21px; background: #f28c28; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.barre-retour:active { background: #d9741a; transform: scale(.94); }
+.barre-retour:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.barre-retour svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.barre-titre { margin: 0; font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.page-pleine .entete-koki, body.page-pleine #portail-sync, body.page-pleine .search,
+body.page-pleine .section > button[onclick="fermerOpportunites()"] { display: none !important; }
+/* Le titre de la page est dans la barre : le titre interne reste lisible par les lecteurs d'écran. */
+body.page-pleine :is(#portail-titre, #titre-opportunites, #titre-commerce, #titre-carte, #titre-menu, #titre-notifications, #titre-rubrique) {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.page-pleine .section:not([hidden]) { padding-top: 12px; }

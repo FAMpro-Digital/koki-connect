@@ -21,7 +21,8 @@
       "develop/navigation-fluide": false,
       "develop/transport-lieux": false,
       "develop/icone-app": false,
-      "develop/admin-client-alignement": false
+      "develop/admin-client-alignement": false,
+      "develop/pages-plein-ecran": false
     }
   }
 }
