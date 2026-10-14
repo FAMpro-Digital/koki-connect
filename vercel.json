@@ -17,7 +17,8 @@
       "develop/profil-espace": false,
       "develop/transport-interface": false,
       "develop/transport-suivi": false,
-      "develop/rubriques-signalements": false
+      "develop/rubriques-signalements": false,
+      "develop/navigation-fluide": false
     }
   }
 }
