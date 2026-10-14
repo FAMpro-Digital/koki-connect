@@ -480,15 +480,36 @@
     let servicesKoki = [];
     let donneesCarte = null;
     let chargementCarte = null;
+    // Contenus publiés utiles à la carte. Sans connexion au serveur, la carte intégrée reste affichée seule.
+    async function contenusPublies() {
+      try {
+        if (!window.KokiPublicFeed) return [];
+        const flux = await KokiPublicFeed.charger();
+        const C = window.KokiPortailCore;
+        return (flux.contenus || []).filter(x => !C || C.visible(x));
+      } catch (_) { return []; }
+    }
+    // Lieux gérés dans Koki Connect Admin (écran « Lieux de la carte ») et structures de santé positionnées.
+    function lieuxAvecPublications(reference, rows) {
+      const L = window.KokiLieuContract, S = window.KokiSanteContract;
+      const lieux = L ? L.fusionner(reference, rows) : [...reference];
+      if (S) for (const row of rows) {
+        const v = S.decode(row);
+        if (v && !v.archive && v.latitude !== null && v.longitude !== null)
+          lieux.push({ id: 'sante-' + row.id, nom: row.titre, categorie: 'Santé', latitude: v.latitude, longitude: v.longitude, position: v.genre + (row.lieu ? ' · ' + row.lieu : ''), source: 'Koki Connect' });
+      }
+      return lieux;
+    }
     async function chargerDonneesCarte() {
       if (donneesCarte) return donneesCarte;
       if (!chargementCarte) chargementCarte = fetch('assets/koki-carte.json').then(reponse => {
         if (!reponse.ok) throw new Error('Carte indisponible');
         return reponse.json();
-      }).then(donnees => {
-        donneesCarte = donnees;
-        servicesKoki = donnees.lieux;
-        return donnees;
+      }).then(async donnees => {
+        const lieux = lieuxAvecPublications(donnees.lieux, await contenusPublies());
+        donneesCarte = { ...donnees, lieux };
+        servicesKoki = lieux;
+        return donneesCarte;
       }).catch(erreur => { chargementCarte = null; throw erreur; });
       return chargementCarte;
     }
@@ -682,7 +703,9 @@ function filtrerCarte() {
     const lien = document.createElement('a'); lien.textContent = 'Itinéraire'; lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude; lien.target='_blank'; lien.rel='noopener';
     const coordonnees = document.createElement('p');
     coordonnees.textContent = 'Latitude : ' + lieu.latitude.toFixed(6) + ' · Longitude : ' + lieu.longitude.toFixed(6);
-    popup.append(titre,details,coordonnees,lien);
+    popup.append(titre,details);
+    if (lieu.description) { const d = document.createElement('p'); d.textContent = lieu.description; popup.append(d); }
+    popup.append(coordonnees,lien);
     const marker = L.circleMarker([lieu.latitude,lieu.longitude],{radius:7,color:lieu.categorie==='Villages et quartiers'?'#245d88':'#087a3d',fillOpacity:0.9}).bindPopup(popup).addTo(marqueursKoki);
     const bouton = document.createElement('button'); bouton.type='button'; bouton.textContent=lieu.nom + ' — ' + lieu.categorie;
     bouton.onclick=()=>{carteKoki.setView([lieu.latitude,lieu.longitude],16);marker.openPopup();document.getElementById('carte-koki').scrollIntoView({block:'center'});}; liste.append(bouton);
@@ -696,13 +719,14 @@ function filtrerCarte() {
   <script src="assets/commerce/app.js"></script>
 <script src="assets/portail/core.js"></script>
 <script src="assets/portail/feed.js"></script>
+<script src="assets/portail/lieu-contract.js"></script>
+<script src="assets/portail/sante-contract.js"></script>
 <script src="assets/portail/education-contract.js"></script>
 <script src="assets/portail/numeros-contract.js"></script>
 <script src="assets/portail/app.js"></script>
 <script src="assets/portail/livre-contract.js"></script>
 <script src="assets/portail/livres-hors-ligne.js"></script>
 <script src="assets/portail/bibliotheque.js"></script>
-<script src="assets/portail/sante-contract.js"></script>
 <script src="assets/portail/sante.js"></script>
 <script src="assets/portail/navigation.js"></script>
 <script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='127.0.0.1'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});</script>

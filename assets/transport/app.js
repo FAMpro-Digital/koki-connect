@@ -34,7 +34,6 @@
       if (!config || !Array.isArray(config.chauffeurs) || !config.demoTarifs) throw new Error('Configuration Transport invalide.');
       configuration = config;
       remplirLieux(donnees.lieux);
-      ajouterStructuresSante();
       etat.course = depot.lireCourse();
       if (etat.course) {
         etat.demo = true; $('demo').checked = true;
@@ -45,9 +44,9 @@
     return initialisation;
   }
   // Lieux proposés : vrais sites de la carte de Koki (OpenStreetMap, noms complétés par le village le plus proche),
-  // regroupés par catégorie, puis structures de santé publiées par Koki Connect quand leur position est connue.
+  // corrigés ou complétés dans Koki Connect Admin, et structures de santé positionnées ; regroupés par catégorie.
   const lieuxTransport = new Map();
-  const ORDRE = ['Villages et quartiers', 'Santé', 'Éducation', 'Commerces', 'Services publics', 'Lieux religieux', 'Sports', 'Eau'];
+  const ORDRE = ['Villages et quartiers', 'Services publics', 'Santé', 'Éducation', 'Commerces', 'Lieux religieux', 'Sports', 'Eau'];
   function remplirLieux(lieux) {
     const groupes = new Map();
     for (const l of lieux) {
@@ -65,19 +64,6 @@
         groupes.get(cat).sort((a, b) => a.nom.localeCompare(b.nom, 'fr')).forEach(l => { if (g.querySelector('option[value="' + CSS.escape(l.id) + '"]')) return; const o = cree('option', l.nom); o.value = l.id; g.append(o); });
       }
     });
-  }
-  async function ajouterStructuresSante() {
-    try {
-      if (!window.KokiPublicFeed || !window.KokiSanteContract) return;
-      const flux = await KokiPublicFeed.charger();
-      const lieux = [];
-      for (const row of flux.contenus || []) {
-        const v = KokiSanteContract.decode(row);
-        if (!v || v.archive || v.latitude == null || v.longitude == null) continue;
-        lieux.push({ id: 'sante-' + row.id, nom: row.titre, categorie: 'Santé', latitude: Number(v.latitude), longitude: Number(v.longitude) });
-      }
-      if (lieux.length) remplirLieux(lieux);
-    } catch (_) { /* Sans le flux, les lieux de la carte restent proposés. */ }
   }
   function pointOption(type, point) {
     const select = $(type);
