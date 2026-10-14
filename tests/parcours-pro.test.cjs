@@ -41,3 +41,8 @@ test('câblage : profil, inscription, retour du lien, renvoi, brouillons, statut
  assert.match(pro,/'En attente de validation'/);assert.match(pro,/Enregistrer le brouillon/);assert.match(pro,/Reprendre ma fiche \(brouillon\)/);
  assert.match(pro,/\}\);nav\.append\(send\);\}\n {3}if\(!edit&&brouillon\)/,'le brouillon ne remplace jamais le bouton d’envoi');
 });
+test('chauffeur refusé : statut « Inscription refusée » et motif de l’administration affichés',()=>{
+ const ui=fs.readFileSync('assets/business/ui.mjs','utf8');
+ assert.match(ui,/profile\.payload\.moderation\?\.decision==='reject'/);assert.match(ui,/'Inscription refusée'/);
+ assert.match(ui,/' Motif indiqué : '\+profile\.payload\.moderation\.note/);
+});
