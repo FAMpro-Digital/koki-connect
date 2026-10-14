@@ -34,7 +34,7 @@ test('brouillons : un par compte et par formulaire, sur l’appareil, effaçable
 });
 test('câblage : profil, inscription, retour du lien, renvoi, brouillons, statut',()=>{
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),ui=fs.readFileSync('assets/business/ui.mjs','utf8'),pro=fs.readFileSync('assets/business/pro-space.mjs','utf8'),portail=fs.readFileSync('assets/portail/app.js','utf8'),cl=fs.readFileSync('assets/business/client.mjs','utf8');
- assert.match(portail,/pro-choix-carte/);assert.match(portail,/P\.choisir\(type\)/);
+ assert.match(rt,/pro-choix-carte/);assert.match(rt,/window\.KokiPro\.choisir\(type\)/);assert.match(portail,/await P\.monter\(zone\)/);
  assert.match(rt,/window\.history\.replaceState/,'« history » est aussi le nom d’une fonction importée : toujours window.history');assert.doesNotMatch(rt,/[^.]history\.replaceState/);
  assert.match(rt,/function retourDeLien/);assert.match(rt,/window\.KokiPortail\.profil\(\)/,'sans type : les trois catégories');
  assert.match(ui,/vue==='renvoi'/);assert.match(cl,/db\.auth\.resend\(\{type:'signup'/);assert.match(cl,/emailRedirectTo=to/);
@@ -45,4 +45,22 @@ test('chauffeur refusé : statut « Inscription refusée » et motif de l’admi
  const ui=fs.readFileSync('assets/business/ui.mjs','utf8');
  assert.match(ui,/profile\.payload\.moderation\?\.decision==='reject'/);assert.match(ui,/'Inscription refusée'/);
  assert.match(ui,/' Motif indiqué : '\+profile\.payload\.moderation\.note/);
+});
+test('Profil : compte et fiches professionnelles regroupés ; rubriques réservées aux clients',()=>{
+ const rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),portail=fs.readFileSync('assets/portail/app.js','utf8'),app=fs.readFileSync('assets/commerce/app.js','utf8');
+ const corps=nom=>{const i=rt.indexOf('async function '+nom+'(');assert.ok(i>=0,nom);const fins=['\nasync function','\nwindow.','\n//'].map(x=>rt.indexOf(x,i+1)).filter(x=>x>0);return rt.slice(i,Math.min(...fins));};
+ // Rubriques : plus aucun formulaire professionnel, seulement un lien vers Profil ; le suivi reste sur place.
+ for(const nom of ['commerce','transport']){const c=corps(nom);assert.doesNotMatch(c,/proSpace\(|professional\(/,nom+' : pas de fiche professionnelle dans la rubrique');assert.match(c,/lienProfil\(/,nom+' : lien vers Profil');assert.match(c,/history\(/,nom+' : suivi conservé dans la rubrique');}
+ // Connexion sur place dans les rubriques (panneau repliable), ouverte avant une commande ou une demande.
+ assert.match(rt,/const status=connexionSurPlace\(account,module,/);assert.match(rt,/d\.id='connexion-'\+module/);
+ assert.match(rt,/async function requestService\(p,area\)\{try\{await api\.identity\(\);\}catch\{ouvrirConnexion\('commerce'\)/);
+ // Profil : « Mon compte » puis « Mon espace professionnel » (fiche commerce/services et inscription chauffeur).
+ const ep=rt.slice(rt.indexOf('async function espacePro('),rt.indexOf('async function espaceProfil('));
+ assert.match(ep,/proSpace\(s,api,status,\{upload,imageSelection,\.\.\.parcoursPro\('commerce'\)\}\)/);
+ assert.match(ep,/professional\(s,api,'transport',status,\{upload,\.\.\.parcoursPro\('transport'\)\}\)/);
+ assert.match(rt,/compte\.id='profil-compte'/);assert.match(rt,/pro\.id='profil-pro'/);assert.match(rt,/monter:espaceProfil/);
+ // Choix d'activité et retour du lien de confirmation : toujours vers Profil.
+ assert.match(rt,/async function ouvrirEspace\(\)\{\n await versProfil\(\);/);
+ assert.match(app,/valeur==='pro'&&defiler\)\{window\.KokiPortail\?\.profil\(\);return;\}/);
+ assert.doesNotMatch(portail,/pro-choix-grille/,'le choix d’activité vient de l’espace connecté');
 });
