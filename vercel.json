@@ -10,7 +10,8 @@
       "develop/activation-commerce": false,
       "fix/inscription-formulaire": false,
       "fix/inscription-diagnostic": false,
-      "develop/activation-transport": false
+      "develop/activation-transport": false,
+      "fix/libelles-chauffeur": false
     }
   }
 }
