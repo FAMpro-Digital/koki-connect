@@ -13,7 +13,9 @@ button:active:not(:disabled), a.com-btn:active, .pro-choix-carte:active, .tr-veh
 nav[aria-label="Navigation principale"] button:active { transform: scale(.92); }
 /* Onglet actif de la barre du bas. */
 nav[aria-label="Navigation principale"] button[aria-current="page"] { color: #0B6B3A; font-weight: 800; }
-nav[aria-label="Navigation principale"] button[aria-current="page"] span { transform: translateY(-2px); display: inline-block; transition: transform .2s ease; }
+nav[aria-label="Navigation principale"] button[aria-current="page"] span { transform: translateY(-2px); display: block; transition: transform .2s ease; }
+nav[aria-label="Navigation principale"] button { position: relative; }
+nav[aria-label="Navigation principale"] button[aria-current="page"]::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 22px; height: 3px; margin-left: -11px; border-radius: 2px; background: #f28c28; }
 /* Ouverture d'une page : glisse depuis la droite ; retour : depuis la gauche. */
 @keyframes koki-page-entree { from { opacity: 0; transform: translate3d(28px,0,0); } to { opacity: 1; transform: none; } }
 @keyframes koki-page-retour { from { opacity: 0; transform: translate3d(-22px,0,0); } to { opacity: 1; transform: none; } }
@@ -44,3 +46,25 @@ body.page-pleine .section > button[onclick="fermerOpportunites()"] { display: no
 body.page-pleine :is(#portail-titre, #titre-opportunites, #titre-commerce, #titre-carte, #titre-menu, #titre-notifications, #titre-rubrique) {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body.page-pleine .section:not([hidden]) { padding-top: 12px; }
+
+/* Activité : courses, commandes, livres, favoris, notifications — couleurs Koki Connect. */
+.act-raccourcis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+.act-raccourci { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-height: 104px; padding: 12px !important; border-radius: 16px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; }
+.act-raccourci-icone { font-size: 24px; margin-bottom: auto; }
+.act-raccourci strong { font-size: 14px; }
+.act-section { margin: 12px 0 16px; }
+.act-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.act-tete h3 { margin: 0; font-size: 17px; color: #13201a; }
+.act-ligne { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; width: 100%; margin-bottom: 8px; padding: 10px 12px !important; border-radius: 16px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; }
+.act-chaud { border: 2px solid #f28c28 !important; background: #fff8f0 !important; }
+.act-icone { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #e8f2ec; }
+.act-texte { display: grid; gap: 2px; min-width: 0; }
+.act-texte strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-detail { font-size: 12px; color: #5b6b63; }
+.act-statut { padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #eef3f0; color: #0b5a3c; white-space: nowrap; }
+.act-statut-chaud { background: #f28c28; color: #fff; }
+.act-connexion { display: grid; gap: 6px; padding: 18px 16px; border-radius: 20px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.55) 0 70px, transparent 71px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.act-connexion span { opacity: .92; line-height: 1.4; }
+.act-liens { display: grid; gap: 8px; margin-top: 10px; }
+.act-bouton { min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; margin-top: 6px; }
+.act-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }

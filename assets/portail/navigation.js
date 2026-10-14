@@ -48,9 +48,13 @@
   }
   function marquerNavigation() {
     pleinEcran();
+    // Onglet actif de la barre du bas : Accueil, Transport, Boutique, Activité (et ce qu'elle regroupe), Profil.
+    const t = titre.textContent;
+    const onglet = courante === null ? 'accueil' : courante === 'vue-transport' ? 'transport' : courante === 'vue-commerce' ? 'boutique'
+      : courante === 'vue-notifications' || (courante === 'vue-portail' && /^(Activité|Favoris|📥 Mes livres)/.test(t)) ? 'activite'
+      : courante === 'vue-portail' && /^Profil/.test(t) ? 'profil' : '';
     document.querySelectorAll('nav[aria-label="Navigation principale"] button').forEach(b => {
-      const actif = (courante === null && /Accueil/.test(b.textContent)) || (courante === 'vue-carte' && /Carte/.test(b.textContent)) ||
-        (courante === 'vue-portail' && /Profil|Favoris/.test(b.textContent) && titre.textContent.startsWith(b.textContent.replace(/[^A-Za-zÀ-ÿ]/g, '')));
+      const actif = b.dataset.nav === onglet;
       if (actif) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
   }
