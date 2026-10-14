@@ -45,4 +45,4 @@ test('interface : aucun identifiant technique demandé, statuts expliqués, reto
  for(const kind of Object.keys(C.statuts))for(const s of C.statuts[kind])assert.ok(C.explicationStatut(kind,s).length>10,kind+' '+s);
  const css=fs.readFileSync('assets/business/style.css','utf8');assert.match(css,/pro-field input[^{]*\{font-size:16px;min-height:48px\}/,'champs à 16 px : pas de zoom automatique sur iPhone');
 });
-test('production : Commerces activé sur autorisation, Transport toujours fermé',()=>{const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.enabled,true);assert.deepEqual(c.modules,{commerce:true,transport:false});});
+test('production : Commerces (13/10/2026) et Transport (14/10/2026) activés sur autorisation',()=>{const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.enabled,true);assert.deepEqual(c.modules,{commerce:true,transport:true});});

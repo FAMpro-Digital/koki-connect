@@ -34,12 +34,12 @@ test('interface : panier latéral, barre panier, puces, Ajouter au panier, aucun
  assert.match(css,/@media \(min-width:900px\)\{#vue-commerce \.business-panel \.cat-cartbar\{display:none\}\}/,'barre panier réservée aux petits écrans');
  assert.doesNotMatch(css.slice(css.indexOf('/* Boutique en ligne')),/(^|[;{])width:\s*\d{3,}px/m,'aucune largeur fixe');
 });
-test('service réel : panier invité sans connexion, commande interne et WhatsApp conservées, Commerce seul activé',()=>{
+test('service réel : panier invité sans connexion, commande interne et WhatsApp conservées',()=>{
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
  assert.match(rt,/async function addToCart\(p,quantity=1\)\{let u=null;try\{u=await api\.identity\(\);\}catch\{\}/,'panier possible avant connexion');
  assert.match(rt,/api\.order\(cart\[0\]\.parent_id/,'commande interne vérifiée par le serveur');
  assert.match(rt,/Connectez-vous dans « Mon compte »/);
- const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules.commerce,true,'commandes Commerce activées (autorisation du 13/10/2026)');assert.equal(c.modules.transport,false);
+ const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules.commerce,true,'commandes Commerce activées (autorisation du 13/10/2026)');assert.equal(c.modules.transport,true,'Transport activé (autorisation du 14/10/2026)');
 });
 test('démonstration : même boutique, données fictives locales, aucun contact réel',()=>{
  const app=fs.readFileSync('assets/commerce/app.js','utf8'),html=fs.readFileSync('index.html','utf8');

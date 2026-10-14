@@ -44,10 +44,10 @@ jobs:
           node --input-type=module - <<'JS'
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
-          // Commerces & Services activé sur autorisation de Mourtada (13/10/2026) ; Transport doit rester fermé.
+          // Activations autorisées par Mourtada : Commerces & Services (13/10/2026), Transport (14/10/2026).
+          // Toute rubrique doit être déclarée explicitement (true ou false) quand le mode métier est actif.
           const business = JSON.parse(fs.readFileSync('assets/business/config.json', 'utf8'));
-          assert.equal(business.modules?.transport, false);
-          assert.ok(business.enabled === false || business.modules?.commerce === true);
+          if (business.enabled) { assert.equal(typeof business.modules?.commerce, 'boolean'); assert.equal(typeof business.modules?.transport, 'boolean'); }
           JS
       - name: Test and build with loopback-only networking
         run: |
