@@ -58,7 +58,13 @@ async function commerce(host,status){const u=await api.identity();catalogue=awai
 async function transportConnecte(){if(!api?.enabled||modules.transport===false)return false;try{await api.identity();return true;}catch{return false;}}
 async function estimerCourse(categorie,depart,destination){try{return await api.estimate(categorie,depart,destination);}catch(e){throw Error(/Tarif validé indisponible/.test(e.message)?'Tarif validé indisponible':e.message);}}
 async function reserverCourse(quote,vehicule){const course=await api.reserve(quote,vehicule);try{await apresCourse();}catch{}return course;}
-window.KokiBusiness={show,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
+// Course du client : la plus récente active (ou terminée, pour la note), avec code, suivi, contacts, note, signalement.
+const ACTIVES=['En attente','Acceptée','Chauffeur en route','Course en cours'];
+async function courseClient(){if(!await transportConnecte())return null;const uid=api.user?.id;const rows=(await api.history('courses')).filter(r=>r.client_id===uid);return rows.find(r=>ACTIVES.includes(r.statut))||rows.find(r=>r.statut==='Terminée')||null;}
+const transportSuivi={courseClient,code:id=>api.run('ride_code',{id}),position:id=>api.run('ride_tracking',{id}),contacts:id=>api.run('ride_contacts',{id}),
+ annuler:async row=>{const r=await api.transition(row,'Annulée');try{await apresCourse();}catch{}return r;},
+ noter:(id,rating,tags,comment)=>api.run('rate_ride',{id,rating,tags,...(comment?{comment}:{})}),signaler:(id,motif,details)=>api.run('report_ride',{id,motif,...(details?{details}:{})})};
+window.KokiBusiness={show,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
 if(new URLSearchParams(location.search).get('koki-recovery')==='1')queueMicrotask(()=>window.KokiCommerce?.afficher());
 
