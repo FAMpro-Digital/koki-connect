@@ -1,5 +1,6 @@
 import {isProcessedImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver,searchCatalogue,catalogueCategories,searchDrivers} from './business-state.js';
+import {indexCatalogue} from './catalogue-state.mjs';
 import {imageSelection} from './ui.mjs';
 import {createBusinessClient} from './client.mjs';
 import {node,field,action,form,accountPanel,history,professional,savedImage,retries} from './ui.mjs';
@@ -64,7 +65,21 @@ async function courseClient(){if(!await transportConnecte())return null;const ui
 const transportSuivi={courseClient,code:id=>api.run('ride_code',{id}),position:id=>api.run('ride_tracking',{id}),contacts:id=>api.run('ride_contacts',{id}),
  annuler:async row=>{const r=await api.transition(row,'Annulée');try{await apresCourse();}catch{}return r;},
  noter:(id,rating,tags,comment)=>api.run('rate_ride',{id,rating,tags,...(comment?{comment}:{})}),signaler:(id,motif,details)=>api.run('report_ride',{id,motif,...(details?{details}:{})})};
-window.KokiBusiness={show,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
+// Recherche de l'accueil : boutiques, produits et services validés (même règle de publication que la boutique en ligne).
+let rechercheCache=null;
+async function catalogueRecherche(){
+ if(rechercheCache&&Date.now()-rechercheCache.t<120000)return rechercheCache.rows;
+ await initialise();if(!api?.enabled||modules.commerce===false)return [];
+ const rows=indexCatalogue(await api.catalog()).liste.map(x=>({id:x.id,kind:x.kind,nom:x.nom,description:x.description||'',categorie:x.categorie||'',village:x.village||''}));
+ rechercheCache={t:Date.now(),rows};return rows;
+}
+// Ouvre la fiche d'un résultat dans Commerces & Services, une fois la boutique en ligne affichée.
+async function ouvrirFiche(id){
+ try{await window.afficherCommerce?.();}catch{}
+ for(let i=0;i<80&&!catalogueHandle?.index;i++)await new Promise(r=>setTimeout(r,100));
+ catalogueHandle?.ouvrir(id);
+}
+window.KokiBusiness={show,catalogueRecherche,ouvrirFiche,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
 if(new URLSearchParams(location.search).get('koki-recovery')==='1')queueMicrotask(()=>window.KokiCommerce?.afficher());
 
