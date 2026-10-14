@@ -1,3 +1,6 @@
+// Coupure de réseau : message compréhensible, et la demande en attente est conservée pour être reprise.
+export const HORS_LIGNE=/Failed to fetch|NetworkError|Load failed|fetch failed|Network request failed|AuthRetryableFetchError/i;
+export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votre connexion puis réessayez.';
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 // Lectures et actions uniques sans clé de reprise (le serveur refuse le doublon : note, signalement).
@@ -24,11 +27,11 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  const scope=()=>`koki.business.pending.${user?.id}`;
  function restore(){pending.clear();try{for(const [k,v] of JSON.parse(storage?.getItem(scope())||'[]'))pending.set(k,v);}catch{}}
  function persist(){try{storage?.setItem(scope(),JSON.stringify([...pending]));}catch{/* Retry remains available in memory. */}}
- async function identity(){requireReady();const {data,error}=await db.auth.getUser();if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}return user;}
+ async function identity(){requireReady();const {data,error}=await db.auth.getUser();if(error&&HORS_LIGNE.test(String(error.message||error.name||''))){const e=Error(MESSAGE_HORS_LIGNE);e.horsLigne=true;throw e;}if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}return user;}
  async function run(command,input={},operation=command){requireReady();const mutation=!reads.has(command);if(command!=='catalog')await identity();while(busy){if(mutation)throw Error('Une opération est déjà en cours.');await new Promise(resolve=>waiters.push(resolve));}
  const body=structuredClone(input);let item;
  if(mutation){const fingerprint=JSON.stringify(body);item=pending.get(operation);if(item&&(item.command!==command||item.fingerprint!==fingerprint))throw Error('Une demande attend confirmation. Reprenez-la avec les mêmes informations avant de les modifier.');if(!item){item={command,fingerprint,input:structuredClone(body),request_id:uuid()};pending.set(operation,item);persist();}body.request_id=item.request_id;}
- busy=true;emit({state:'loading',command});try{const {data,error}=await db.rpc('koki_business',{command,input:body});if(error){const e=Error(error.code==='42501'?'Autorisation refusée. Vérifiez votre compte et vos droits.':error.code==='PGRST202'?'Fonctions serveur non activées sur cet environnement.':error.message||'Opération refusée.');e.definitive=!!error.code&&!['57014','08006','08000'].includes(error.code)&&!String(error.code).startsWith('5');throw e;}
+ busy=true;emit({state:'loading',command});try{const {data,error}=await db.rpc('koki_business',{command,input:body});if(error){const e=Error(HORS_LIGNE.test(String(error.message||''))?MESSAGE_HORS_LIGNE:error.code==='42501'?'Autorisation refusée. Vérifiez votre compte et vos droits.':error.code==='PGRST202'?'Fonctions serveur non activées sur cet environnement.':error.message||'Opération refusée.');e.definitive=!!error.code&&!['57014','08006','08000'].includes(error.code)&&!String(error.code).startsWith('5');throw e;}
  if(mutation){pending.delete(operation);persist();}emit({state:'success',command});return data;
  }catch(e){if(mutation&&e.definitive){pending.delete(operation);persist();}emit({state:'error',command,retry:mutation&&pending.has(operation)});throw e;}finally{busy=false;emit({state:'idle',command});waiters.shift()?.();}}
  return {subscribe(listener){listeners.add(listener);return ()=>listeners.delete(listener);},get enabled(){return enabled&&!!db;},get busy(){return busy;},get user(){return user;},get recovering(){return recovering;},identity,run,

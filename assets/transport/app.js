@@ -201,7 +201,7 @@
     if (valeur==='personnalise') return;
     const lieu=lieuxTransport.get(valeur);
     etat[type]=lieu?{nom:lieu.nom,latitude:lieu.latitude,longitude:lieu.longitude}:null;
-    etat.choisi=null; actualiser();
+    etat.choisi=null; message(''); actualiser();
   }
   async function utiliserPosition() {
     if (courseActive()) return;

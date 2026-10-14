@@ -26,7 +26,8 @@
       "develop/education-moderne": false,
       "develop/sports-asc": false,
       "develop/barre-activite": false,
-      "develop/glisser-onglets": false
+      "develop/glisser-onglets": false,
+      "develop/corrections-bugs": false
     }
   }
 }
