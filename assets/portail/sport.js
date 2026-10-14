@@ -2,7 +2,7 @@
 // Données : flux public (contrat koki.sport.*, voir sport-contract.js) saisies dans Koki Connect Admin.
 (function(){'use strict';
 const S=KokiSportContract,C=KokiPortailCore,$=id=>document.getElementById(id);
-const TITRE='⚽ Sports & ASC';
+const TITRE='⚽ Sport';
 let generation=0,onglet='Matchs',choixCompetition='',choixPoule='';
 function n(tag,text,cls){const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(cls)e.className=cls;return e;}
 function b(text,fn,cls){const e=n('button',text,cls);e.type='button';e.onclick=fn;return e;}
@@ -46,7 +46,7 @@ async function accueil(){
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();
  // Bandeau : match en direct, sinon prochain match, sinon dernier résultat.
  const direct=d.matchs.filter(m=>m.statut==='En direct'),prochain=d.matchs.find(m=>m.statut==='À venir'&&Date.parse(m.date)>=Date.now()-3*3600000),dernier=[...d.matchs].reverse().find(m=>m.statut==='Terminé');
- const hero=n('section',undefined,'sp-hero');hero.append(n('p','KOKI CONNECT · SPORTS & ASC','sp-hero-sur'),n('h3',direct.length?'En direct à Koki':prochain?'Prochain match':dernier?'Dernier résultat':'Sports à Koki','sp-hero-titre'));
+ const hero=n('section',undefined,'sp-hero');hero.append(n('p','KOKI CONNECT · SPORT','sp-hero-sur'),n('h3',direct.length?'En direct à Koki':prochain?'Prochain match':dernier?'Dernier résultat':'Sports à Koki','sp-hero-titre'));
  const vedette=direct[0]||prochain||dernier;if(vedette)hero.append(carteMatch(vedette,d));else hero.append(n('p','Les matchs des navétanes et les résultats des ASC s’afficheront ici.','sp-hero-texte'));
  const tabs=n('div',undefined,'sp-onglets');tabs.setAttribute('role','tablist');const zone=n('div',undefined,'sp-zone');
  const ONGLETS=[['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰']];

@@ -238,7 +238,7 @@
 <button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" onclick="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
 <button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" onclick="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
 <button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" onclick="KokiPortail.liste('Opportunités')"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
-<button type="button" class="raccourci" data-recherche="Sports & ASC" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sports & ASC</strong></button>
+<button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
 <button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
 <button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" onclick="KokiPortail.liste('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
 <button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" onclick="KokiPortail.lieux('Services publics')"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
@@ -252,7 +252,7 @@
 <section class="section" id="accueil-publicites"><div class="portail-title"><h2>📣 Publicités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Publicités')">Voir plus</button></div><div id="portail-publicites" class="portail-grid"></div></section>
 <section class="section" id="accueil-commerces"><div class="portail-title"><h2>🛍️ Commerces & promotions</h2><button class="portail-more" type="button" onclick="afficherCommerce()">Voir plus</button></div><div id="portail-commerces" class="portail-grid"></div></section>
 <section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Opportunités')">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
-<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sports & ASC</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
+<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sport</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
 <section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
 <section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
@@ -426,7 +426,7 @@
     <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
       <button type="button" onclick="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sports / ASC</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherCommerce()"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
