@@ -12,7 +12,8 @@
       "fix/inscription-diagnostic": false,
       "develop/activation-transport": false,
       "fix/libelles-chauffeur": false,
-      "develop/parcours-pro": false
+      "develop/parcours-pro": false,
+      "securite/refus-chauffeur-motif": false
     }
   }
 }
