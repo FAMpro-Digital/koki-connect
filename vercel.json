@@ -16,7 +16,8 @@
       "securite/refus-chauffeur-motif": false,
       "develop/profil-espace": false,
       "develop/transport-interface": false,
-      "develop/transport-suivi": false
+      "develop/transport-suivi": false,
+      "develop/rubriques-signalements": false
     }
   }
 }
