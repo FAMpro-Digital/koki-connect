@@ -26,3 +26,19 @@ img { -webkit-user-drag: none; }
   .section.page-entree, .section.page-retour { animation: none; }
   button:active, a.com-btn:active, .portail-card:active, .pro-choix-carte:active, .tr-vehicule:active, .tr-outil:active, summary:active, nav[aria-label="Navigation principale"] button:active { transform: none; }
 }
+
+/* Page ouverte en plein écran : barre fixe (Retour + titre) à la place de la bannière de l'accueil. */
+.barre-page { position: sticky; top: 0; z-index: 1200; display: flex; align-items: center; gap: 6px; min-height: 56px;
+  padding: env(safe-area-inset-top, 0) 12px 0 4px; background: rgba(255,255,255,.96); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e3ebe6; box-shadow: 0 2px 10px rgba(19,32,26,.06); }
+.barre-page[hidden] { display: none; }
+.barre-retour { flex: none; width: 48px; height: 48px; border: 0; border-radius: 24px; background: transparent; color: #087a3d; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.barre-retour:active { background: #e8f3ec; }
+.barre-retour svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.barre-titre { margin: 0; font-size: 18px; font-weight: 700; color: #13201a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.page-pleine .entete-koki, body.page-pleine #portail-sync, body.page-pleine .search,
+body.page-pleine .section > button[onclick="fermerOpportunites()"] { display: none !important; }
+/* Le titre de la page est dans la barre : le titre interne reste lisible par les lecteurs d'écran. */
+body.page-pleine :is(#portail-titre, #titre-opportunites, #titre-commerce, #titre-carte, #titre-menu, #titre-notifications, #titre-rubrique) {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.page-pleine .section:not([hidden]) { padding-top: 12px; }
