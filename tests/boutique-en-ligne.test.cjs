@@ -38,7 +38,7 @@ test('service réel : panier invité sans connexion, commande interne et WhatsAp
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
  assert.match(rt,/async function addToCart\(p,quantity=1\)\{let u=null;try\{u=await api\.identity\(\);\}catch\{\}/,'panier possible avant connexion');
  assert.match(rt,/api\.order\(cart\[0\]\.parent_id/,'commande interne vérifiée par le serveur');
- assert.match(rt,/Connectez-vous dans « Mon compte »/);
+ assert.match(rt,/catch\{ouvrirConnexion\('commerce'\);throw Error\('Connectez-vous/,'connexion ouverte sur place avant de commander');
  const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules.commerce,true,'commandes Commerce activées (autorisation du 13/10/2026)');assert.equal(c.modules.transport,true,'Transport activé (autorisation du 14/10/2026)');
 });
 test('démonstration : même boutique, données fictives locales, aucun contact réel',()=>{
