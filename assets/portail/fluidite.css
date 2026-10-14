@@ -1,0 +1,28 @@
+/* Sensation d'application : touches réactives, ouvertures et retours animés, défilement fluide.
+   Tout est désactivé quand le téléphone demande moins d'animations. */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overscroll-behavior-x: none; }
+/* Plus de délai au toucher (double-tap) sur les éléments interactifs. */
+button, a, select, input, textarea, label, summary, [role="button"] { touch-action: manipulation; }
+/* Retour visuel immédiat à l'appui. */
+button, a.com-btn, .portail-card, .pro-choix-carte, .tr-vehicule, .tr-chauffeur, .tr-outil, summary {
+  transition: transform .12s cubic-bezier(.2,.8,.2,1), background-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+button:active:not(:disabled), a.com-btn:active, .pro-choix-carte:active, .tr-vehicule:active:not(:disabled), .tr-outil:active, summary:active { transform: scale(.97); }
+.portail-card:active { transform: scale(.985); }
+nav[aria-label="Navigation principale"] button:active { transform: scale(.92); }
+/* Onglet actif de la barre du bas. */
+nav[aria-label="Navigation principale"] button[aria-current="page"] { color: #0B6B3A; font-weight: 800; }
+nav[aria-label="Navigation principale"] button[aria-current="page"] span { transform: translateY(-2px); display: inline-block; transition: transform .2s ease; }
+/* Ouverture d'une page : glisse depuis la droite ; retour : depuis la gauche. */
+@keyframes koki-page-entree { from { opacity: 0; transform: translate3d(28px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes koki-page-retour { from { opacity: 0; transform: translate3d(-22px,0,0); } to { opacity: 1; transform: none; } }
+.section.page-entree { animation: koki-page-entree .28s cubic-bezier(.2,.8,.2,1) both; }
+.section.page-retour { animation: koki-page-retour .24s cubic-bezier(.2,.8,.2,1) both; }
+/* Les listes longues se dessinent au fil du défilement. */
+.portail-grid > .portail-card, .tr-chauffeurs > * { content-visibility: auto; contain-intrinsic-size: auto 220px; }
+img { -webkit-user-drag: none; }
+@media (prefers-reduced-motion: reduce) {
+  .section.page-entree, .section.page-retour { animation: none; }
+  button:active, a.com-btn:active, .portail-card:active, .pro-choix-carte:active, .tr-vehicule:active, .tr-outil:active, summary:active, nav[aria-label="Navigation principale"] button:active { transform: none; }
+}
