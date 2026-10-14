@@ -38,3 +38,9 @@
 .sante-rappel{margin:0;padding:12px 14px;border-radius:14px;background:#fff3f6;color:#7a0d2e;font-size:14px;line-height:1.45}
 .sante-vide{padding:24px;text-align:center;background:#fff;border:1px dashed #c9d0d6;border-radius:18px;color:#4a535c}
 .sante-fiche{max-width:720px}
+/* Profil : choix de l'activité professionnelle (3 cartes, une colonne au téléphone). */
+.pro-choix{background:#fff;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 3px 14px #143b1010}.pro-choix h3{margin:0 0 6px;font-size:18px}.pro-choix p{margin:0 0 12px;line-height:1.5;color:#3d4b40}
+.pro-choix-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.pro-choix-carte{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:96px;padding:14px;border:1.5px solid #d8e2da;border-radius:14px;background:#f7faf8;color:#17201b;font:inherit;cursor:pointer}
+.pro-choix-carte span:first-child{font-size:26px;line-height:1}.pro-choix-carte strong{font-size:16px}.pro-choix-carte span:last-child{font-size:14px;color:#4a564d;line-height:1.4}
+.pro-choix-carte:focus-visible{outline:3px solid #ff9500;outline-offset:2px}.pro-choix-actuel{border-color:#087a3d;background:#eaf6ef}
