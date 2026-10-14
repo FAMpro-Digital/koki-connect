@@ -14,7 +14,8 @@
       "fix/libelles-chauffeur": false,
       "develop/parcours-pro": false,
       "securite/refus-chauffeur-motif": false,
-      "develop/profil-espace": false
+      "develop/profil-espace": false,
+      "develop/transport-interface": false
     }
   }
 }
