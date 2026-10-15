@@ -15,7 +15,7 @@ test('Santé : ouvert maintenant (heure de Koki), garde et horaires',()=>{
 test('Application : page Santé reliée à l’accueil',()=>{
  const html=fs.readFileSync('index.html','utf8');
  assert.ok(html.includes('assets/portail/sante-contract.js')&&html.includes('assets/portail/sante.js'));
- assert.equal((html.match(/KokiSante\.ouvrir\(\)/g)||[]).length,2);
+ assert.equal((html.match(/KokiSante\.ouvrir\(\)/g)||[]).length,3,"tuile, informations utiles et menu");
  const app=fs.readFileSync('assets/portail/app.js','utf8');assert.match(app,/KokiSanteContract\.decode\(x\)/);assert.match(app,/window\.KokiPortail=\{ouvrir,detail,/);
  const page=fs.readFileSync('assets/portail/sante.js','utf8');for(const t of ['1515','tel:','Ouvert maintenant','Pharmacie de garde','Alertes et campagnes'])assert.ok(page.includes(t),t);
  assert.doesNotMatch(fs.readFileSync('assets/portail/style.css','utf8').match(/\/\* Rubrique Santé[\s\S]*/)[0],/(^|[;{])width:\s*\d{3,}px/m,'aucune largeur fixe : mise en page adaptative');
