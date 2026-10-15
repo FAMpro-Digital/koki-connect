@@ -75,3 +75,41 @@ body.page-pleine .section:not([hidden]) { padding-top: 12px; }
 body[data-glisse="gauche"] .section:not([hidden]) { animation: onglet-depuis-droite .25s ease-out; }
 body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gauche .25s ease-out; }
 @media (prefers-reduced-motion: reduce) { body[data-glisse] .section:not([hidden]) { animation: none; } }
+
+/* Profil simplifié : en-tête de compte, connexion en une étape, raccourcis, espace pro replié. */
+.profil-espace .pf-tete { display: flex; align-items: center; gap: 14px; margin: 4px 0 12px; padding: 18px 16px; border-radius: 22px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.55) 0 70px, transparent 71px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.pf-avatar { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #fff; color: #0b5a3c; font-size: 26px; font-weight: 800; border: 3px solid #f28c28; }
+.pf-tete-texte { display: grid; gap: 3px; min-width: 0; }
+.pf-tete-texte strong { font-size: 18px; color: #fff; overflow-wrap: anywhere; }
+.pf-tete-texte span { font-size: 13px; color: rgba(255,255,255,.9); line-height: 1.35; }
+.profil-espace .profil-compte { margin: 0 0 12px; border-radius: 20px; }
+.profil-espace .profil-compte > h3 { margin: 0 0 4px; color: #0b5a3c; }
+.profil-espace .pf-compte-connecte { padding: 0; border: 0; background: none; margin: 0; }
+.profil-espace .pf-compte-connecte > p[role="status"]:empty { display: none; }
+.profil-espace .connexion-sms { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.profil-espace .connexion-sms h3 { display: none; }
+.profil-espace .connexion-sms input[type="tel"] { min-height: 52px; font-size: 18px; border-radius: 14px; }
+.profil-espace .connexion-sms button[type="submit"], .profil-espace .connexion-code button[type="submit"] { width: 100%; min-height: 52px; border-radius: 14px; border: 0; background: #f28c28; color: #fff; font-weight: 800; font-size: 16px; }
+.profil-espace .connexion-sms p { margin: 8px 0 0; font-size: 13px; color: #5b6b63; }
+.profil-espace .connexion-code { margin: 12px 0 0; padding: 12px; border-radius: 14px; background: #e8f2ec; border: 0; }
+.profil-espace .connexion-code input { min-height: 52px; font-size: 22px; letter-spacing: .3em; text-align: center; border-radius: 14px; }
+.connexion-email { margin-top: 12px; border-top: 1px solid #e3ebe6; padding-top: 8px; }
+.connexion-email > summary { min-height: 44px; display: flex; align-items: center; color: #087a3d; font-weight: 700; cursor: pointer; }
+.connexion-liens { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+.profil-espace .connexion-liens button { min-height: 40px; padding: 0 !important; border: 0 !important; background: none !important; color: #087a3d !important; font-weight: 700; text-decoration: underline; box-shadow: none; }
+.pf-raccourcis { display: grid; margin: 0 0 12px; border-radius: 18px; background: #fff; border: 1px solid #e3ebe6; overflow: hidden; }
+.pf-raccourci { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 14px !important; border: 0 !important; border-bottom: 1px solid #eef2ef !important; border-radius: 0 !important; background: #fff !important; color: #13201a !important; font-size: 16px; font-weight: 600; text-align: left; }
+.pf-raccourci:last-child { border-bottom: 0 !important; }
+.pf-raccourci-icone { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #e8f2ec; font-size: 18px; }
+.pf-chevron { font-size: 22px; color: #f28c28; font-weight: 800; }
+.pro-replie { margin: 0 0 12px; border-radius: 18px; background: #fff; border: 1px solid #e3ebe6; overflow: hidden; }
+.pro-replie > summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 14px; font-weight: 700; color: #0b5a3c; cursor: pointer; list-style: none; }
+.pro-replie > summary::-webkit-details-marker { display: none; }
+.pro-replie > summary::after { content: '›'; margin-left: auto; font-size: 22px; color: #f28c28; transition: transform .2s; }
+.pro-replie[open] > summary::after { transform: rotate(90deg); }
+.pro-replie-icone { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #fff3e6; }
+.pro-replie .pro-choix { margin: 0; box-shadow: none; padding-top: 0; }
+.pf-fin, .pf-plus { display: grid; gap: 8px; margin: 4px 0 12px; }
+.pf-deconnexion { min-height: 48px; border-radius: 14px !important; border: 1.5px solid #e9c4a3 !important; background: #fff !important; color: #c25e0e !important; font-weight: 800; }
+.pf-lien { justify-self: center; min-height: 40px; padding: 0 8px !important; border: 0 !important; background: none !important; color: #5b6b63 !important; font-size: 13px; text-decoration: underline; }
+.profil-espace p[role="status"]:empty { display: none; }
