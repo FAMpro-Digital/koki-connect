@@ -28,7 +28,8 @@
       "develop/barre-activite": false,
       "develop/glisser-onglets": false,
       "develop/corrections-bugs": false,
-      "develop/opportunites": false
+      "develop/opportunites": false,
+      "develop/evenements": false
     }
   }
 }

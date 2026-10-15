@@ -17,7 +17,7 @@ test('échéances : dernier jour, plus que n jours, date, expirée ; familles du
 test('application : une seule page, offres expirées ou archivées retirées partout',()=>{
  const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),op=fs.readFileSync('assets/portail/opportunites.js','utf8');
  assert.match(app,/function offreFermee\(x\)\{if\(x\.type!=='Opportunités'\|\|!window\.KokiOffreContract\)return false;const v=KokiOffreContract\.decode\(x\);return !!v&&\(v\.archive\|\|KokiOffreContract\.expiree\(v\)\);\}/);
- assert.match(app,/function visibles\(\)\{return C\.trier\(contenus\.filter\(x=>C\.visible\(x\)&&!offreFermee\(x\)\)\);\}/);
+ assert.match(app,/function visibles\(\)\{return C\.trier\(contenus\.filter\(x=>C\.visible\(x\)&&!offreFermee\(x\)(&&!evenementPasse\(x\))?\)\);\}/);
  assert.match(app,/if\(type==='Opportunités'&&window\.KokiOpportunites\)\{KokiOpportunites\.ouvrir\('Toutes'\);return;\}/);
  assert.match(html,/function afficherOpportunites\(\) \{\n  if \(window\.KokiOpportunites\) \{ KokiOpportunites\.ouvrir\('Toutes'\); return; \}/);
  assert.match(html,/<span>💼 Emplois &amp; Opportunités<\/span>/);
