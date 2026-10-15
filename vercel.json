@@ -30,7 +30,8 @@
       "develop/corrections-bugs": false,
       "develop/opportunites": false,
       "develop/evenements": false,
-      "develop/services-publics": false
+      "develop/services-publics": false,
+      "develop/profil-simple": false
     }
   }
 }
