@@ -153,3 +153,43 @@
 .op-postuler { border: 2px solid #f28c28; background: #fff8f0; }
 .op-bouton { width: 100%; min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; }
 .op-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }
+
+/* Événements — agenda aux couleurs Koki Connect. */
+.ev-hero { position: relative; overflow: hidden; margin: 4px 0 12px; padding: 18px 16px 16px; border-radius: 22px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.6) 0 80px, transparent 81px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.ev-hero-sur { margin: 0 0 4px; font-size: 11px; letter-spacing: .12em; font-weight: 700; color: #ffd2a6; }
+.ev-hero-titre { margin: 0 0 12px; font-size: 24px; color: #fff; }
+.ev-hero-texte { margin: 0; color: rgba(255,255,255,.92); }
+.ev-periodes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 0 0 8px; border-radius: 14px; background: #e3ede6; }
+.ev-periode { min-height: 42px; padding: 0 2px !important; border: 0 !important; border-radius: 11px !important; background: transparent !important; color: #0b5a3c !important; font-weight: 700; font-size: 12px; line-height: 1.1; }
+.ev-periode[aria-pressed="true"] { background: #0b5a3c !important; color: #fff !important; }
+.ev-genres { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; }
+.ev-genres::-webkit-scrollbar { display: none; }
+.ev-puce { flex: none; min-height: 36px; padding: 0 12px !important; border-radius: 999px !important; border: 1.5px solid #cfe0d5 !important; background: #fff !important; color: #0b5a3c !important; font-weight: 700; white-space: nowrap; }
+.ev-puce[aria-pressed="true"] { background: #f28c28 !important; border-color: #f28c28 !important; color: #fff !important; }
+.ev-agenda { display: grid; gap: 10px; margin-bottom: 16px; }
+.ev-mois-titre { margin: 12px 2px 0; font-size: 15px; color: #5b6b63; }
+.ev-carte { display: grid; grid-template-columns: 58px 1fr auto; gap: 12px; align-items: center; width: 100%; padding: 12px !important; border-radius: 18px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; box-shadow: 0 2px 8px rgba(19,32,26,.05); }
+.ev-en-cours { border: 2px solid #f28c28 !important; }
+.ev-date { display: grid; justify-items: center; align-content: center; width: 58px; height: 62px; border-radius: 14px; background: linear-gradient(160deg, #0b5a3c, #087a3d); color: #fff; }
+.ev-jour { font-size: 24px; font-weight: 800; line-height: 1; }
+.ev-mois { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #ffd2a6; font-weight: 700; }
+.ev-texte { display: grid; gap: 2px; min-width: 0; }
+.ev-genre { font-size: 12px; font-weight: 700; color: #c25e0e; }
+.ev-texte strong { font-size: 16px; line-height: 1.25; }
+.ev-lieu { font-size: 13px; color: #5b6b63; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-quand { justify-self: start; margin-top: 3px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; background: #e8f2ec; color: #0b5a3c; }
+.ev-quand-direct { background: #f28c28; color: #fff; }
+.ev-vignette { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; margin: 0; }
+.ev-vide { padding: 14px; border-radius: 14px; background: #fff; border: 1px dashed #cfe0d5; color: #5b6b63; }
+.ev-affiche { width: 100%; max-height: 360px; object-fit: cover; border-radius: 20px; margin-bottom: 12px; }
+.ev-fiche-tete { display: grid; gap: 4px; justify-items: start; padding: 16px; margin-bottom: 12px; border-radius: 20px; background: linear-gradient(180deg, #e8f2ec, #fff); }
+.ev-fiche-tete h2 { margin: 0; font-size: 22px; line-height: 1.2; }
+.ev-fiche-date { margin: 2px 0; font-weight: 700; color: #0b5a3c; }
+.ev-actions { display: grid; gap: 8px; margin-bottom: 12px; }
+.ev-bouton { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; text-decoration: none; }
+.ev-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }
+.ev-infos { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; padding: 14px 16px; margin: 0 0 12px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; }
+.ev-infos dt { color: #5b6b63; } .ev-infos dd { margin: 0; font-weight: 700; }
+.ev-bloc { padding: 14px 16px; margin-bottom: 12px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; }
+.ev-bloc h3 { margin: 0 0 8px; font-size: 16px; } .ev-bloc p { line-height: 1.5; white-space: pre-line; }
+.ev-programme { border-left: 4px solid #f28c28; }
