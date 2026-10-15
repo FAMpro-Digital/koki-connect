@@ -66,3 +66,12 @@ test('espace chauffeur : libellés en français (« Ajouter un véhicule »)',()
  const ui=require('node:fs').readFileSync('assets/business/ui.mjs','utf8');
  assert.doesNotMatch(ui,/'Ajouter '\+kind|'Gérer '\+kind/,'plus de « Ajouter vehicules »');assert.match(ui,/vehicules:'un véhicule'/);
 });
+test('Profil simplifié : connexion par numéro d’abord, e-mail replié, compte connecté et déconnexion à part',async()=>{
+ const api=fauxApi();const {host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');accountPanel(host,api,async()=>{});await tick();
+ const formes=all(host).filter(e=>e.tagName==='FORM');assert.equal(formes[0].dataset.vue,'sms','le numéro de téléphone vient en premier');
+ const replie=all(host).find(e=>e.tagName==='DETAILS');assert.ok(replie,'e-mail replié');assert.ok([...replie.descendants()].includes(formulaire(host,'connexion')));
+ for(const l of ['Mot de passe oublié','Créer mon compte'])assert.ok([...replie.descendants()].includes(bouton(host,l)),l+' dans la partie repliée');
+ const api2={...fauxApi(),identity:async()=>({id:'u1',phone:'221771234567'}),logout:async()=>{}};const h2=setup(api2).host,fin=new El('div');let vu=null;
+ accountPanel(h2,api2,async()=>{},{connecte:(box,u,qui)=>{vu=qui;},deconnexion:fin});await tick();await tick();
+ assert.ok(vu,'en-tête du compte connecté');assert.ok(bouton(fin,'Déconnexion de cet appareil'),'déconnexion placée en bas du profil');assert.equal(bouton(h2,'Déconnexion de cet appareil'),undefined);
+});

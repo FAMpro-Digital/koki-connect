@@ -48,9 +48,8 @@ async function rechercher(q){clearTimeout(timer);timer=setTimeout(async()=>{awai
 // professionnels, la fiche (boutique, services) ou l'inscription chauffeur. Les rubriques Commerce, Services et Transport
 // restent consacrées aux clients : catalogue, panier, demandes, réservations et leur suivi.
 async function profil(){const box=ouvrir('Profil utilisateur');const P=window.KokiPro;
- box.append(n('p','Votre compte Koki Connect et, si vous êtes commerçant, prestataire ou chauffeur, votre espace professionnel. Vos commandes, demandes et courses se suivent dans leurs rubriques.'));
  const zone=n('div');zone.className='profil-espace';box.append(zone);
- box.append(b('Je suis client : voir les commerces',async()=>{P?.oublier();await afficherCommerce();}),b('Tableau de bord des contenus',admin),b('Menu et informations',afficherMenu));
+ const plus=n('div');plus.className='pf-plus';const pub=b('Publier sur Koki Connect (administration)',admin);pub.className='pf-lien';plus.append(pub);box.append(plus);
  if(!P){zone.append(n('p','Espace connecté momentanément indisponible. Rechargez la page.'));return;}
  await P.monter(zone);}
 async function favoris(){await pret;const box=ouvrir('Favoris');const xs=visibles().filter(x=>fav.includes(x.id));xs.forEach(x=>box.append(card(x)));if(!xs.length)box.append(n('p','Aucun favori disponible. Ajoutez un contenu publié à vos favoris. Les favoris restent sur cet appareil.'));}

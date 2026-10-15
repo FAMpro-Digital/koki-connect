@@ -128,29 +128,48 @@ function choixActivite(host,actuel,intro){
  for(const [type,t] of Object.entries(Pro.TYPES)){if(modules[t.module]===false)continue;const c=node('button');c.type='button';c.className='pro-choix-carte'+(type===actuel?' pro-choix-actuel':'');c.dataset.type=type;if(type===actuel)c.setAttribute('aria-current','true');const i=node('span',t.icone);i.setAttribute('aria-hidden','true');c.append(i,node('strong',t.label),node('span',t.description));c.onclick=()=>window.KokiPro.choisir(type);grille.append(c);}
  sec.append(grille);host.append(sec);
 }
+const nc=(t,x,c)=>{const e=node(t,x);e.className=c;return e;};
+// Espace pro replié en une ligne pour les clients ; ouvert dès qu'une activité est choisie.
+function replie(host,t){host.querySelector?.('h3')?.remove();const d=node('details');d.className='pro-replie';d.open=!!t;const s=node('summary');s.append(nc('span','💼','pro-replie-icone'),node('span','Vous êtes commerçant, prestataire ou chauffeur ?'));d.append(s);host.append(d);return d;}
 async function espacePro(host,connected){
  host.replaceChildren(node('h3','Mon espace professionnel'));const status=node('p');status.setAttribute('role','status');host.append(status);
  const t=Pro.lire(proStorage());
  if(!connected){
-  choixActivite(host,t,t?'Activité choisie : '+Pro.TYPES[t].label+'. Créez votre compte ou connectez-vous ci-dessus : votre fiche s’ouvrira ensuite ici.':'Vous êtes commerçant, prestataire ou chauffeur ? Choisissez votre activité, puis créez votre compte ci-dessus. Votre fiche sera vérifiée par l’administration avant publication.');
-  if(t)action(host,'Annuler ce choix',async()=>{Pro.effacer(proStorage());await espacePro(host,false);},status);
+  const d=replie(host,t);
+  choixActivite(d,t,t?'Activité choisie : '+Pro.TYPES[t].label+'. Connectez-vous ci-dessus avec votre numéro : votre fiche s’ouvrira ensuite ici.':'Choisissez votre activité, puis connectez-vous ci-dessus. Votre fiche sera vérifiée par l’administration avant publication.');
+  if(t)action(d,'Annuler ce choix',async()=>{Pro.effacer(proStorage());await espacePro(host,false);},status);
   return;
  }
  const [fiches,chauffeurs]=await Promise.all([modules.commerce?api.mine('professionnels'):[],modules.transport?api.mine('chauffeurs'):[]]);
  const commerce=modules.commerce&&(fiches.length>0||t==='commercant'||t==='prestataire'),transport=modules.transport&&(chauffeurs.length>0||t==='chauffeur');
  if(commerce){const s=node('section');host.append(s);await proSpace(s,api,status,{upload,imageSelection,...parcoursPro('commerce')});}
  if(transport){const s=node('section');s.className='business-panel';host.append(s);await professional(s,api,'transport',status,{upload,...parcoursPro('transport')});}
- if(!commerce&&!transport){choixActivite(host,t,'Vous utilisez Koki Connect comme client. Vous êtes commerçant, prestataire ou chauffeur ? Choisissez votre activité pour créer votre fiche.');return;}
+ if(!commerce&&!transport){choixActivite(replie(host,t),t,'Choisissez votre activité pour créer votre fiche professionnelle.');return;}
  const autre=node('details');autre.className='pro-autre';autre.append(node('summary','Ajouter une autre activité'));choixActivite(autre,t,'Choisissez l’activité à ajouter :');host.append(autre);
+}
+// Profil façon application : en-tête (compte), raccourcis, compte / connexion, espace professionnel, déconnexion.
+function raccourcis(){
+ const nav=node('div');nav.className='pf-raccourcis';nav.setAttribute('role','group');nav.setAttribute('aria-label','Raccourcis');
+ for(const [icone,texte,fn] of [['🧾','Mes commandes et courses',()=>window.KokiActivite?.ouvrir()],['❤️','Mes favoris',()=>window.KokiPortail?.favoris()],['🔔','Notifications',()=>window.afficherNotifications?.()],['ℹ️','Aide et informations',()=>window.afficherMenu?.()]]){
+  const b=node('button');b.type='button';b.className='pf-raccourci';b.append(nc('span',icone,'pf-raccourci-icone'),node('span',texte),nc('span','›','pf-chevron'));b.onclick=fn;nav.append(b);}
+ return nav;
+}
+function entete(tete,u,qui){
+ tete.replaceChildren();const a=nc('span',u?String(qui||'K').replace(/^\+?221\s?/,'').trim().charAt(0).toUpperCase()||'K':'👤','pf-avatar');
+ const t=nc('div','','pf-tete-texte');t.append(node('strong',u?qui:'Bienvenue sur Koki Connect'),node('span',u?'Compte connecté sur cet appareil':'Connectez-vous avec votre numéro pour commander, réserver une course et suivre vos demandes.'));
+ tete.append(a,t);tete.classList.toggle('pf-tete-connecte',!!u);
 }
 async function espaceProfil(host){
  host.replaceChildren(node('p','Chargement de votre espace…'));
  try{await initialise();}catch(e){host.replaceChildren(node('p',lisible(e)));return;}
  host.replaceChildren();
- const compte=node('section');compte.id='profil-compte';compte.className='business-panel profil-compte';compte.append(node('h3','Mon compte'));
- const pro=node('section');pro.id='profil-pro';pro.className='profil-pro';host.append(compte,pro);
+ const tete=node('section');tete.className='pf-tete';entete(tete,null);
+ const compte=node('section');compte.id='profil-compte';compte.className='business-panel profil-compte';const titre=node('h3','Se connecter');compte.append(titre);
+ const pro=node('section');pro.id='profil-pro';pro.className='profil-pro';const fin=node('div');fin.className='pf-fin';
+ host.append(tete,compte,raccourcis(),pro,fin);
  const service=modules.commerce?apiDe('commerce'):apiDe('transport');
- accountPanel(compte,service,async connected=>{try{await espacePro(pro,connected&&service.enabled);}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien()});
+ accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);try{await espacePro(pro,connected&&service.enabled);}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
+  connecte:(box,u,qui)=>entete(tete,u,qui),deconnexion:fin});
  // Avant connexion (ou service en préparation), le choix d'activité est déjà proposé.
  if(!api?.user)await espacePro(pro,false);
 }
