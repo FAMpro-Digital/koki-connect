@@ -119,3 +119,10 @@ body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gau
 .rb-bandeau p { margin: 0; line-height: 1.45; }
 .rb-bandeau .rb-contact { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 6px; font-size: 13px; color: #5b6b63; }
 .rb-bandeau .rb-contact a { font-weight: 800; color: #087a3d; text-decoration: none; }
+
+/* Zones tactiles d'au moins 44 px (appels, e-mails, actualisation, zoom de la carte). */
+#portail-vue a[href^="tel:"], #portail-vue a[href^="mailto:"], #vue-menu a[href^="tel:"], #vue-menu a[href^="mailto:"] { display: inline-flex; align-items: center; min-height: 44px; }
+#actualiser-meteo { min-width: 44px; min-height: 44px; font-size: 16px !important; }
+#portail-vue > button { min-height: 44px; }
+.leaflet-control-zoom a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 22px !important; }
+.menu-sep { margin: 8px 2px 0; font-size: 13px; font-weight: 700; color: #5b6b63; text-transform: uppercase; letter-spacing: .06em; }

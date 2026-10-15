@@ -32,7 +32,39 @@
       "develop/evenements": false,
       "develop/services-publics": false,
       "develop/profil-simple": false,
-      "develop/rubriques-uniques": false
+      "develop/rubriques-uniques": false,
+      "develop/audit-corrections": false
     }
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://qsbmzzbiztfqysstepxm.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://qsbmzzbiztfqysstepxm.supabase.co wss://qsbmzzbiztfqysstepxm.supabase.co https://api.open-meteo.com; media-src 'self' blob: https://qsbmzzbiztfqysstepxm.supabase.co; font-src 'self' data:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000"
+        }
+      ]
+    }
+  ]
 }
