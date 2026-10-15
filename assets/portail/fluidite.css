@@ -113,3 +113,9 @@ body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gau
 .pf-deconnexion { min-height: 48px; border-radius: 14px !important; border: 1.5px solid #e9c4a3 !important; background: #fff !important; color: #c25e0e !important; font-weight: 800; }
 .pf-lien { justify-self: center; min-height: 40px; padding: 0 8px !important; border: 0 !important; background: none !important; color: #5b6b63 !important; font-size: 13px; text-decoration: underline; }
 .profil-espace p[role="status"]:empty { display: none; }
+
+/* Renseignements d'une rubrique (présentation, responsable, contact), publiés depuis l'administration. */
+.rb-bandeau { margin: 0 0 12px; padding: 12px 14px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; border-left: 5px solid #f28c28; color: #13201a; }
+.rb-bandeau p { margin: 0; line-height: 1.45; }
+.rb-bandeau .rb-contact { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 6px; font-size: 13px; color: #5b6b63; }
+.rb-bandeau .rb-contact a { font-weight: 800; color: #087a3d; text-decoration: none; }

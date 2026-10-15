@@ -26,7 +26,7 @@ test('recherche Éducation : livres et établissements ; hors connexion, Mes liv
  assert.match(edu,/Vos livres téléchargés restent lisibles dans « Mes livres »/);
 });
 test('accueil : livres, écoles, structures de santé, numéros et lieux ne sont pas des publications de l’accueil',()=>{
- assert.match(app,/function fiche\(x\)\{.*if\(x\.type!=='Informations utiles'\)return false;if\(x\.categorie==='Lieux de la carte'\)return true;for\(const K of \[window\.KokiLivreContract,window\.KokiEducationContract,window\.KokiSanteContract,window\.KokiNumeroContract\]\)if\(K&&K\.decode\(x\)\)return true;.*return false;\}/);
+ assert.match(app,/function fiche\(x\)\{.*if\(x\.type!=='Informations utiles'\)return false;if\(x\.categorie==='Lieux de la carte'\)return true;.*for\(const K of \[window\.KokiLivreContract,window\.KokiEducationContract,window\.KokiSanteContract,window\.KokiNumeroContract\]\)if\(K&&K\.decode\(x\)\)return true;.*return false;\}/);
  assert.match(app,/function actifs\(\)\{return visibles\(\)\.filter\(x=>!fiche\(x\)\);\}/);
  assert.match(app,/const xs=actifs\(\)\.filter\(x=>x\.type!=='Publicités'/,'notifications sans fiches de catalogue');
  assert.match(app,/for\(const x of visibles\(\)\.filter\(x=>!\(x\.type==='Informations utiles'&&x\.categorie==='Lieux de la carte'\)\)\)rows\.push\(\{nom:x\.titre,texte:x\.resume\+' '\+x\.categorie,type:.*window\.KokiLivreContract\?\.decode\(x\)\?'📚 Bibliothèque'/,'la recherche trouve toujours les livres');

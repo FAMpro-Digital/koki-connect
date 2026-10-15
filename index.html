@@ -256,7 +256,7 @@
 <section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
 <section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
-<section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-vue"></div></section>
+<section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-bandeau" class="rb-bandeau" hidden></div><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
@@ -291,7 +291,7 @@
 
   <section id="vue-commerce" class="section" hidden aria-labelledby="titre-commerce">
     <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
-    <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2>
+    <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
     <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
     <p id="market-message" role="status"></p>
@@ -357,7 +357,7 @@
       </div>
       <div class="tr-feuille">
         <span class="tr-poignee" aria-hidden="true"></span>
-        <h2 id="titre-transport" tabindex="-1">Où allez-vous ?</h2>
+        <h2 id="titre-transport" tabindex="-1">Où allez-vous ?</h2><div id="bandeau-transport" class="rb-bandeau" hidden></div>
         <p class="tr-marque"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Chauffeurs vérifiés par Koki Connect · paiement en espèces</p>
         <p id="transport-message" class="tr-message" role="status"></p>
         <div id="transport-suivi" class="tr-suivi" hidden></div>
@@ -725,6 +725,7 @@ function filtrerCarte() {
   <script src="assets/commerce/app.js"></script>
 <script src="assets/portail/core.js"></script>
 <script src="assets/portail/feed.js"></script>
+<script src="assets/portail/rubriques-contract.js"></script>
 <script src="assets/portail/lieu-contract.js"></script>
 <script src="assets/portail/sante-contract.js"></script>
 <script src="assets/portail/education-contract.js"></script>
