@@ -430,7 +430,7 @@
       <button type="button" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherCommerce()"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherOpportunites()"><span>💼 Opportunités jeunes</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
@@ -560,6 +560,7 @@ function filtrerOpportunites(rubrique) {
     visibles === 1 ? '1 rubrique affichée : ' + rubrique + '.' : visibles + ' rubriques affichées.';
 }
 function afficherOpportunites() {
+  if (window.KokiOpportunites) { KokiOpportunites.ouvrir('Toutes'); return; }
   filtrerOpportunites('Toutes');
   document.querySelector('.search').hidden = true;
   document.querySelectorAll('body > .section').forEach(section => {
@@ -729,6 +730,8 @@ function filtrerCarte() {
 <script src="assets/portail/education.js"></script>
 <script src="assets/portail/sport-contract.js"></script>
 <script src="assets/portail/sport.js"></script>
+<script src="assets/portail/offre-contract.js"></script>
+<script src="assets/portail/opportunites.js"></script>
 <script src="assets/portail/activite.js"></script>
 <script src="assets/portail/sante.js"></script>
 <script src="assets/portail/navigation.js"></script>

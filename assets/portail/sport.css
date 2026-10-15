@@ -112,3 +112,44 @@
 .sp-bouton { display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 14px !important; background: var(--sp-orange) !important; border: 0 !important; color: #fff !important; font-weight: 800; text-decoration: none; }
 .sp-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: var(--sp-vert-fonce) !important; }
 @media (prefers-reduced-motion: reduce) { .sp-statut-direct { animation: none; } .sp-match:active { transform: none; } }
+
+/* Emplois & Opportunités — couleurs Koki Connect. */
+.op-hero { position: relative; overflow: hidden; margin: 4px 0 12px; padding: 18px 16px 16px; border-radius: 22px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.6) 0 80px, transparent 81px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.op-hero-sur { margin: 0 0 4px; font-size: 11px; letter-spacing: .12em; font-weight: 700; color: #ffd2a6; }
+.op-hero-titre { margin: 0 0 4px; font-size: 24px; color: #fff; }
+.op-hero-texte { margin: 0 0 14px; color: rgba(255,255,255,.92); line-height: 1.4; }
+.op-recherche { display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 14px; border-radius: 16px; background: #fff; color: #13201a; }
+.op-recherche input { flex: 1; min-width: 0; border: 0 !important; outline: 0; background: transparent; font-size: 16px; padding: 12px 0 !important; margin: 0 !important; box-shadow: none !important; }
+.op-puces { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; scrollbar-width: none; }
+.op-puces::-webkit-scrollbar { display: none; }
+.op-puce { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px !important; border-radius: 999px !important; border: 1.5px solid #cfe0d5 !important; background: #fff !important; color: #0b5a3c !important; font-weight: 700; white-space: nowrap; }
+.op-puce-nb { min-width: 22px; padding: 1px 6px; border-radius: 999px; background: #e8f2ec; font-size: 12px; }
+.op-puce[aria-pressed="true"] { background: #0b5a3c !important; border-color: #0b5a3c !important; color: #fff !important; }
+.op-puce[aria-pressed="true"] .op-puce-nb { background: #f28c28; color: #fff; }
+.op-liste { display: grid; gap: 10px; margin: 6px 0 16px; }
+@media (min-width: 760px) { .op-liste { grid-template-columns: 1fr 1fr; } }
+.op-carte { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: start; width: 100%; padding: 14px !important; border-radius: 18px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; box-shadow: 0 2px 8px rgba(19,32,26,.05); }
+.op-urgent { border: 2px solid #f28c28 !important; }
+.op-icone, .op-fiche-icone { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #e8f2ec; }
+.op-texte { display: grid; gap: 3px; min-width: 0; }
+.op-cat { font-size: 12px; font-weight: 700; color: #c25e0e; }
+.op-texte strong { font-size: 16px; line-height: 1.25; }
+.op-qui { font-size: 13px; color: #5b6b63; }
+.op-pied { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+.op-echeance { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; background: #e8f2ec; color: #0b5a3c; }
+.op-echeance-urgente { background: #f28c28; color: #fff; }
+.op-date { font-size: 12px; color: #8a9790; }
+.op-vide { padding: 14px; border-radius: 14px; background: #fff; border: 1px dashed #cfe0d5; color: #5b6b63; }
+.op-fampro { display: grid; gap: 6px; padding: 14px 16px; margin-bottom: 16px; border-radius: 16px; background: #fff4e8; border: 1px solid #fde0c2; }
+.op-fampro a { color: #0b5a3c; font-weight: 700; }
+.op-fiche-tete { display: grid; gap: 4px; justify-items: start; padding: 16px; margin-bottom: 12px; border-radius: 20px; background: linear-gradient(180deg, #e8f2ec, #fff); }
+.op-fiche-tete h2 { margin: 0; font-size: 21px; line-height: 1.2; }
+.op-fiche-org { margin: 0; font-weight: 700; color: #0b5a3c; }
+.op-image { width: 100%; max-height: 240px; object-fit: cover; border-radius: 16px; margin-bottom: 12px; }
+.op-infos { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; padding: 14px 16px; margin: 0 0 12px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; }
+.op-infos dt { color: #5b6b63; } .op-infos dd { margin: 0; font-weight: 700; }
+.op-bloc { padding: 14px 16px; margin-bottom: 12px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; }
+.op-bloc h3 { margin: 0 0 8px; font-size: 16px; } .op-bloc p { line-height: 1.5; white-space: pre-line; }
+.op-postuler { border: 2px solid #f28c28; background: #fff8f0; }
+.op-bouton { width: 100%; min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; }
+.op-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }
