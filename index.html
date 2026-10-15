@@ -293,7 +293,7 @@
     <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
     <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
-    <div class="market-demo"><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
+    <div class="market-demo" hidden><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
     <p id="market-message" role="status"></p>
     <div id="market-demo-interface" hidden>
     <div class="market-tabs" role="group" aria-label="Démonstration : suivi et espace professionnel">
@@ -422,19 +422,24 @@
 
   <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
     <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
-    <h2 id="titre-menu" tabindex="-1">Menu</h2><div class="portail-actions"><button onclick="KokiPortail.admin()">Tableau de bord des contenus</button></div>
+    <h2 id="titre-menu" tabindex="-1">Menu</h2>
     <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
       <button type="button" onclick="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Transport" onclick="afficherTransport()"><span>🚕 Transport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Commerces &amp; Services" onclick="afficherCommerce()"><span>🛍️ Commerces &amp; Services</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Éducation" onclick="KokiPortail.education()"><span>🎓 Éducation</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Emplois &amp; Opportunités" onclick="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Sport" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Santé" onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')"><span>🏥 Santé</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Événements" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Services publics" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
+      <p class="menu-sep">Informations</p>
       <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherCommerce()"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="KokiPortail.admin()"><span>🔐 Espace administration</span><span aria-hidden="true">›</span></button>
     </div>
     <article class="card" aria-labelledby="titre-a-propos">
       <h3 id="titre-a-propos">À propos de KOKI CONNECT</h3>
