@@ -27,7 +27,8 @@
       "develop/sports-asc": false,
       "develop/barre-activite": false,
       "develop/glisser-onglets": false,
-      "develop/corrections-bugs": false
+      "develop/corrections-bugs": false,
+      "develop/opportunites": false
     }
   }
 }
