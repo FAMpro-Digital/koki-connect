@@ -241,7 +241,7 @@
 <button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
 <button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
 <button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" onclick="KokiPortail.liste('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
-<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" onclick="KokiPortail.lieux('Services publics')"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
+<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
     </div>
     <div id="service-proche" style="margin-top:18px;"></div>
   </section>
@@ -254,7 +254,7 @@
 <section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Opportunités')">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
 <section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sport</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
 <section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
-<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
+<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
 <section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
@@ -431,6 +431,7 @@
       <button type="button" onclick="afficherCommerce()"><span>🏪 Commerces et services</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
@@ -499,6 +500,11 @@
         const v = S.decode(row);
         if (v && !v.archive && v.latitude !== null && v.longitude !== null)
           lieux.push({ id: 'sante-' + row.id, nom: row.titre, categorie: 'Santé', latitude: v.latitude, longitude: v.longitude, position: v.genre + (row.lieu ? ' · ' + row.lieu : ''), source: 'Koki Connect' });
+      }
+      if (window.KokiServiceContract) for (const row of rows) {
+        const v = KokiServiceContract.decodeService(row);
+        if (v && !v.archive && v.latitude !== null && v.longitude !== null)
+          lieux.push({ id: 'service-' + row.id, nom: row.titre, categorie: 'Services publics', latitude: v.latitude, longitude: v.longitude, position: v.genre + (row.lieu ? ' · ' + row.lieu : ''), source: 'Koki Connect' });
       }
       return lieux;
     }
@@ -734,6 +740,8 @@ function filtrerCarte() {
 <script src="assets/portail/opportunites.js"></script>
 <script src="assets/portail/evenement-contract.js"></script>
 <script src="assets/portail/evenements.js"></script>
+<script src="assets/portail/service-contract.js"></script>
+<script src="assets/portail/services-publics.js"></script>
 <script src="assets/portail/activite.js"></script>
 <script src="assets/portail/sante.js"></script>
 <script src="assets/portail/navigation.js"></script>

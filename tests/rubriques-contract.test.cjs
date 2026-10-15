@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const R=require('../assets/portail/rubriques-contract.js'),FICHIER='assets/portail/rubriques-contract.js';
 const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8');
 // Empreinte du contrat : identique dans les deux dépôts (admin : src/rubriques-contract.js).
-const EMPREINTE='5b067bb0d69d10d70bc2f06b0c98447942c47d20cd5faaf6d16290396e62115e';
+const EMPREINTE='86f8b6a30cf1980f2112b0a7e1009a2b6fb7dfaf677e718d7c44540613d5a718';
 test('contrat Rubriques : identique dans les deux dépôts',()=>{assert.equal(createHash('sha256').update(fs.readFileSync(FICHIER)).digest('hex'),EMPREINTE);});
 test('accueil : les 8 raccourcis suivent le contrat (ordre, nom, icône, couleur)',()=>{
  const tuiles=[...html.matchAll(/<button type="button" class="raccourci" data-recherche="([^"]+)" style="background:(#[0-9a-f]{6})"[^>]*><span aria-hidden="true">([^<]+)<\/span><strong>([^<]+)<\/strong>/g)].map(m=>({nom:m[1],couleur:m[2],icone:m[3],titre:m[4]}));
