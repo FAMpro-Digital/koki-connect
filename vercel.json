@@ -33,7 +33,8 @@
       "develop/services-publics": false,
       "develop/profil-simple": false,
       "develop/rubriques-uniques": false,
-      "develop/audit-corrections": false
+      "develop/audit-corrections": false,
+      "fix/profil-pro-styles": false
     }
   },
   "headers": [
