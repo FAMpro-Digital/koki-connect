@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 test('Profil : en-tête, raccourcis, espace pro replié, déconnexion en bas',()=>{
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),css=fs.readFileSync('assets/portail/fluidite.css','utf8');
- assert.match(rt,/host\.append\(tete,compte,raccourcis\(\),pro,fin\)/);
+ assert.match(rt,/host\.append\(tete,compte,liens,pro,fin\)/);
  for(const x of ['Mes commandes et courses','Mes favoris','Notifications','Aide et informations'])assert.match(rt,new RegExp(x));
  assert.match(rt,/connecte:\(box,u,qui\)=>entete\(tete,u,qui\),deconnexion:fin/);
  assert.match(rt,/const d=node\('details'\);d\.className='pro-replie';d\.open=!!t;/,'replié pour les clients, ouvert dès qu’une activité est choisie');

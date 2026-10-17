@@ -29,9 +29,9 @@ function choice(host,{legend,name,values,value}){
  host.append(fs);return {get value(){return fs.querySelector('input:checked')?.value||'';},set onchange(fn){for(const r of fs.querySelectorAll('input'))r.onchange=fn;}};
 }
 function badge(kind,statut,row){
- const locked=row?.payload?.moderation_lock===true;const b=node('span',locked?'Suspendu par l’administration':(['En attente','À valider'].includes(statut)?'En attente de validation':statut),'pro-badge pro-badge-'+(locked?'bloque':({'Actif':'ok','Disponible':'ok','À valider':'attente','En attente':'attente','Épuisé':'info','Indisponible':'info','Masqué':'info','Refusé':'alerte','Suspendu':'alerte','Fermé':'alerte','Archivé':'neutre'})[statut]||'neutre'));return b;
+ const pending=statut==='Masqué'&&row?.payload?.moderation?.decision==='pending_review';const locked=row?.payload?.moderation_lock===true;const b=node('span',pending?'En attente de validation':locked?'Suspendu par l’administration':(['En attente','À valider'].includes(statut)?'En attente de validation':statut),'pro-badge pro-badge-'+(locked?'bloque':({'Actif':'ok','Disponible':'ok','À valider':'attente','En attente':'attente','Épuisé':'info','Indisponible':'info','Masqué':'info','Refusé':'alerte','Suspendu':'alerte','Fermé':'alerte','Archivé':'neutre'})[statut]||'neutre'));return b;
 }
-function explanation(kind,row){const box=node('div',null,'pro-explain');box.append(node('p',row.payload?.moderation_lock?'Suspendu par l’administration : contactez Koki Connect pour le remettre en ligne.':C.explicationStatut(kind,row.statut)));const m=row.payload?.moderation;if(m?.note&&(['Refusé','Suspendu','Fermé','Archivé','Masqué'].includes(row.statut)||m.decision==='reject_changes'))box.append(node('p',(m.decision==='reject_changes'?'Modifications refusées. ':'')+'Motif indiqué : '+m.note,'pro-note'));
+function explanation(kind,row){const box=node('div',null,'pro-explain');box.append(node('p',row.statut==='Masqué'&&row.payload?.moderation?.decision==='pending_review'?'Produit envoyé à l’administration. Il sera visible après validation.':row.payload?.moderation_lock?'Suspendu par l’administration : contactez Koki Connect pour le remettre en ligne.':C.explicationStatut(kind,row.statut)));const m=row.payload?.moderation;if(m?.note&&(['Refusé','Suspendu','Fermé','Archivé','Masqué'].includes(row.statut)||m.decision==='reject_changes'))box.append(node('p',(m.decision==='reject_changes'?'Modifications refusées. ':'')+'Motif indiqué : '+m.note,'pro-note'));
  if(row.payload?.modification){const w=node('div',null,'pro-pending');w.append(node('strong','Modifications en attente de validation'),node('p','Votre fiche reste visible avec les informations déjà validées. Les changements de nom, d’activité, de numéros ou de photos seront publiés après validation.'));box.append(w);}return box;}
 function prixTexte(p){if(p.tarif==='devis')return 'Sur devis';return C.formaterPrix(p.prix);}
 
@@ -88,7 +88,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function frame(title){
   host.replaceChildren();const bar=node('div',null,'pro-bar');
   if(stack.length>1)bar.append(button('← Retour',back,{kind:'back'}));
-  else bar.append(button('← Retour au catalogue',()=>document.getElementById('business-catalogue')?.scrollIntoView({block:'start'}),{kind:'back'}));
+  else bar.append(button('← Retour à ma boutique',()=>{stack.length=1;render();},{kind:'back'}));
   const h=node('h3',title,'pro-title');h.tabIndex=-1;bar.append(h);host.append(bar,local);queueMicrotask(()=>{if(stack.length>1)h.focus({preventScroll:true});});
   const body=node('div',null,'pro-body');host.append(body);return body;
  }
@@ -97,7 +97,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function render(){const {view,params}=stack.at(-1);({accueil,fiche,boutiques,boutique:boutiqueForm,produits,produit:produitForm,services,service:serviceForm})[view](params||{});}
 
  function accueil(){
-  host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3','Espace professionnel','pro-title'));host.append(head,local);
+  host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3',state.boutiques.some(b=>b.statut!=='Archivé')?'Ma boutique':'Espace professionnel','pro-title'));host.append(head,local);
   if(state.profile)fin();
   if(!state.profile&&intention&&!intentionVue){intentionVue=true;open=true;queueMicrotask(()=>go('fiche',{profil:intention}));}
   const reprise=!state.profile&&brouillon?.lire();
@@ -111,11 +111,11 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const p=state.profile,card=node('article',null,'pro-card');
   const title=node('div',null,'pro-card-head');title.append(node('h4',p.payload.nom),badge('professionnels',p.statut,p));card.append(title,node('p',p.payload.type+(p.payload.village?' · '+p.payload.village:'')),explanation('professionnels',p));
   if(!['Suspendu','Archivé'].includes(p.statut))card.append(button('Modifier ma fiche',()=>go('fiche',{edit:true}),{kind:'secondary'}));
-  body.append(card);
+  if(!state.boutiques.some(b=>b.statut!=='Archivé'))body.append(card);else{const infos=node('details');infos.append(node('summary','Informations professionnelles'),card);body.append(infos);for(const boutique of state.boutiques.filter(b=>b.statut!=='Archivé'))body.append(listCard('boutiques',boutique,{details:[boutique.payload.adresse],actions:[]}));}
   const actif=p.statut==='Actif',menu=node('div',null,'pro-menu');
   const entry=(label,count,view,enabled,reason)=>{const b=button(label+' ('+count+')',()=>go(view),{kind:'tile'});if(!enabled){b.disabled=true;b.title=reason;}menu.append(b);};
   const wait='Disponible après la validation de votre fiche.';
-  if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',actif,wait);entry('Mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
+  if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',actif,wait);entry('Ajouter et gérer mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
   if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',actif,wait);
   body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
  }
@@ -238,7 +238,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const stock=input(f,{label:'Stock disponible',type:'number',value:p.stock??1,required:true,hint:'À 0, le produit s’affiche « Épuisé ».'});
   const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
   const photos=photosField(f,{existing:p.photos||(p.image_path?[p.image_path]:[]),api,upload,imageSelection,status});
-  const send=button(row?'Enregistrer le produit':'Publier le produit');body.append(send);
+  const send=button(row?'Enregistrer le produit':'Envoyer le produit pour validation');body.append(send);
   send.onclick=()=>guarded(send,async()=>{
    const num=el=>el.value.trim()===''?null:Number(el.value);
    const values={name:name.value.trim(),price:num(price),stock:num(stock)};if(num(old)!==null)values.old_price=num(old);
@@ -246,7 +246,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    if(category.value.trim())values.category=category.value.trim();if(description.value.trim())values.description=description.value.trim();
    values.photos=await photos.collect();if(shop)values.parent_id=shop.value;
    if(state.produits.some(x=>x.id!==row?.id&&x.statut!=='Archivé'&&x.parent_id===(row?.parent_id||shop?.value||shops[0]?.id)&&C.cleNom(x.payload.nom)===C.cleNom(values.name)))throw Error('Un produit porte déjà ce nom dans cette boutique.');
-   await api.saveProduct(values,row);await done(row?'Produit mis à jour.':'Produit publié dans le catalogue.');
+   const saved=await api.saveProduct(values,row);await done(saved.payload?.moderation?.decision==='pending_review'?'Produit envoyé : en attente de validation par l’administration.':row?'Produit mis à jour.':'Produit enregistré.');
   });
  }
 
