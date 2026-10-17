@@ -39,7 +39,7 @@ test('interface : aucun identifiant technique demandé, statuts expliqués, reto
  const ui=fs.readFileSync('assets/business/pro-space.mjs','utf8');
  const labels=[...ui.matchAll(/label:'([^']+)'/g)].map(m=>m[1]);assert.ok(labels.length>20);
  for(const l of labels)assert.doesNotMatch(l,/identifiant|\bid\b|uuid|référence technique/i,l);
- assert.match(ui,/history\.pushState/);assert.match(ui,/addEventListener\('popstate'/);assert.match(ui,/'← Retour'/);assert.match(ui,/Retour au catalogue/);
+ assert.match(ui,/history\.pushState/);assert.match(ui,/addEventListener\('popstate'/);assert.match(ui,/'← Retour'/);assert.match(ui,/Retour à ma boutique/);
  assert.match(ui,/C\.explicationStatut/);assert.match(ui,/Étape '\+\(step\+1\)\+' sur '\+total/);
  const C=require('../assets/business/commerce-contract.js');
  for(const kind of Object.keys(C.statuts))for(const s of C.statuts[kind])assert.ok(C.explicationStatut(kind,s).length>10,kind+' '+s);

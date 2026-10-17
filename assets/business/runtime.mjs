@@ -91,7 +91,7 @@ async function activite(){
 }
 window.KokiBusiness={show,catalogueRecherche,ouvrirFiche,activite,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
-if(new URLSearchParams(location.search).get('koki-recovery')==='1')queueMicrotask(()=>window.KokiCommerce?.afficher());
+// Les retours de récupération sont ouverts dans Profil par retourDeLien().
 
 // ——— Parcours d'inscription professionnelle ———
 // Le type choisi (commerçant, prestataire, chauffeur) vient du lien de confirmation ou de cet appareil. Au retour du lien,
@@ -145,6 +145,7 @@ async function espacePro(host,connected){
  if(commerce){const s=node('section');host.append(s);await proSpace(s,api,status,{upload,imageSelection,...parcoursPro('commerce')});}
  if(transport){const s=node('section');s.className='business-panel';host.append(s);await professional(s,api,'transport',status,{upload,...parcoursPro('transport')});}
  if(!commerce&&!transport){choixActivite(replie(host,t),t,'Choisissez votre activité pour créer votre fiche professionnelle.');return;}
+ if(fiches.some(f=>['Commerçant','Les deux'].includes(f.payload?.type)))return;
  const autre=node('details');autre.className='pro-autre';autre.append(node('summary','Ajouter une autre activité'));choixActivite(autre,t,'Choisissez l’activité à ajouter :');host.append(autre);
 }
 // Profil façon application : en-tête (compte), raccourcis, compte / connexion, espace professionnel, déconnexion.
@@ -166,9 +167,9 @@ async function espaceProfil(host){
  const tete=node('section');tete.className='pf-tete';entete(tete,null);
  const compte=node('section');compte.id='profil-compte';compte.className='business-panel profil-compte';const titre=node('h3','Se connecter');compte.append(titre);
  const pro=node('section');pro.id='profil-pro';pro.className='profil-pro';const fin=node('div');fin.className='pf-fin';
- host.append(tete,compte,raccourcis(),pro,fin);
+ const liens=raccourcis();host.append(tete,compte,liens,pro,fin);
  const service=modules.commerce?apiDe('commerce'):apiDe('transport');
- accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);try{await espacePro(pro,connected&&service.enabled);}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
+ accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);tete.hidden=false;liens.hidden=false;host.classList.remove('profil-boutique');try{await espacePro(pro,connected&&service.enabled);if(connected&&modules.commerce){const boutiques=await api.mine('boutiques');const marchand=boutiques.some(b=>b.statut!=='Archivé');tete.hidden=marchand;liens.hidden=marchand;host.classList.toggle('profil-boutique',marchand);}}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
   connecte:(box,u,qui)=>entete(tete,u,qui),deconnexion:fin});
  // Avant connexion (ou service en préparation), le choix d'activité est déjà proposé.
  if(!api?.user)await espacePro(pro,false);
@@ -182,7 +183,7 @@ window.KokiPro=Object.freeze({types:Pro.TYPES,choix:()=>Pro.lire(proStorage()),m
  if(auth.erreur)erreurLien=Pro.messageLien(auth.erreur);
  // Nettoyage de l'adresse : paramètre du parcours retiré ; fragment d'erreur retiré ; les jetons de session restent pour Supabase.
  try{if(type||auth.erreur){const u=new URL(href);u.searchParams.delete('koki-pro');if(auth.erreur)u.hash='';window.history.replaceState(window.history.state,'',u.pathname+u.search+u.hash);}}catch{}
- if(!type&&!auth.session&&!auth.erreur)return;
+ if(!type&&!auth.session&&!auth.erreur&&new URLSearchParams(location.search).get('koki-recovery')!=='1')return;
  queueMicrotask(async()=>{
   const choix=Pro.lire(proStorage());
   try{await initialise();}catch{}
