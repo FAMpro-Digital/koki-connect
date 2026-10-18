@@ -21,7 +21,7 @@ export function messageInscription(error){const code=String(error?.code||''),sta
 export function lienRetour(retour){try{const url=new URL(retour||location.origin+location.pathname,location.href);if(url.origin!==location.origin)return null;if(!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))return null;url.hash='';return url.href;}catch{return null;}}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
 export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{}}={}){
- let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}});
+ let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
  let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
  const scope=()=>`koki.business.pending.${user?.id}`;
@@ -37,6 +37,15 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  return {subscribe(listener){listeners.add(listener);return ()=>listeners.delete(listener);},get enabled(){return enabled&&!!db;},get busy(){return busy;},get user(){return user;},get recovering(){return recovering;},identity,run,
  async recover(email,redirect){requireReady();const url=new URL(redirect);if(url.origin!==location.origin||!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))throw Error('Lien de récupération invalide.');const {error}=await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:url.href});if(error)throw Error('Envoi indisponible. Patientez avant de réessayer.');},
  async changePassword(password){requireReady();await identity();if(password.length<12)throw Error('Choisissez au moins 12 caractères.');const {error}=await db.auth.updateUser({password});if(error)throw Error('Modification refusée. Vérifiez votre session et la double authentification si elle est activée.');recovering=false;},
+ async sendEmailLink(email,{retour}={}){
+  requireReady();const address=String(email||'').trim(),to=lienRetour(retour);
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))throw Error('Vérifiez votre adresse e-mail.');
+  if(!to)throw Error('Lien de retour invalide.');
+  const {error}=await db.auth.signInWithOtp({email:address,options:{shouldCreateUser:true,emailRedirectTo:to}});
+  if(error){if(HORS_LIGNE.test(String(error.message||'')))throw Error(MESSAGE_HORS_LIGNE);
+   if(error.status===429||/rate_limit/.test(error.code||''))throw Error('Trop de demandes. Patientez une minute avant de demander un nouveau lien.');
+   throw Error('Impossible d’envoyer le lien de connexion. Vérifiez votre adresse ou réessayez plus tard.');}
+ },
  async login(email,password){requireReady();const {error}=await db.auth.signInWithPassword({email:email.trim(),password});if(error)throw Error('Connexion refusée. Vérifiez vos identifiants.');return identity();},
  async sendCode(phone){requireReady();const number=normalizePhone(phone);const {error}=await db.auth.signInWithOtp({phone:number,options:{shouldCreateUser:true,channel:'sms'}});if(error)throw Error(error.status===429||/rate|second/i.test(error.message||'')?'Trop de demandes. Patientez avant de redemander un code.':'Envoi du code impossible. Vérifiez le numéro et réessayez.');return number;},
  async verifyCode(phone,code){requireReady();const number=normalizePhone(phone);const token=String(code??'').replace(/\s/g,'');if(!/^\d{6}$/.test(token))throw Error('Saisissez le code à 6 chiffres reçu par SMS.');const {error}=await db.auth.verifyOtp({phone:number,token,type:'sms'});if(error)throw Error('Code invalide ou expiré. Redemandez un code.');return identity();},
