@@ -13,10 +13,35 @@ export function retries(host,api,status,onSuccess=()=>{}){const box=node('div');
 export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=>undefined,erreurLien='',connecte=null,deconnexion=null}={}){
  const status=node('p');status.setAttribute('role','status');host.append(status);
  if(!api.enabled){status.textContent='Service connecté en préparation. Les migrations doivent être validées et activées sur un environnement isolé.';return status;}
- const box=node('div');host.append(box);let courriel='';if(erreurLien)status.textContent=erreurLien;
+ const box=node('div');host.append(box);let courriel='',vue='connexion';if(erreurLien)status.textContent=erreurLien;
  async function render(){box.replaceChildren();deconnexion?.replaceChildren();if(api.recovering||new URLSearchParams(location.search).get('koki-recovery')==='1'){const reset=form(box,'Définir votre mot de passe client',[['password','Nouveau mot de passe','password'],['confirm','Confirmer le mot de passe','password']],async x=>{if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');try{await api.changePassword(x.password.value);}finally{x.password.value='';x.confirm.value='';}const url=new URL(location.href);url.searchParams.delete('koki-recovery');window.history.replaceState(null,'',url.pathname+url.search);status.textContent='Mot de passe mis à jour.';await render();},status);reset.inputs.password.autocomplete='new-password';reset.inputs.confirm.autocomplete='new-password';return;}let u=null;try{u=await api.identity();}catch{}
  if(u){const qui=u.email||globalThis.KokiCommerceContract?.afficherTelephone('+'+String(u.phone||'').replace(/^\+/,''))||u.phone;if(connecte)connecte(box,u,qui);else box.append(node('p','Connecté : '+qui));const sortie=action(deconnexion||box,'Déconnexion de cet appareil',async()=>{await api.logout();await render();await onConnected(false);},status);sortie.classList?.add('pf-deconnexion');try{await onConnected(true);}catch(e){status.textContent=e.message;}return;}
  const choix=intention();
+ if(choix){
+  box.append(node('p','Espace '+choix+' : compte avec adresse e-mail et mot de passe.'));
+  const changer=next=>{courriel=box.querySelector?.('input[type=email]')?.value||courriel;vue=next;status.textContent='';return render();};
+  if(vue==='inscription'){
+   const f=form(box,'Créer mon compte professionnel',[['email','Adresse e-mail','email',courriel],['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
+    if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
+    courriel=x.email.value.trim();try{await api.signup(courriel,x.password.value,{retour:retour(),professional:true});}finally{x.password.value='';x.confirm.value='';}
+    vue='connexion';await render();status.textContent='Compte créé : confirmez votre adresse avec le lien reçu par e-mail, puis connectez-vous avec votre mot de passe.';
+   },status);f.f.dataset.vue='inscription';f.inputs.password.minLength=12;f.inputs.confirm.minLength=12;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Créer mon compte professionnel';
+  }else if(vue==='oubli'||vue==='renvoi'){
+   const f=form(box,vue==='oubli'?'Réinitialiser mon mot de passe':'Recevoir un nouveau lien de confirmation',[['email','Adresse e-mail','email',courriel]],async x=>{
+    courriel=x.email.value.trim();if(vue==='oubli'){const u=new URL(retour()||location.href);u.searchParams.set('koki-recovery','1');await api.recover(courriel,u.href);}else await api.resendConfirmation(courriel,{retour:retour()});
+    status.textContent='Consultez votre boîte e-mail et vos spams pour continuer.';
+   },status);f.f.dataset.vue=vue;f.b.textContent='Envoyer le lien';
+  }else{
+   const f=form(box,'Connexion professionnelle',[['email','Adresse e-mail','email',courriel],['password','Mot de passe','password']],async x=>{
+    courriel=x.email.value.trim();try{await api.login(courriel,x.password.value);}finally{x.password.value='';}await render();
+   },status);f.f.dataset.vue='connexion-pro';f.inputs.password.autocomplete='current-password';f.b.textContent='Se connecter';
+   action(box,'Créer mon compte professionnel',()=>changer('inscription'),status);
+   action(box,'Mot de passe oublié',()=>changer('oubli'),status);
+   action(box,'Recevoir un nouveau lien de confirmation',()=>changer('renvoi'),status);
+  }
+  if(vue!=='connexion')action(box,'Retour à la connexion',()=>changer('connexion'),status);
+  return;
+ }
  box.append(node('p',choix?'Confirmez votre adresse e-mail pour accéder à votre fiche '+choix+'.':'Créez votre compte ou reconnectez-vous avec votre adresse e-mail, sans mot de passe.'));
  const fields=form(box,'Continuer avec mon adresse e-mail',[['email','Adresse e-mail','email',courriel]],async x=>{
   courriel=x.email.value.trim();await api.sendEmailLink(courriel,{retour:retour()});
