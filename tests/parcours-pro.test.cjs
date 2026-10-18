@@ -53,7 +53,7 @@ test('Profil : compte et fiches professionnelles regroupés ; rubriques réserv�
  for(const nom of ['commerce','transport']){const c=corps(nom);assert.doesNotMatch(c,/proSpace\(|professional\(/,nom+' : pas de fiche professionnelle dans la rubrique');assert.match(c,/lienProfil\(/,nom+' : lien vers Profil');assert.match(c,/history\(/,nom+' : suivi conservé dans la rubrique');}
  // Connexion sur place dans les rubriques (panneau repliable), ouverte avant une commande ou une demande.
  assert.match(rt,/const status=connexionSurPlace\(account,module,/);assert.match(rt,/d\.id='connexion-'\+module/);
- assert.match(rt,/async function requestService\(p,area\)\{try\{await api\.identity\(\);\}catch\{ouvrirConnexion\('commerce'\)/);
+ assert.match(rt,/async function requestService\(p,area\)\{await requireClientAccount\(api,\(\)=>ouvrirConnexion\('commerce'\)\)/);
  // Profil : « Mon compte » puis « Mon espace professionnel » (fiche commerce/services et inscription chauffeur).
  const ep=rt.slice(rt.indexOf('async function espacePro('),rt.indexOf('async function espaceProfil('));
  assert.match(ep,/proSpace\(s,api,status,\{upload,imageSelection,\.\.\.parcoursPro\('commerce'\)\}\)/);
