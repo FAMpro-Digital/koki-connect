@@ -20,3 +20,18 @@ test('inscription réussie : e-mail nettoyé et lien de confirmation vers la pag
  globalThis.location={origin:'http://exemple.test',pathname:'/'};const d2=db({error:null});await createBusinessClient(d2,{enabled:true}).signup('a@b.sn','motdepasse-solide');
  assert.deepEqual(d2.appels[0].options,{},'aucune redirection non chiffrée hors poste local');
 });
+
+test('professionnel : mot de passe minimum et marqueur de parcours sans rôle',async()=>{
+ globalThis.location={origin:'https://koki-connect.vercel.app',pathname:'/'};
+ const {createBusinessClient}=await charger();const d=db({error:null});const api=createBusinessClient(d,{enabled:true});
+ await assert.rejects(api.signup('pro@exemple.sn','court',{professional:true}),/12 caractères/);assert.equal(d.appels.length,0);
+ await api.signup('pro@exemple.sn','motdepasse-solide',{professional:true});
+ assert.deepEqual(d.appels[0].options.data,{professional_password_set:true});
+});
+test('client devenant professionnel : mot de passe enregistré et identité actualisée',async()=>{
+ const {createBusinessClient}=await charger();let user={id:'u',user_metadata:{}},saved;
+ const api=createBusinessClient({auth:{getUser:async()=>({data:{user}}),updateUser:async x=>{saved=x;user={...user,user_metadata:x.data};return {error:null};}}},{enabled:true});
+ await assert.rejects(api.setProfessionalPassword('court'),/12 caractères/);
+ await api.setProfessionalPassword('motdepasse-solide');
+ assert.equal(saved.password,'motdepasse-solide');assert.equal(api.user.user_metadata.professional_password_set,true);
+});

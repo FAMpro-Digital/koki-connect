@@ -136,11 +136,19 @@ async function espacePro(host,connected){
  const t=Pro.lire(proStorage());
  if(!connected){
   const d=replie(host,t);
-  choixActivite(d,t,t?'Activité choisie : '+Pro.TYPES[t].label+'. Connectez-vous ci-dessus avec votre numéro : votre fiche s’ouvrira ensuite ici.':'Choisissez votre activité, puis connectez-vous ci-dessus. Votre fiche sera vérifiée par l’administration avant publication.');
-  if(t)action(d,'Annuler ce choix',async()=>{Pro.effacer(proStorage());await espacePro(host,false);},status);
+  choixActivite(d,t,t?'Activité choisie : '+Pro.TYPES[t].label+'. Connectez-vous ci-dessus avec votre adresse e-mail et votre mot de passe : votre fiche s’ouvrira ensuite ici.':'Choisissez votre activité, puis connectez-vous ci-dessus. Votre fiche sera vérifiée par l’administration avant publication.');
+  if(t)action(d,'Annuler ce choix',async()=>{Pro.effacer(proStorage());await versProfil();},status);
   return;
  }
  const [fiches,chauffeurs]=await Promise.all([modules.commerce?api.mine('professionnels'):[],modules.transport?api.mine('chauffeurs'):[]]);
+ // Un client déjà connecté doit aussi définir un mot de passe avant sa première fiche professionnelle.
+ // Ce marqueur facilite le parcours ; il ne confère aucun rôle ni aucune autorisation.
+ if((t||fiches.length||chauffeurs.length)&&!api.user?.user_metadata?.professional_password_set){
+  const f=form(host,'Définir mon mot de passe professionnel',[['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
+   if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
+   try{await api.setProfessionalPassword(x.password.value);}finally{x.password.value='';x.confirm.value='';}await espacePro(host,true);
+  },status);f.inputs.password.minLength=12;f.inputs.confirm.minLength=12;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Enregistrer mon mot de passe';return;
+ }
  const commerce=modules.commerce&&(fiches.length>0||t==='commercant'||t==='prestataire'),transport=modules.transport&&(chauffeurs.length>0||t==='chauffeur');
  if(commerce){const s=node('section');host.append(s);await proSpace(s,api,status,{upload,imageSelection,...parcoursPro('commerce')});}
  if(transport){const s=node('section');s.className='business-panel';host.append(s);await professional(s,api,'transport',status,{upload,...parcoursPro('transport')});}
@@ -157,7 +165,7 @@ function raccourcis(){
 }
 function entete(tete,u,qui){
  tete.replaceChildren();const a=nc('span',u?String(qui||'K').replace(/^\+?221\s?/,'').trim().charAt(0).toUpperCase()||'K':'👤','pf-avatar');
- const t=nc('div','','pf-tete-texte');t.append(node('strong',u?qui:'Bienvenue sur Koki Connect'),node('span',u?'Compte connecté sur cet appareil':'Connectez-vous avec votre numéro pour commander, réserver une course et suivre vos demandes.'));
+ const t=nc('div','','pf-tete-texte');t.append(node('strong',u?qui:'Bienvenue sur Koki Connect'),node('span',u?'Compte connecté sur cet appareil':'Connectez-vous avec votre adresse e-mail et votre mot de passe pour commander, réserver une course et suivre vos demandes.'));
  tete.append(a,t);tete.classList.toggle('pf-tete-connecte',!!u);
 }
 async function espaceProfil(host){

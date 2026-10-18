@@ -37,7 +37,7 @@ test('câblage : profil, inscription, retour du lien, renvoi, brouillons, statut
  assert.match(rt,/pro-choix-carte/);assert.match(rt,/window\.KokiPro\.choisir\(type\)/);assert.match(portail,/await P\.monter\(zone\)/);
  assert.match(rt,/window\.history\.replaceState/,'« history » est aussi le nom d’une fonction importée : toujours window.history');assert.doesNotMatch(rt,/[^.]history\.replaceState/);
  assert.match(rt,/function retourDeLien/);assert.match(rt,/window\.KokiPortail\.profil\(\)/,'sans type : les trois catégories');
- assert.match(ui,/vue==='renvoi'/);assert.match(cl,/db\.auth\.resend\(\{type:'signup'/);assert.match(cl,/emailRedirectTo=to/);
+ assert.match(ui,/Recevoir un nouveau lien/);assert.match(cl,/db\.auth\.resend\(\{type:'signup'/);assert.match(cl,/emailRedirectTo=to/);
  assert.match(pro,/'En attente de validation'/);assert.match(pro,/Enregistrer le brouillon/);assert.match(pro,/Reprendre ma fiche \(brouillon\)/);
  assert.match(pro,/\}\);nav\.append\(send\);\}\n {3}if\(!edit&&brouillon\)/,'le brouillon ne remplace jamais le bouton d’envoi');
 });

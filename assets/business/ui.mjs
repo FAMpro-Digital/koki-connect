@@ -13,53 +13,46 @@ export function retries(host,api,status,onSuccess=()=>{}){const box=node('div');
 export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=>undefined,erreurLien='',connecte=null,deconnexion=null}={}){
  const status=node('p');status.setAttribute('role','status');host.append(status);
  if(!api.enabled){status.textContent='Service connecté en préparation. Les migrations doivent être validées et activées sur un environnement isolé.';return status;}
- const box=node('div');host.append(box);let vue=erreurLien?'renvoi':'connexion',courriel='';if(erreurLien)status.textContent=erreurLien;
- // Bouton de navigation entre les vues : ne déclenche aucune validation (type=button, hors de tout formulaire).
- const aller=(label,cible,email,dans=box)=>{const b=node('button',label);b.type='button';b.dataset.vue=cible;b.onclick=()=>{courriel=email?.value.trim()||courriel;vue=cible;if(cible!=='connexion')status.textContent='';render().catch(e=>{status.textContent=e.message;});};dans.append(b);return b;};
+ const box=node('div');host.append(box);let courriel='',vue='connexion';if(erreurLien)status.textContent=erreurLien;
  async function render(){box.replaceChildren();deconnexion?.replaceChildren();if(api.recovering||new URLSearchParams(location.search).get('koki-recovery')==='1'){const reset=form(box,'Définir votre mot de passe client',[['password','Nouveau mot de passe','password'],['confirm','Confirmer le mot de passe','password']],async x=>{if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');try{await api.changePassword(x.password.value);}finally{x.password.value='';x.confirm.value='';}const url=new URL(location.href);url.searchParams.delete('koki-recovery');window.history.replaceState(null,'',url.pathname+url.search);status.textContent='Mot de passe mis à jour.';await render();},status);reset.inputs.password.autocomplete='new-password';reset.inputs.confirm.autocomplete='new-password';return;}let u=null;try{u=await api.identity();}catch{}
  if(u){const qui=u.email||globalThis.KokiCommerceContract?.afficherTelephone('+'+String(u.phone||'').replace(/^\+/,''))||u.phone;if(connecte)connecte(box,u,qui);else box.append(node('p','Connecté : '+qui));const sortie=action(deconnexion||box,'Déconnexion de cet appareil',async()=>{await api.logout();await render();await onConnected(false);},status);sortie.classList?.add('pf-deconnexion');try{await onConnected(true);}catch(e){status.textContent=e.message;}return;}
- // Trois vues distinctes : connexion, inscription, mot de passe oublié. Chaque bouton valide UNIQUEMENT son propre formulaire :
- // « Créer mon compte » et « Mot de passe oublié » ouvrent leur formulaire au lieu de valider les champs de connexion.
- if(vue==='inscription'){
-  const choix=intention();box.append(node('p',choix?'Inscription en tant que '+choix+' : après la confirmation de votre e-mail, vous arriverez directement sur votre fiche.':'Créez votre compte client avec votre adresse e-mail. Un e-mail de confirmation vous sera envoyé.'));
-  const inscription=form(box,'Créer mon compte',[['email','Adresse e-mail','email',courriel],['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{courriel=x.email.value.trim();
-   if(x.password.value.length<12)throw Error('Choisissez un mot de passe de 12 caractères minimum.');
-   if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
-   try{await api.signup(courriel,x.password.value,{retour:retour()});}finally{x.password.value='';x.confirm.value='';}
-   status.textContent='Compte créé : consultez votre e-mail pour confirmer votre inscription, puis connectez-vous.';vue='connexion';await render();},status);
-  inscription.f.dataset.vue='inscription';inscription.inputs.email.autocomplete='email';inscription.inputs.password.autocomplete='new-password';inscription.inputs.confirm.autocomplete='new-password';inscription.inputs.password.minLength=12;inscription.inputs.confirm.minLength=12;inscription.b.textContent='Créer mon compte';
-  aller('J’ai déjà un compte : me connecter','connexion',inscription.inputs.email);
+ const choix=intention();
+ if(choix){
+  box.append(node('p','Espace '+choix+' : compte avec adresse e-mail et mot de passe.'));
+  const changer=next=>{courriel=box.querySelector?.('input[type=email]')?.value||courriel;vue=next;status.textContent='';return render();};
+  if(vue==='inscription'){
+   const f=form(box,'Créer mon compte professionnel',[['email','Adresse e-mail','email',courriel],['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
+    if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
+    courriel=x.email.value.trim();try{await api.signup(courriel,x.password.value,{retour:retour(),professional:true});}finally{x.password.value='';x.confirm.value='';}
+    vue='connexion';await render();status.textContent='Compte créé : confirmez votre adresse avec le lien reçu par e-mail, puis connectez-vous avec votre mot de passe.';
+   },status);f.f.dataset.vue='inscription';f.inputs.password.minLength=12;f.inputs.confirm.minLength=12;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Créer mon compte professionnel';
+  }else if(vue==='oubli'||vue==='renvoi'){
+   const f=form(box,vue==='oubli'?'Réinitialiser mon mot de passe':'Recevoir un nouveau lien de confirmation',[['email','Adresse e-mail','email',courriel]],async x=>{
+    courriel=x.email.value.trim();if(vue==='oubli'){const u=new URL(retour()||location.href);u.searchParams.set('koki-recovery','1');await api.recover(courriel,u.href);}else await api.resendConfirmation(courriel,{retour:retour()});
+    status.textContent='Consultez votre boîte e-mail et vos spams pour continuer.';
+   },status);f.f.dataset.vue=vue;f.b.textContent='Envoyer le lien';
+  }else{
+   const f=form(box,'Connexion professionnelle',[['email','Adresse e-mail','email',courriel],['password','Mot de passe','password']],async x=>{
+    courriel=x.email.value.trim();try{await api.login(courriel,x.password.value);}finally{x.password.value='';}await render();
+   },status);f.f.dataset.vue='connexion-pro';f.inputs.password.autocomplete='current-password';f.b.textContent='Se connecter';
+   action(box,'Créer mon compte professionnel',()=>changer('inscription'),status);
+   action(box,'Mot de passe oublié',()=>changer('oubli'),status);
+   action(box,'Recevoir un nouveau lien de confirmation',()=>changer('renvoi'),status);
+  }
+  if(vue!=='connexion')action(box,'Retour à la connexion',()=>changer('connexion'),status);
   return;
  }
- if(vue==='oubli'){
-  const oubli=form(box,'Mot de passe oublié',[['email','Adresse e-mail du compte','email',courriel]],async x=>{courriel=x.email.value.trim();const url=new URL(location.origin+location.pathname);url.searchParams.set('koki-recovery','1');await api.recover(courriel,url.href);status.textContent='Si cette adresse possède un compte, un lien de récupération lui sera envoyé.';},status);
-  oubli.f.dataset.vue='oubli';oubli.inputs.email.autocomplete='email';oubli.b.textContent='Recevoir le lien de récupération';
-  aller('Retour à la connexion','connexion',oubli.inputs.email);
-  return;
+ box.append(node('p',choix?'Confirmez votre adresse e-mail pour accéder à votre fiche '+choix+'.':'Créez votre compte ou reconnectez-vous avec votre adresse e-mail, sans mot de passe.'));
+ const fields=form(box,'Continuer avec mon adresse e-mail',[['email','Adresse e-mail','email',courriel]],async x=>{
+  courriel=x.email.value.trim();await api.sendEmailLink(courriel,{retour:retour()});
+  status.textContent='Consultez votre boîte e-mail et vos spams. Cliquez sur le dernier lien reçu pour confirmer votre adresse et accéder à votre compte. Aucun mot de passe à saisir.';
+  fields.b.textContent='Recevoir un nouveau lien';
+ },status);
+ fields.f.dataset.vue='connexion';fields.inputs.email.autocomplete='email';fields.b.textContent='Recevoir mon lien de connexion';
+ box.append(node('p','Première visite ? Votre compte sera accessible après confirmation. À chaque nouvelle connexion, demandez un nouveau lien avec la même adresse e-mail.'));
+
  }
- // Lien de confirmation expiré ou perdu : nouvel e-mail (même lien de retour, donc même formulaire à l'arrivée).
- if(vue==='renvoi'){
-  const renvoi=form(box,'Recevoir un nouvel e-mail de confirmation',[['email','Adresse e-mail utilisée à l’inscription','email',courriel]],async x=>{courriel=x.email.value.trim();await api.resendConfirmation(courriel,{retour:retour()});status.textContent='Si cette adresse attend une confirmation, un nouvel e-mail vient de lui être envoyé. Ouvrez le lien le plus récent.';},status);
-  renvoi.f.dataset.vue='renvoi';renvoi.inputs.email.autocomplete='email';renvoi.b.textContent='Renvoyer l’e-mail de confirmation';
-  aller('Retour à la connexion','connexion',renvoi.inputs.email);
-  return;
- }
- // Connexion en une étape : numéro de téléphone puis code SMS (le compte est créé au premier code).
- // L'e-mail (connexion, mot de passe oublié, confirmation, inscription) reste disponible, replié.
- const codeBox=node('div');
- const sms=form(box,'Se connecter avec mon numéro',[['phone','Numéro de téléphone (ex. 77 123 45 67)','tel']],async x=>{const number=await api.sendCode(x.phone.value);status.textContent='Code envoyé par SMS au '+number+'.';codeBox.replaceChildren();const c=form(codeBox,'Code reçu par SMS',[['code','Code à 6 chiffres','text']],async y=>{try{await api.verifyCode(number,y.code.value);}finally{y.code.value='';}await render();},status);c.inputs.code.autocomplete='one-time-code';c.inputs.code.inputMode='numeric';c.inputs.code.maxLength=8;c.b.textContent='Valider le code';c.f.classList?.add('connexion-code');c.inputs.code.focus?.();},status);
- sms.inputs.phone.autocomplete='tel';sms.inputs.phone.inputMode='tel';sms.b.textContent='Recevoir mon code par SMS';sms.f.dataset.vue='sms';sms.f.classList?.add('connexion-sms');
- sms.f.append(node('p','Pas de mot de passe à retenir. Nouveau sur Koki Connect ? Votre compte est créé avec votre premier code.'));box.append(codeBox);
- const autre=node('details');autre.className='connexion-email';autre.append(node('summary','Utiliser une adresse e-mail'));if(courriel)autre.open=true;box.append(autre);
- const fields=form(autre,'Connexion par e-mail',[['email','Adresse e-mail','email',courriel],['password','Mot de passe','password']],async x=>{courriel=x.email.value.trim();try{await api.login(courriel,x.password.value);}finally{x.password.value='';}await render();},status);
- fields.f.dataset.vue='connexion';fields.inputs.password.autocomplete='current-password';fields.inputs.email.autocomplete='username';fields.b.textContent='Se connecter';
- // Navigation seulement : aucun contrôle des champs de connexion.
- const liens=node('div');liens.className='connexion-liens';autre.append(liens);
- aller('Mot de passe oublié','oubli',fields.inputs.email,liens);
- aller('E-mail de confirmation non reçu ou expiré','renvoi',fields.inputs.email,liens);
- aller('Créer mon compte','inscription',fields.inputs.email,liens);
- }
- const stop=api.subscribe?.(event=>{if(!host.isConnected){stop?.();return;}if(event.state==='recovery')render().catch(e=>status.textContent=e.message);});render().catch(e=>{status.textContent=e.message;});return status;
+ const stop=api.subscribe?.(event=>{if(!host.isConnected){stop?.();return;}if(['recovery','signed-in'].includes(event.state))render().catch(e=>status.textContent=e.message);});render().catch(e=>{status.textContent=e.message;});return status;
 }
 export async function history(host,api,kind,status,{ownedIds=[],admin=false,query='',filter='Tous',observe}={}){host.replaceChildren();const all=await api.history(kind);observe?.(all);host.append(node('p','Suivi actualisé à '+new Date().toLocaleTimeString('fr-FR')+' · '+all.length+' opération(s) chargée(s).'));const rows=filterBusinessRows(all,query,filter);if(!rows.length)host.append(node('p',all.length?'Aucune opération ne correspond aux filtres.':'Aucune opération enregistrée.'));for(const row of rows){const c=node('article');c.className='business-card';c.append(node('h4',(row.payload.nom||kind)+' · '+row.statut),node('p','Référence : '+row.id.slice(0,8)),node('p',new Date(row.created_at).toLocaleString('fr-FR')));const steps=statusSteps(row),timeline=node('ol');timeline.className='business-timeline';for(const step of steps){const li=node('li',step);if(step===row.statut)li.setAttribute('aria-current','step');timeline.append(li);}c.append(timeline);if(row.payload.depart&&row.payload.destination)c.append(node('p','Départ : '+[row.payload.depart.latitude,row.payload.depart.longitude].join(', ')+' → Destination : '+[row.payload.destination.latitude,row.payload.destination.longitude].join(', ')));
  for(const key of ['total','fare_fcfa','tarif','distance','categorie','date','besoin','lieu','adresse','quote_fcfa','quote_text'])if(row.payload[key]!=null)c.append(node('p',({total:'Total FCFA',fare_fcfa:'Estimation FCFA',tarif:'Tarif FCFA',distance:'Distance indicative km',categorie:'Véhicule',date:'Date souhaitée',besoin:'Besoin',lieu:'Lieu',adresse:'Adresse',quote_fcfa:'Devis FCFA',quote_text:'Proposition'})[key]+' : '+row.payload[key]));const own=ownedIds.includes(row.provider_id)||ownedIds.includes(row.driver_id);const next=nextStatus(row);const refaire=()=>history(host,api,kind,status,{ownedIds,admin,query,filter,observe});

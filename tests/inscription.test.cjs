@@ -1,5 +1,3 @@
-// Non-régression : « Créer mon compte » et « Mot de passe oublié » ouvrent leur propre formulaire
-// et ne valident jamais les champs de connexion (bug « Veuillez renseigner ce champ »).
 const test=require('node:test'),assert=require('node:assert/strict');
 class El{
  constructor(tag){this.tagName=tag.toUpperCase();this.children=[];this.attributes={};this.dataset={};this.value='';this.required=false;this.minLength=-1;this.type='';this.validations=0;}
@@ -26,52 +24,55 @@ const champ=(f,label)=>[...f.descendants()].find(e=>e.attributes['aria-label']==
 const envoyer=async f=>{await f.onsubmit({preventDefault(){}});await tick();};
 function fauxApi(){const appels=[];return {appels,enabled:true,pending:()=>[],subscribe:()=>()=>{},
  identity:async()=>{throw Error('Connectez-vous');},login:async(e,p)=>{appels.push(['login',e,p]);throw Error('Connexion refusée. Vérifiez vos identifiants.');},
- signup:async(e,p)=>{appels.push(['signup',e,p]);},recover:async(e,u)=>{appels.push(['recover',e,u]);},sendCode:async()=>'+221770000000'};}
+ sendEmailLink:async(e,o)=>{appels.push(['email',e,o]);},signup:async(e,p)=>{appels.push(['signup',e,p]);},recover:async(e,u)=>{appels.push(['recover',e,u]);},sendCode:async()=>'+221770000000'};}
 async function monter(){const api=fauxApi();const {host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');const status=accountPanel(host,api,async()=>{});await tick();return {api,host,status};}
 
-test('« Créer mon compte » ouvre le formulaire d’inscription sans valider la connexion',async()=>{
- const {api,host}=await monter();const connexion=formulaire(host,'connexion');assert.ok(connexion,'formulaire de connexion affiché');
- const b=bouton(host,'Créer mon compte');assert.equal(b.type,'button','pas un bouton d’envoi');assert.ok(![...connexion.descendants()].includes(b),'hors du formulaire de connexion');
- b.onclick();await tick();
- assert.equal(connexion.validations,0,'aucun « Veuillez renseigner ce champ » sur la connexion');
- assert.ok(formulaire(host,'inscription'),'formulaire d’inscription ouvert');assert.equal(formulaire(host,'connexion'),undefined);assert.deepEqual(api.appels,[]);
-});
-test('inscription : contrôles propres (12 caractères, confirmation) puis création du compte',async()=>{
- const {api,host,status}=await monter();bouton(host,'Créer mon compte').onclick();await tick();
- let f=formulaire(host,'inscription');
- await envoyer(f);assert.deepEqual(api.appels,[],'champs vides : rien envoyé');
- champ(f,'Adresse e-mail').value='awa@exemple.sn';champ(f,'Mot de passe (12 caractères minimum)').value='court';champ(f,'Confirmer le mot de passe').value='court';
- await envoyer(f);assert.deepEqual(api.appels,[]);
- champ(f,'Mot de passe (12 caractères minimum)').value='motdepasse-solide';champ(f,'Confirmer le mot de passe').value='autre-motdepasse';
- await envoyer(f);assert.deepEqual(api.appels,[]);assert.match(status.textContent,/ne correspondent pas/);
- champ(f,'Confirmer le mot de passe').value='motdepasse-solide';await envoyer(f);
- assert.deepEqual(api.appels,[['signup','awa@exemple.sn','motdepasse-solide']]);assert.match(status.textContent,/consultez votre e-mail/);
- assert.ok(formulaire(host,'connexion'),'retour à la connexion après inscription');assert.equal(champ(formulaire(host,'connexion'),'Adresse e-mail').value,'awa@exemple.sn','adresse reprise');
-});
-test('« Se connecter » valide et envoie seulement le formulaire de connexion',async()=>{
+
+test('email seul : inscription et reconnexion attendent la confirmation',async()=>{
  const {api,host,status}=await monter();const f=formulaire(host,'connexion');
- await envoyer(f);assert.deepEqual(api.appels,[],'champs vides : connexion bloquée par le navigateur');
- champ(f,'Adresse e-mail').value='awa@exemple.sn';champ(f,'Mot de passe').value='motdepasse-solide';await envoyer(f);
- assert.deepEqual(api.appels,[['login','awa@exemple.sn','motdepasse-solide']]);assert.match(status.textContent,/Connexion refusée/);assert.equal(champ(f,'Mot de passe').value,'','mot de passe effacé');
+ assert.equal(all(host).filter(e=>e.tagName==='INPUT').length,1);
+ assert.equal(champ(f,'Adresse e-mail').type,'email');
+ await envoyer(f);assert.deepEqual(api.appels,[]);
+ champ(f,'Adresse e-mail').value='awa@exemple.sn';await envoyer(f);
+ assert.deepEqual(api.appels,[['email','awa@exemple.sn',{retour:undefined}]]);
+ assert.match(status.textContent,/dernier lien reçu/);assert.ok(formulaire(host,'connexion'));
+ assert.ok(bouton(host,'Recevoir un nouveau lien'));
+ await envoyer(f);assert.equal(api.appels.length,2);
 });
-test('« Mot de passe oublié » ouvre son formulaire, envoie le lien de récupération, retour possible',async()=>{
- const {api,host,status}=await monter();const connexion=formulaire(host,'connexion');champ(connexion,'Adresse e-mail').value='awa@exemple.sn';
- bouton(host,'Mot de passe oublié').onclick();await tick();assert.equal(connexion.validations,0);
- const f=formulaire(host,'oubli');assert.equal(champ(f,'Adresse e-mail du compte').value,'awa@exemple.sn','adresse reprise');
- await envoyer(f);assert.equal(api.appels[0][0],'recover');assert.equal(api.appels[0][1],'awa@exemple.sn');assert.match(api.appels[0][2],/^https:\/\/koki-connect\.vercel\.app\/\?koki-recovery=1$/);
- assert.match(status.textContent,/lien de récupération/);
- bouton(host,'Retour à la connexion').onclick();await tick();assert.ok(formulaire(host,'connexion'));
+test('erreur du serveur : message affiché et nouvel essai possible',async()=>{
+ const {api,host,status}=await monter();api.sendEmailLink=async()=>{throw Error('Envoi indisponible');};
+ const f=formulaire(host,'connexion');champ(f,'Adresse e-mail').value='awa@exemple.sn';await envoyer(f);
+ assert.equal(status.textContent,'Envoi indisponible');assert.equal(bouton(host,'Recevoir mon lien de connexion').disabled,false);
 });
-test('espace chauffeur : libellés en français (« Ajouter un véhicule »)',()=>{
- const ui=require('node:fs').readFileSync('assets/business/ui.mjs','utf8');
- assert.doesNotMatch(ui,/'Ajouter '\+kind|'Gérer '\+kind/,'plus de « Ajouter vehicules »');assert.match(ui,/vehicules:'un véhicule'/);
+test('lien expiré, destination conservée et session confirmée',async()=>{
+ const api=fauxApi(),{host}=setup(api);let listener,user=null;const connected=[];
+ api.subscribe=fn=>{listener=fn;return ()=>{};};api.identity=async()=>user;
+ api.logout=async()=>{user=null;};
+ const {accountPanel}=await import('../assets/business/ui.mjs');
+ const status=accountPanel(host,api,async value=>connected.push(value),{retour:()=> 'https://koki-connect.vercel.app/?koki-pro=commercant',erreurLien:'Lien expiré'});
+ await tick();assert.match(status.textContent,/expiré/);
+ const f=formulaire(host,'connexion');champ(f,'Adresse e-mail').value='awa@exemple.sn';await envoyer(f);
+ assert.equal(api.appels[0][2].retour,'https://koki-connect.vercel.app/?koki-pro=commercant');assert.deepEqual(connected,[]);
+ user={id:'u1',email:'awa@exemple.sn'};listener({state:'signed-in'});await tick();
+ assert.deepEqual(connected,[true]);assert.equal(formulaire(host,'connexion'),undefined);
+ await bouton(host,'Déconnexion de cet appareil').onclick();await tick();assert.ok(formulaire(host,'connexion'));assert.deepEqual(connected,[true,false]);
 });
-test('Profil simplifié : connexion par numéro d’abord, e-mail replié, compte connecté et déconnexion à part',async()=>{
- const api=fauxApi();const {host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');accountPanel(host,api,async()=>{});await tick();
- const formes=all(host).filter(e=>e.tagName==='FORM');assert.equal(formes[0].dataset.vue,'sms','le numéro de téléphone vient en premier');
- const replie=all(host).find(e=>e.tagName==='DETAILS');assert.ok(replie,'e-mail replié');assert.ok([...replie.descendants()].includes(formulaire(host,'connexion')));
- for(const l of ['Mot de passe oublié','Créer mon compte'])assert.ok([...replie.descendants()].includes(bouton(host,l)),l+' dans la partie repliée');
- const api2={...fauxApi(),identity:async()=>({id:'u1',phone:'221771234567'}),logout:async()=>{}};const h2=setup(api2).host,fin=new El('div');let vu=null;
- accountPanel(h2,api2,async()=>{},{connecte:(box,u,qui)=>{vu=qui;},deconnexion:fin});await tick();await tick();
- assert.ok(vu,'en-tête du compte connecté');assert.ok(bouton(fin,'Déconnexion de cet appareil'),'déconnexion placée en bas du profil');assert.equal(bouton(h2,'Déconnexion de cet appareil'),undefined);
+
+for(const type of ['Commerçant','Prestataire','Chauffeur'])test(type+' : inscription avec mot de passe obligatoire',async()=>{
+ const api=fauxApi(),{host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');
+ accountPanel(host,api,async()=>{},{intention:()=>type,retour:()=>location.href});await tick();
+ assert.ok(formulaire(host,'connexion-pro'));assert.equal(bouton(host,'Recevoir mon lien de connexion'),undefined);
+ await bouton(host,'Créer mon compte professionnel').onclick();await tick();
+ const f=formulaire(host,'inscription');champ(f,'Adresse e-mail').value='pro@exemple.sn';
+ await envoyer(f);assert.equal(api.appels.length,0);
+ champ(f,'Mot de passe (12 caractères minimum)').value='Mot-de-passe-solide';champ(f,'Confirmer le mot de passe').value='autre-mot-de-passe';
+ await envoyer(f);assert.equal(api.appels.length,0);
+ champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';await envoyer(f);
+ assert.deepEqual(api.appels,[['signup','pro@exemple.sn','Mot-de-passe-solide']]);assert.ok(formulaire(host,'connexion-pro'));
+});
+test('professionnel : connexion par mot de passe et récupération',async()=>{
+ const api=fauxApi(),{host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');accountPanel(host,api,async()=>{},{intention:()=> 'Chauffeur'});await tick();
+ const f=formulaire(host,'connexion-pro');champ(f,'Adresse e-mail').value='pro@exemple.sn';champ(f,'Mot de passe').value='motdepasse-solide';await envoyer(f);
+ assert.equal(api.appels[0][0],'login');
+ await bouton(host,'Mot de passe oublié').onclick();await tick();const reset=formulaire(host,'oubli');champ(reset,'Adresse e-mail').value='pro@exemple.sn';await envoyer(reset);assert.equal(api.appels[1][0],'recover');
 });
