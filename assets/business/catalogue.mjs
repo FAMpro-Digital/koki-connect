@@ -1,3 +1,4 @@
+import {requireClientAccount} from './client-access.mjs';
 // Catalogue public Commerces & Services — boutique en ligne adaptative (téléphone d'abord, panier latéral sur grand écran).
 // Recherche, onglets, puces de catégories, promotions, cartes « Ajouter au panier », fiches détaillées avec galerie,
 // Appeler / WhatsApp / Commander sur WhatsApp, panier (une boutique) avec retrait ou livraison, paiement à la réception.
@@ -34,12 +35,20 @@ function prixBloc(x){
 function badge(x){const t=etiquetteDisponibilite(x);if(!t)return null;return node('span',t,'cat-badge '+(disponible(x)?'cat-ok':'cat-off'));}
 
 // panier (facultatif) : {lignes(), ajouter(x,q), changer(id,q), commander(mode,adresse), position?(), note}
-export async function catalogue(host,{api,addToCart,requestService,raccourcis=[],panier=null,vide='Aucun commerce ou service validé pour le moment.'}){
+export async function catalogue(host,{api,requireAccount=()=>requireClientAccount(api),addToCart,requestService,raccourcis=[],panier=null,vide='Aucun commerce ou service validé pour le moment.'}){
  let idx=indexCatalogue([]);const f={kind:'produits',query:'',categorie:'',village:'',disponibles:false,tri:'recent'};let limite=PAGE;
  const stack=[{view:'liste'}];const images=new Map();
  let mode='retrait',adresse='';const ajouterPanier=panier?(x,q)=>panier.ajouter(x,q):addToCart;
  const message=node('p',null,'cat-message');message.setAttribute('role','status');
  const say=t=>{message.textContent=t;};
+ // Les URL de contact ne sont pas exposées dans un lien activable avant vérification.
+ function contact(label,url,kind){
+  const b=button(label,async()=>{
+   if(b.disabled)return;b.disabled=true;
+   try{await requireAccount();window.location.assign(url);}catch(e){say(e.message);}finally{b.disabled=false;}
+  },kind);return b;
+ }
+
  async function photo(img,path){try{if(!images.has(path))images.set(path,api.image(path));img.src=await images.get(path);}catch{images.delete(path);img.alt='Photo indisponible';img.classList.add('cat-photo-off');}}
  // Les images se chargent quand elles approchent de l'écran (économie de données mobiles).
  const watcher=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){watcher.unobserve(e.target);photo(e.target,e.target.dataset.path);}},{rootMargin:'300px'}):null;
@@ -72,7 +81,7 @@ export async function catalogue(host,{api,addToCart,requestService,raccourcis=[]
    if(!disponible(x)){zone.append(node('span','Épuisé','cat-pill'));return;}
    if(ajouterPanier&&quantite(x.id)>0&&panier){zone.append(compteur(x));return;}
    if(ajouterPanier){const b=button('Ajouter au panier',()=>ajouter(x,1),'cart');b.setAttribute('aria-label','Ajouter « '+x.nom+' » au panier');zone.append(b);return;}
-   const w=lienCommande(x,idx,1);if(w)zone.append(lien('Commander sur WhatsApp',w,'whatsapp'));return;
+   const w=lienCommande(x,idx,1);if(w)zone.append(contact('Commander sur WhatsApp',w,'whatsapp'));return;
   }
   if(x.kind==='services')zone.append(button('Demander un devis',()=>go('fiche',{id:x.id}),'dark'));
  }
@@ -114,7 +123,7 @@ export async function catalogue(host,{api,addToCart,requestService,raccourcis=[]
   const cmd=button('Commander · paiement à la réception',async()=>{cmd.disabled=true;try{if(mode==='livraison'&&adresse.trim().length<3)throw Error('Indiquez l’adresse ou le lieu de livraison.');const r=await panier.commander(mode,adresse);say(r||'Commande enregistrée.');}catch(e){say(e.message);}finally{cmd.disabled=false;window.dispatchEvent(new Event('koki-cart'));}},'primary');
   if(!panier?.commander)cmd.disabled=true;aside.append(cmd);
   const zoneWa=node('div');aside.append(zoneWa);
-  function wa(){zoneWa.replaceChildren();const u=lienPanierWhatsApp(ls,idx,{mode,adresse});if(u)zoneWa.append(lien('Commander sur WhatsApp',u,'whatsapp-light'));}
+  function wa(){zoneWa.replaceChildren();const u=lienPanierWhatsApp(ls,idx,{mode,adresse});if(u)zoneWa.append(contact('Commander sur WhatsApp',u,'whatsapp-light'));}
   wa();
   aside.append(node('p',panier?.note||'Paiement à la réception. La boutique confirme le prix, le stock et les frais de livraison.','cat-hint'));
  }
@@ -191,9 +200,9 @@ export async function catalogue(host,{api,addToCart,requestService,raccourcis=[]
   box.append(node('p',x.kind==='professionnels'?'Contacter '+c.vendeur:'Proposé par '+c.vendeur+(x.kind==='produits'&&c.boutique?' · '+c.boutique:''),'cat-seller'));
   const actions=node('div',null,'cat-actions');
   const principal=x.kind==='produits'?lienCommande(x,idx,qte):x.kind==='services'?lienDevis(x,idx):null;
-  if(principal)actions.append(lien(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp'));
-  if(c.appel)actions.append(lien('Appeler le '+c.telephone,c.appel,'call'));
-  if(c.whatsapp)actions.append(lien(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp'));
+  if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp'));
+  if(c.appel)actions.append(contact('Appeler le '+c.telephone,c.appel,'call'));
+  if(c.whatsapp)actions.append(contact(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp'));
   const carte=lienCarte(x,idx);if(carte)actions.append(lien('Voir sur la carte',carte,'secondary'));
   if(!c.appel&&!c.whatsapp)box.append(node('p','Numéro non communiqué.'));
   box.append(actions);return box;
