@@ -20,5 +20,6 @@ export default [
   { files: ['assets/**/*.js', 'sw.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.serviceworker } }, rules: regles },
   { files: ['assets/**/*.mjs', 'assets/business/business-state.js'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.browser }, rules: regles },
   { files: ['scripts/**/*.mjs', 'eslint.config.mjs', 'tests/e2e/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.node }, rules: regles },
+  { files: ['tests/fixtures/**/*.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.node } }, rules: regles },
   { files: ['tests/**/*.cjs'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },
 ];
