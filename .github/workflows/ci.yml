@@ -1,0 +1,65 @@
+name: CI
+
+# Vérifications obligatoires avant toute fusion dans main.
+# Le workflow « Development tests and build » reste en place pour la branche develop/phases-2-6.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  # Une nouvelle poussée sur une PR annule l'ancienne vérification ; un push sur main n'est jamais annulé.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    # Nom du contrôle à exiger dans la règle de protection de main : « verify ».
+    name: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Verify deployment configuration guards
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+          const headers = Object.fromEntries((vercel.headers?.[0]?.headers ?? []).map(h => [h.key, h.value]));
+          assert.ok(headers['Content-Security-Policy'], 'vercel.json doit garder la politique CSP');
+          assert.ok(headers['Strict-Transport-Security'], 'vercel.json doit garder HSTS');
+          const backend = JSON.parse(fs.readFileSync('assets/portail/backend.json', 'utf8'));
+          assert.notEqual(backend.local, true, 'backend.json ne doit jamais viser le Supabase local');
+          assert.match(backend.publishableKey, /^sb_publishable_/, 'seule une clé publishable est autorisée');
+          const business = JSON.parse(fs.readFileSync('assets/business/config.json', 'utf8'));
+          if (business.enabled) {
+            assert.equal(typeof business.modules?.commerce, 'boolean');
+            assert.equal(typeof business.modules?.transport, 'boolean');
+          }
+          JS
+      - name: Test and build with loopback-only networking
+        run: |
+          sudo unshare --net bash -euc '
+            ip link set lo up
+            exec runuser -u "$1" -- bash -euc "node --test tests/*.test.cjs && node scripts/prepare-preview.mjs"
+          ' -- "$(id -un)"
+      - name: Test data collection converter
+        run: |
+          python3 -m venv "$RUNNER_TEMP/collecte-venv"
+          "$RUNNER_TEMP/collecte-venv/bin/pip" install --quiet --no-input openpyxl==3.1.5
+          "$RUNNER_TEMP/collecte-venv/bin/python" -I collecte/tests/test_convertir.py
