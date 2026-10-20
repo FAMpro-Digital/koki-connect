@@ -126,3 +126,16 @@ body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gau
 #portail-vue > button { min-height: 44px; }
 .leaflet-control-zoom a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 22px !important; }
 .menu-sep { margin: 8px 2px 0; font-size: 13px; font-weight: 700; color: #5b6b63; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Animation au toucher : onde partant du doigt (assets/portail/touches.js), vert Koki sur fond clair, blanche sur fond foncé. */
+.koki-touche { position: fixed; z-index: 2147483000; overflow: hidden; pointer-events: none; contain: strict; }
+.koki-touche > span { position: absolute; border-radius: 50%; transform: scale(0); opacity: 1; animation: koki-onde .55s cubic-bezier(.25,.6,.35,1) forwards; }
+.koki-touche-fin { transition: opacity .4s ease; opacity: 0; }
+@keyframes koki-onde { to { transform: scale(1); } }
+/* Barre du bas : l'icône rebondit légèrement à l'appui. */
+nav[aria-label="Navigation principale"] button:active span { animation: koki-rebond .32s cubic-bezier(.2,.8,.2,1); }
+@keyframes koki-rebond { 0% { transform: scale(1); } 40% { transform: scale(.82); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .koki-touche { display: none; }
+  nav[aria-label="Navigation principale"] button:active span { animation: none; }
+}
