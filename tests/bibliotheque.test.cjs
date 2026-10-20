@@ -60,9 +60,9 @@ test('Flux : lien de livre signé seulement pour koki-livres et les formats auto
 });
 
 test('Application : Bibliothèque reliée, service worker publié',()=>{
-  const html=fs.readFileSync('index.html','utf8');
+  const html=require('./_aide.cjs').accueil();
   for(const f of ['livre-contract.js','livres-hors-ligne.js','bibliotheque.js'])assert.ok(html.includes('assets/portail/'+f));
-  assert.ok(html.includes("register('sw.js')"));
+  assert.ok(fs.readFileSync('assets/portail/sw-register.js','utf8').includes("register('sw.js')"));assert.match(html,/<script defer src="assets\/portail\/sw-register\.js"><\/script>/);
   assert.ok(fs.readFileSync('scripts/prepare-preview.mjs','utf8').includes("'sw.js'"));
   const sw=fs.readFileSync('sw.js','utf8');assert.ok(!sw.includes('supabase.co'));assert.ok(sw.includes('url.origin!==self.location.origin'));
   for(const f of ['assets/portail/bibliotheque.js','assets/portail/app.js','sw.js'])new vm.Script(fs.readFileSync(f,'utf8'));

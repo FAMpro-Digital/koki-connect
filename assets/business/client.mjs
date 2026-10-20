@@ -1,4 +1,8 @@
 // Coupure de réseau : message compréhensible, et la demande en attente est conservée pour être reprise.
+// Données de trajet conservées sur l'appareil (course en cours, notes de chauffeurs) : liées au compte, effacées à la déconnexion.
+// Les favoris et les fiches enregistrées par la personne sur son appareil ne sont pas touchés.
+const CLES_COMPTE=['koki.transport.demo.course.v1','koki.transport.notees.v1'];
+function purgerDonneesCompte(){for(const k of CLES_COMPTE){try{globalThis.localStorage?.removeItem(k);}catch{}try{globalThis.sessionStorage?.removeItem(k);}catch{}}}
 export const HORS_LIGNE=/Failed to fetch|NetworkError|Load failed|fetch failed|Network request failed|AuthRetryableFetchError/i;
 export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votre connexion puis réessayez.';
 import './commerce-contract.js';
@@ -55,7 +59,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async signup(email,password,{retour,professional=false}={}){requireReady();if(professional&&password.length<12)throw Error('Choisissez au moins 12 caractères.');const options=professional?{data:{professional_password_set:true}}:{};const to=lienRetour(retour);if(to)options.emailRedirectTo=to;const {error}=await db.auth.signUp({email:email.trim(),password,options});if(error)throw Error(messageInscription(error));},
  // Nouvel e-mail de confirmation (lien expiré ou perdu). Réponse identique que le compte existe ou non.
  async resendConfirmation(email,{retour}={}){requireReady();const options={};const to=lienRetour(retour);if(to)options.emailRedirectTo=to;const {error}=await db.auth.resend({type:'signup',email:String(email||'').trim(),options});if(error)throw Error(messageInscription(error));},
- async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');const {error}=await db.auth.signOut({scope:'local'});if(error)throw Error('Déconnexion impossible.');try{storage?.removeItem(scope());}catch{}user=null;pending.clear();},
+ async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');const {error}=await db.auth.signOut({scope:'local'});if(error)throw Error('Déconnexion impossible.');try{storage?.removeItem(scope());}catch{}purgerDonneesCompte();user=null;pending.clear();},
  pending(){return [...pending.entries()].map(([operation,v])=>({operation,...structuredClone(v)}));},
  retry(operation){const v=pending.get(operation);if(!v)throw Error('Aucune demande à reprendre.');return run(v.command,v.input,operation);},
  catalog:()=>run('catalog'),history:kind=>run('history',{kind}),get:id=>run('get',{id}),

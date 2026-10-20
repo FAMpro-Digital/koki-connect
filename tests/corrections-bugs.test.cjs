@@ -1,6 +1,6 @@
 // Corrections du 14/10/2026 : messages hors connexion, demandes en attente conservées, message Transport à jour.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const client=fs.readFileSync('assets/business/client.mjs','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),tr=fs.readFileSync('assets/transport/app.js','utf8'),html=fs.readFileSync('index.html','utf8');
+const client=fs.readFileSync('assets/business/client.mjs','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),tr=fs.readFileSync('assets/transport/app.js','utf8'),html=require('./_aide.cjs').accueil();
 test('hors connexion : jamais « TypeError: Failed to fetch » à l’écran',()=>{
  const re=/Failed to fetch|NetworkError|Load failed|fetch failed|Network request failed|AuthRetryableFetchError/i;
  for(const m of ['TypeError: Failed to fetch','NetworkError when attempting to fetch resource.','Load failed','AuthRetryableFetchError'])assert.ok(re.test(m),m);

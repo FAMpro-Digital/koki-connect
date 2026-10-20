@@ -17,7 +17,7 @@ test('fichier agenda : début, fin, rappel 2 h avant, caractères échappés',()
  assert.match(ics,/^BEGIN:VCALENDAR\r\n/);assert.match(ics,/DTEND:20261016T233000Z/);assert.match(ics,/SUMMARY:Fête\\, danse\\\; joie/);assert.match(ics,/TRIGGER:-PT2H/);
 });
 test('application : agenda dédié, événements terminés ou archivés retirés partout',()=>{
- const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),ev=fs.readFileSync('assets/portail/evenements.js','utf8');
+ const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/app.js','utf8'),ev=fs.readFileSync('assets/portail/evenements.js','utf8');
  assert.match(html,/<script defer src="assets\/portail\/evenement-contract\.js"><\/script>\s*<script defer src="assets\/portail\/evenements\.js"><\/script>/);
  assert.match(app,/function evenementPasse\(x\)/);assert.match(app,/!offreFermee\(x\)&&!evenementPasse\(x\)/);
  assert.match(app,/if\(type==='Événements'&&window\.KokiEvenements\)\{KokiEvenements\.ouvrir\(\);return;\}/);

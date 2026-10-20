@@ -42,7 +42,7 @@ test('service réel : panier invité sans connexion, commande interne et WhatsAp
  const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules.commerce,true,'commandes Commerce activées (autorisation du 13/10/2026)');assert.equal(c.modules.transport,true,'Transport activé (autorisation du 14/10/2026)');
 });
 test('démonstration : même boutique, données fictives locales, aucun contact réel',()=>{
- const app=fs.readFileSync('assets/commerce/app.js','utf8'),html=fs.readFileSync('index.html','utf8');
+ const app=fs.readFileSync('assets/commerce/app.js','utf8'),html=require('./_aide.cjs').accueil();
  assert.match(app,/function sourceDemo\(\)/);assert.match(app,/sourceDemo,/,'exposée au catalogue');
  assert.doesNotMatch(app.slice(app.indexOf('function lignesDemo')),/telephone:p\.telephone/,'aucun numéro réel en démonstration');
  assert.doesNotMatch(html,/KokiCommerce\.(catalogue|panier|commander)\(/,'ancien catalogue démo retiré');

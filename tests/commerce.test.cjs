@@ -15,7 +15,7 @@ C.validerDemande('Réparer une fuite',{nom:'Koki'},'2026-10-08','2026-10-07');
 for(const date of ['2026-02-30','2026-10-06','invalid'])assert.throws(()=>C.validerDemande('Réparer une fuite',{nom:'Koki'},date,'2026-10-07'));
 assert.throws(()=>C.validerDemande('Court',{nom:'Koki'},'2026-10-08','2026-10-07'));
 assert.equal(C.metiers.length,19);
-const fs=require('node:fs');const html=fs.readFileSync('index.html','utf8');
+const fs=require('node:fs');const html=require('./_aide.cjs').accueil();
 assert.equal((html.match(/navigator\.geolocation\.getCurrentPosition/g)||[]).length,1);
 assert.ok(html.includes('afficherCommerce()'));assert.ok(html.includes('vue-transport'));
 console.log('Commerce : stock, panier, montants, statuts, dates et GPS partagé validés.');

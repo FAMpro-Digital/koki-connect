@@ -24,7 +24,7 @@ test('démarche : pièces et étapes ligne par ligne, lien vers un service, avis
  assert.equal(S.avis(ligne('Services publics',JSON.parse(S.encodeService({genre:'Mairie'})))),false,'une fiche n’est pas un avis');
 });
 test('application : rubrique dédiée, fiches hors de l’accueil, carte et recherche',()=>{
- const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),sp=fs.readFileSync('assets/portail/services-publics.js','utf8');
+ const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/app.js','utf8'),sp=fs.readFileSync('assets/portail/services-publics.js','utf8');
  assert.match(html,/<script defer src="assets\/portail\/service-contract\.js"><\/script>\s*<script defer src="assets\/portail\/services-publics\.js"><\/script>/);
  assert.equal((html.match(/KokiServicesPublics\.ouvrir\(\)/g)||[]).length,3);
  assert.match(html,/categorie: 'Services publics', latitude: v\.latitude/);

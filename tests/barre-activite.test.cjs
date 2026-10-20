@@ -1,12 +1,12 @@
 // Barre du bas : Accueil, Transport, Boutique, Activité, Profil ; page Activité.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const html=fs.readFileSync('index.html','utf8'),nav=fs.readFileSync('assets/portail/navigation.js','utf8'),act=fs.readFileSync('assets/portail/activite.js','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
+const html=require('./_aide.cjs').accueil(),nav=fs.readFileSync('assets/portail/navigation.js','utf8'),act=fs.readFileSync('assets/portail/activite.js','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
 test('barre du bas : 5 onglets utiles, plus de Carte / Publier / Favoris',()=>{
  const barre=html.slice(html.indexOf('<nav aria-label="Navigation principale">'),html.indexOf('</nav>',html.indexOf('<nav aria-label="Navigation principale">')));
  assert.deepEqual([...barre.matchAll(/data-nav="([a-z]+)"/g)].map(m=>m[1]),['accueil','transport','boutique','activite','profil']);
- assert.match(barre,/onclick="afficherTransport\(\)"/);assert.match(barre,/onclick="afficherCommerce\(\)"/);assert.match(barre,/onclick="KokiActivite\.ouvrir\(\)"/);
+ assert.match(barre,/data-clic="afficherTransport\(\)"/);assert.match(barre,/data-clic="afficherCommerce\(\)"/);assert.match(barre,/data-clic="KokiActivite\.ouvrir\(\)"/);
  assert.doesNotMatch(barre,/Publier|Favoris|afficherCarte/);
- assert.match(html,/onclick="afficherCarte\(\)"/,'la carte reste accessible depuis l’accueil');
+ assert.match(html,/data-clic="afficherCarte\(\)"/,'la carte reste accessible depuis l’accueil');
  assert.match(html,/KokiPortail\.admin\(\)/,'publier reste accessible depuis le menu');
 });
 test('onglet actif : Activité couvre favoris, livres et notifications',()=>{

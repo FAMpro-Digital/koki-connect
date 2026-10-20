@@ -20,7 +20,7 @@ test('listes regroupées par catégorie et triées, lieux publiés et structures
   assert.match(app, /document\.createElement\('optgroup'\)/);
   assert.match(app, /localeCompare\(b\.nom, 'fr'\)/);
   assert.match(app, /lieuxTransport\.get\(valeur\)/);
-  const html = fs.readFileSync('index.html', 'utf8');
+  const html = require('./_aide.cjs').accueil();
   assert.match(html, /const v = S\.decode\(row\);\n\s+if \(v && !v\.archive && v\.latitude !== null && v\.longitude !== null\)/);
   assert.doesNotMatch(app, /ajouterStructuresSante/, 'structures de santé déjà fournies par chargerDonneesCarte');
 });
