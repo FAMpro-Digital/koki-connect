@@ -19,9 +19,12 @@ jobs:
       - name: ESLint (annotations)
         run: |
           set +e
-          npx eslint . -f unix > /tmp/out.txt 2>&1
-          head -c 300 /tmp/out.txt | head -3 | while IFS= read -r l; do echo "::notice::$(echo "$l" | cut -c1-300)"; done
-          grep -E "\[Error|\[Warning" /tmp/out.txt | sed 's#/home/runner/work/[^/]*/[^/]*/##' | awk -F'[ ]' '{print}' | sort | uniq -c | sort -rn | head -3 >/dev/null
-          grep -oE "\[(Error|Warning)/[a-z-]+\]" /tmp/out.txt | sort | uniq -c | sort -rn | while IFS= read -r l; do echo "::error::regle $l"; done
-          grep -E "\[Error" /tmp/out.txt | sed 's#/home/runner/work/[^/]*/[^/]*/##' | head -25 | while IFS= read -r l; do echo "::error::$(echo "$l" | cut -c1-260)"; done
-          tail -2 /tmp/out.txt | while IFS= read -r l; do echo "::notice::$l"; done
+          npx eslint . -f json > /tmp/out.json 2>/tmp/err.txt
+          head -c 300 /tmp/err.txt | while IFS= read -r l; do echo "::notice::$l"; done
+          node -e '
+            const r=JSON.parse(require("fs").readFileSync("/tmp/out.json","utf8"));
+            const c={};const lignes=[];
+            for(const f of r)for(const m of f.messages){c[m.ruleId+":"+m.severity]=(c[m.ruleId+":"+m.severity]||0)+1;if(m.severity===2&&lignes.length<30)lignes.push(f.filePath.replace(/.*koki-connect\//,"")+":"+m.line+" "+m.ruleId+" "+m.message.slice(0,80));}
+            console.log("::notice::"+JSON.stringify(c));
+            for(const l of lignes)console.log("::error::"+l);
+          '
