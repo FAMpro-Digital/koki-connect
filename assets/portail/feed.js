@@ -10,11 +10,17 @@ async function signerUne(c,headers,row){try{const signed=await request(c.url+'/s
 async function signerImages(c,headers,queue){if(!queue.length)return;
 try{const lot=await request(c.url+'/storage/v1/object/sign/koki-media',{method:'POST',headers,body:JSON.stringify({expiresIn:120,paths:queue.map(x=>x.image_path)})});if(!Array.isArray(lot))throw Error('lot invalide');const parChemin=new Map(lot.map(x=>[x&&x.path,x]));let echec=[];for(const row of queue){const r=parChemin.get(row.image_path);const url=r&&!r.error&&typeof r.signedURL==='string'?c.url+'/storage/v1'+r.signedURL:null;if(url&&imagePermise(url))row.image=url;else echec.push(row);}for(const row of echec)row.image=null;return;}catch(_){}
 let i=0;await Promise.all(Array.from({length:Math.min(4,queue.length)},async()=>{while(i<queue.length)await signerUne(c,headers,queue[i++]);}));}
-async function charger(){const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const data=await request(c.url+'/rest/v1/rpc/koki_public_feed',{method:'POST',headers,body:'{}'});if(data.version!==1||!Array.isArray(data.contenus))throw Error('Flux public invalide');const rows=data.contenus.filter(x=>x&&typeof x.id==='string'&&typeof x.titre==='string'&&typeof x.resume==='string'&&x.statut==='publié');
+async function chargerReseau(){const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const data=await request(c.url+'/rest/v1/rpc/koki_public_feed',{method:'POST',headers,body:'{}'});if(data.version!==1||!Array.isArray(data.contenus))throw Error('Flux public invalide');const rows=data.contenus.filter(x=>x&&typeof x.id==='string'&&typeof x.titre==='string'&&typeof x.resume==='string'&&x.statut==='publié');
 // Les images ont une URL temporaire ; chaque actualisation renouvelle leur accès.
 const queue=rows.filter(x=>x.image_path&&/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(x.image_path));let i=0;
 // Signature par lot : une seule requête pour toutes les images ; repli image par image si le lot échoue.
 await signerImages(c,headers,queue);return {version:1,contenus:rows};}
+// Dernier flux public réussi, gardé sur l'appareil : affiché si le réseau ou le serveur est indisponible.
+// Uniquement des contenus publiés (publics) ; les URL d'images temporaires ne sont pas conservées.
+const CLE_COPIE='koki.flux.public.v1',COPIE_MAX=1500000;
+function garderCopie(flux){try{const lot={version:1,date:Date.now(),contenus:flux.contenus.slice(0,60).map(x=>({...x,image:null}))};const texte=JSON.stringify(lot);if(texte.length<=COPIE_MAX)root.localStorage.setItem(CLE_COPIE,texte);}catch(_){}}
+function lireCopie(){try{const lot=JSON.parse(root.localStorage.getItem(CLE_COPIE));if(lot&&lot.version===1&&Array.isArray(lot.contenus)&&lot.contenus.every(x=>x&&x.statut==='publié'&&typeof x.id==='string'))return {version:1,contenus:lot.contenus.map(x=>({...x,image:null})),horsLigne:true,date:lot.date};}catch(_){}return null;}
+async function charger(){try{const flux=await chargerReseau();garderCopie(flux);return flux;}catch(e){const copie=lireCopie();if(copie)return copie;throw e;}}
 // Livres gratuits : lien temporaire (5 min) vers un fichier du bucket privé koki-livres ; jamais d'autre origine ni d'autre bucket.
 // Le serveur ne signe que les fichiers de livres gratuits publiés (politique livres_public_read).
 function fichierPermis(value){try{const u=new URL(value);return !!config&&u.origin===config.url&&/^\/storage\/v1\/object\/sign\/koki-livres\/[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(u.pathname);}catch(_){return false;}}

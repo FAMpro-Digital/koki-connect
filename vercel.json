@@ -40,7 +40,8 @@
       "develop/animation-touches": false,
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
-      "securite/csp-gestionnaires": false
+      "securite/csp-gestionnaires": false,
+      "fiabilite/service-worker": false
     }
   },
   "headers": [
