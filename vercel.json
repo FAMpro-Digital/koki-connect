@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
       "fix/profil-boutique-liens": false,
@@ -41,7 +42,8 @@
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,
-      "fiabilite/service-worker": false
+      "fiabilite/service-worker": false,
+      "tests/qualite-automatisee": false
     }
   },
   "headers": [
