@@ -37,7 +37,8 @@
       "develop/rubriques-uniques": false,
       "develop/audit-corrections": false,
       "fix/profil-pro-styles": false,
-      "develop/animation-touches": false
+      "develop/animation-touches": false,
+      "ci/verification-main": false
     }
   },
   "headers": [
