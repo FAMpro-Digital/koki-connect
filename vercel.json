@@ -43,7 +43,8 @@
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,
       "fiabilite/service-worker": false,
-      "tests/qualite-automatisee": false
+      "tests/qualite-automatisee": false,
+      "diag/tmp-lint": false
     }
   },
   "headers": [
