@@ -71,7 +71,8 @@
     if (!option) { option = cree('option'); option.value = 'personnalise'; select.append(option); }
     option.textContent = point.nom; select.value = 'personnalise';
   }
-  function carteInitialiser() {
+  async function carteInitialiser() {
+    if (!window.L && window.KokiLeaflet) { try { await window.KokiLeaflet.charger(); } catch (_) { /* message ci-dessous */ } }
     if (!window.L) { message('Carte indisponible. Utilisez les listes de lieux.'); return; }
     if (!carte) {
       carte = L.map('transport-carte').setView(CENTRE_KOKI, 14);
@@ -192,7 +193,7 @@
     document.getElementById('titre-transport').focus();
     document.getElementById('vue-transport').scrollIntoView({block:'start'});
     message('Chargement de Transport…');
-    try { await initialiser(); carteInitialiser(); actualiser(); await window.KokiBusiness?.show('transport',etat.demo); actualiser(); message(''); await suivre(); }
+    try { await initialiser(); await carteInitialiser(); actualiser(); await window.KokiBusiness?.show('transport',etat.demo); actualiser(); message(''); await suivre(); }
     catch(e) { message(e.message); }
   }
   function changerLieu(type) {

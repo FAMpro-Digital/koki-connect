@@ -29,7 +29,7 @@ test('classement : 3/1/0, départage différence puis buts, matchs non terminés
 test('rubrique branchée : Sports moderne, fiches hors accueil, recherche et détail',()=>{
  const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),sp=fs.readFileSync('assets/portail/sport.js','utf8'),css=fs.readFileSync('assets/portail/sport.css','utf8');
  assert.ok(html.indexOf('assets/portail/sport.js')>html.indexOf('assets/portail/sport-contract.js')&&html.indexOf('assets/portail/sport-contract.js')>html.indexOf('assets/portail/app.js"'));
- assert.match(html,/<link rel="stylesheet" href="assets\/portail\/sport\.css">/);
+ assert.match(html,/<link rel="stylesheet" href="assets\/portail\/sport\.css" media="print" data-differe>/);
  assert.match(app,/async function liste\(type\)\{if\(type==='Sports & ASC'&&window\.KokiSport\)\{KokiSport\.accueil\(\);return;\}/);
  assert.match(app,/function fiche\(x\)\{if\(x\.type==='Sports & ASC'&&window\.KokiSportContract\)return !!\(KokiSportContract\.decodeEquipe\(x\)\|\|KokiSportContract\.decodeMatch\(x\)\);/);
  assert.match(app,/if\(KokiSportContract\.decodeMatch\(x\)\)\{KokiSport\.match\(x\.id\);return;\}/);

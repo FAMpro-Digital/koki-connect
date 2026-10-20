@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KOKI CONNECT</title>
-  <link rel="stylesheet" href="assets/leaflet/leaflet.css">
-  <link rel="stylesheet" href="assets/transport/style.css">
-  <link rel="stylesheet" href="assets/commerce/style.css">
+  <link rel="stylesheet" href="assets/transport/style.css" media="print" data-differe>
+  <link rel="stylesheet" href="assets/commerce/style.css" media="print" data-differe>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
@@ -199,10 +198,10 @@
     #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
   </style>
   <link rel="stylesheet" href="assets/portail/style.css">
-<link rel="stylesheet" href="assets/business/style.css">
+<link rel="stylesheet" href="assets/business/style.css" media="print" data-differe>
 <link rel="stylesheet" href="assets/portail/fluidite.css">
-  <link rel="stylesheet" href="assets/portail/education.css">
-  <link rel="stylesheet" href="assets/portail/sport.css">
+  <link rel="stylesheet" href="assets/portail/education.css" media="print" data-differe>
+  <link rel="stylesheet" href="assets/portail/sport.css" media="print" data-differe>
   <link rel="stylesheet" href="assets/portail/typographie.css">
 </head>
 
@@ -263,7 +262,7 @@
     <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
     <p style="margin-bottom:15px;">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
     <article class="card highlight" aria-labelledby="titre-fampro" style="margin-bottom:20px;">
-      <img src="assets/fampro-digital.png" alt="Logo Fampro Digital" style="display:block; width:100%; max-width:360px; height:auto; margin-bottom:16px; border-radius:12px;">
+      <img src="assets/fampro-digital.webp" width="720" height="360" loading="lazy" decoding="async" alt="Logo Fampro Digital" style="display:block; width:100%; max-width:360px; height:auto; margin-bottom:16px; border-radius:12px;">
       <h3 id="titre-fampro">Découvrez Fampro Digital</h3>
       <p>Vous avez une idée ou un projet numérique ? Présentez-le à Fampro Digital pour échanger sur vos objectifs et vos besoins.</p>
       <p>📩 Contactez Fampro Digital pour en savoir plus.</p>
@@ -479,8 +478,7 @@
 <button type="button" data-nav="activite" onclick="KokiActivite.ouvrir()"><span>🧾</span>Activité</button>
 <button type="button" data-nav="profil" onclick="KokiPortail.profil()"><span>👤</span>Profil</button>
 </nav>
-  <script src="assets/leaflet/leaflet.js">
-</script>
+  <script src="assets/leaflet/chargeur.js"></script>
   <script>
     document.getElementById('date-entete').textContent = new Intl.DateTimeFormat('fr-SN', {
       timeZone: 'Africa/Dakar', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -683,6 +681,7 @@ async function afficherCarte() {
   statut.textContent = 'Chargement de la carte…';
   try {
     await chargerDonneesCarte();
+    if (!window.L && window.KokiLeaflet) await window.KokiLeaflet.charger();
     if (!window.L) throw new Error('Carte indisponible');
     if (!carteKoki) {
       carteKoki = L.map('carte-koki').setView(CENTRE_KOKI,12);
@@ -724,35 +723,36 @@ function filtrerCarte() {
   });
 }
 </script>
+<script defer src="assets/transport/core.js"></script>
+  <script defer src="assets/transport/app.js"></script>
+  <script defer src="assets/commerce/core.js"></script>
+  <script defer src="assets/commerce/app.js"></script>
+<script defer src="assets/portail/core.js"></script>
+<script defer src="assets/portail/feed.js"></script>
+<script defer src="assets/portail/rubriques-contract.js"></script>
+<script defer src="assets/portail/lieu-contract.js"></script>
+<script defer src="assets/portail/sante-contract.js"></script>
+<script defer src="assets/portail/education-contract.js"></script>
+<script defer src="assets/portail/numeros-contract.js"></script>
+<script defer src="assets/portail/app.js"></script>
+<script defer src="assets/portail/livre-contract.js"></script>
+<script defer src="assets/portail/livres-hors-ligne.js"></script>
+<script defer src="assets/portail/bibliotheque.js"></script>
+<script defer src="assets/portail/education.js"></script>
+<script defer src="assets/portail/sport-contract.js"></script>
+<script defer src="assets/portail/sport.js"></script>
+<script defer src="assets/portail/offre-contract.js"></script>
+<script defer src="assets/portail/opportunites.js"></script>
+<script defer src="assets/portail/evenement-contract.js"></script>
+<script defer src="assets/portail/evenements.js"></script>
+<script defer src="assets/portail/service-contract.js"></script>
+<script defer src="assets/portail/services-publics.js"></script>
+<script defer src="assets/portail/activite.js"></script>
+<script defer src="assets/portail/sante.js"></script>
+<script defer src="assets/portail/navigation.js"></script>
+<script defer src="assets/portail/touches.js"></script>
+<script defer src="assets/portail/styles-differes.js"></script>
   <script type="module" src="assets/business/runtime.mjs"></script>
-<script src="assets/transport/core.js"></script>
-  <script src="assets/transport/app.js"></script>
-  <script src="assets/commerce/core.js"></script>
-  <script src="assets/commerce/app.js"></script>
-<script src="assets/portail/core.js"></script>
-<script src="assets/portail/feed.js"></script>
-<script src="assets/portail/rubriques-contract.js"></script>
-<script src="assets/portail/lieu-contract.js"></script>
-<script src="assets/portail/sante-contract.js"></script>
-<script src="assets/portail/education-contract.js"></script>
-<script src="assets/portail/numeros-contract.js"></script>
-<script src="assets/portail/app.js"></script>
-<script src="assets/portail/livre-contract.js"></script>
-<script src="assets/portail/livres-hors-ligne.js"></script>
-<script src="assets/portail/bibliotheque.js"></script>
-<script src="assets/portail/education.js"></script>
-<script src="assets/portail/sport-contract.js"></script>
-<script src="assets/portail/sport.js"></script>
-<script src="assets/portail/offre-contract.js"></script>
-<script src="assets/portail/opportunites.js"></script>
-<script src="assets/portail/evenement-contract.js"></script>
-<script src="assets/portail/evenements.js"></script>
-<script src="assets/portail/service-contract.js"></script>
-<script src="assets/portail/services-publics.js"></script>
-<script src="assets/portail/activite.js"></script>
-<script src="assets/portail/sante.js"></script>
-<script src="assets/portail/navigation.js"></script>
-<script src="assets/portail/touches.js"></script>
 <script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='127.0.0.1'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
