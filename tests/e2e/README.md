@@ -15,7 +15,7 @@ Aucun test de charge : un seul navigateur par test.
 cd tests/e2e
 npm install
 npm run install:navigateur   # télécharge Chromium (une fois)
-npm test                     # bureau + mobile (Pixel 7)
+npm test                     # ordinateur (Desktop Chrome) + mobile (Pixel 5)
 npm run test:mobile          # un seul profil
 ```
 

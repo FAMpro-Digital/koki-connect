@@ -54,6 +54,7 @@ function simulerSupabase(route, journal) {
   }
   if (chemin === '/rest/v1/koki_transport_rates') return json(route, 200, TARIFS);
   if (chemin === '/auth/v1/user') return json(route, 401, { message: 'invalid JWT' });
+  if (chemin.startsWith('/storage/v1/')) { journal.stockage += 1; return json(route, 404, { statusCode: '404', error: 'not_found', message: 'Objet fictif absent' }); }
   if (chemin.startsWith('/auth/v1/')) { journal.authentifications += 1; return json(route, 400, { error: 'invalid_grant', error_description: 'test' }); }
   journal.nonPrevues.push(requete.method() + ' ' + chemin);
   return json(route, 404, { message: 'simulation : appel non prévu' });
@@ -62,7 +63,7 @@ function simulerSupabase(route, journal) {
 export const test = base.extend({
   // Journal de ce que la page a tenté ; vérifié automatiquement à la fin de chaque test.
   journal: [async ({ context }, use) => {
-    const journal = { flux: 0, commandes: [], authentifications: 0, nonPrevues: [], interdites: [], externesBloquees: [] };
+    const journal = { flux: 0, commandes: [], authentifications: 0, stockage: 0, nonPrevues: [], interdites: [], externesBloquees: [] };
     await context.route('**/*', (route) => {
       const url = new URL(route.request().url());
       const hote = url.hostname;
@@ -75,6 +76,7 @@ export const test = base.extend({
     });
     await use(journal);
     expect(journal.interdites, 'Aucune requête vers la production, vercel.app ou un autre Supabase').toEqual([]);
+    expect(journal.nonPrevues, 'Aucun appel Supabase simulé non prévu (Auth, RPC, REST, Storage)').toEqual([]);
   }, { auto: true }],
   // Erreurs JavaScript non gérées de la page : jamais tolérées.
   erreursPage: [async ({ page }, use) => {

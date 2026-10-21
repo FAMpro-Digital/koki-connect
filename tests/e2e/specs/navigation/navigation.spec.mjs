@@ -4,7 +4,7 @@ test.describe('Navigation principale', () => {
   test('ouverture de l’application et barre de navigation', async ({ page }) => {
     await page.goto('/index.html');
     await expect(page).toHaveTitle('KOKI CONNECT');
-    await expect(page.locator('#vue-portail')).toBeVisible();
+    await expect(page.locator('#tableau-de-bord')).toBeVisible();
     const boutons = page.locator('nav[aria-label="Navigation principale"] button[data-nav]');
     await expect(boutons).toHaveCount(5);
     await expect(boutons).toHaveText([/Accueil/, /Transport/, /Boutique/, /Activité/, /Profil/]);
@@ -16,14 +16,14 @@ test.describe('Navigation principale', () => {
 
     await nav('transport').click();
     await expect(page.locator('#vue-transport')).toBeVisible();
-    await expect(page.locator('#vue-portail')).toBeHidden();
+    await expect(page.locator('#tableau-de-bord')).toBeHidden();
 
     await nav('boutique').click();
     await expect(page.locator('#vue-commerce')).toBeVisible();
     await expect(page.locator('#vue-transport')).toBeHidden();
 
     await nav('accueil').click();
-    await expect(page.locator('#vue-portail')).toBeVisible();
+    await expect(page.locator('#tableau-de-bord')).toBeVisible();
   });
 
   test('le flux public est demandé à l’ouverture', async ({ page, journal }) => {

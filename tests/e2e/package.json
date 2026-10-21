@@ -7,7 +7,7 @@
     "install:navigateur": "playwright install chromium",
     "test": "playwright test",
     "test:mobile": "playwright test --project=mobile",
-    "test:bureau": "playwright test --project=bureau"
+    "test:ordinateur": "playwright test --project=ordinateur"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0"

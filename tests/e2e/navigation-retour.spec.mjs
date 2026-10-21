@@ -1,9 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/isolation.mjs';
 
-// Boutons Retour, navigation principale et retour du focus. Aucune requête externe (Supabase, météo, tuiles) ne part.
-test.beforeEach(async ({ page }) => {
-  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
-});
+// Boutons Retour, navigation principale et retour du focus. Isolation : helpers/isolation.mjs (Supabase simulé, rien de distant).
 
 async function ouvrir(page) {
   const erreurs = [];

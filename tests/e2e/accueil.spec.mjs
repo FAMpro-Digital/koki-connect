@@ -1,9 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/isolation.mjs';
 
-// Aucune requête ne part vers Supabase (production ou autre), la météo ou les tuiles de carte pendant les tests.
-test.beforeEach(async ({ page }) => {
-  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
-});
+// Aucune requête distante : Supabase est simulé (helpers/isolation.mjs). Le test hors ligne a besoin du service worker.
+test.use({ serviceWorkers: 'allow' });
 
 async function ouvrir(page) {
   const erreurs = [];
