@@ -8,7 +8,7 @@
     "test:e2e": "playwright test --config tests/e2e/playwright.config.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.1",
+    "@eslint/js": "10.0.1",
     "@playwright/test": "1.57.0",
     "eslint": "9.39.1",
     "globals": "16.5.0"
