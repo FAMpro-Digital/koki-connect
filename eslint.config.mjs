@@ -23,4 +23,5 @@ export default [
   { files: ['scripts/**/*.mjs', 'eslint.config.mjs', 'tests/e2e/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   { files: ['tests/fixtures/**/*.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.node } }, rules: regles },
   { files: ['tests/**/*.cjs'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },
+  { files: ['tests/load/**/*.js', 'tests/load/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023 }, rules: { ...regles, 'no-undef': 'off' } },
 ];

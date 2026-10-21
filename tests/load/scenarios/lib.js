@@ -35,7 +35,7 @@ export function lectureTable(url, cle, chemin, jeton, etiquette) {
 }
 
 export function jsonSur(reponse) {
-  try { return reponse.json(); } catch (_) { return null; }
+  try { return reponse.json(); } catch { return null; }
 }
 
 // Sonde unique avant la montée en charge : valide la cible et estime le volume sortant AVANT d'envoyer la charge.

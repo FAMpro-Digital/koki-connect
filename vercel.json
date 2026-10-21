@@ -43,6 +43,7 @@
       "develop/animation-touches": false,
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
+      "test/koki-connect-performance": false,
       "securite/csp-gestionnaires": false,
       "fiabilite/service-worker": false,
       "tests/qualite-automatisee": false
