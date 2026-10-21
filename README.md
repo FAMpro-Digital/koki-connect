@@ -22,3 +22,6 @@ node --test tests/*.test.cjs          # application
 python3 collecte/tests/test_convertir.py   # collecte
 node scripts/prepare-preview.mjs      # préproduction statique
 ```
+
+## Performance et charge
+Suite préparée sur la branche `test/koki-connect-performance` : scripts k6 (`tests/load/`), tests Playwright locaux (`tests/e2e/`), garde-fous et workflow manuel. Aucun test de charge ne s'exécute sans autorisation écrite et uniquement sur un projet Supabase TEST. Voir `tests/load/README.md`, `tests/e2e/README.md` et `docs/PERFORMANCE-RAPPORT.md`.

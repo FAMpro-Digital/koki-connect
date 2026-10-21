@@ -1,0 +1,135 @@
+name: Performance (manuel)
+
+# Ce workflow ne se déclenche JAMAIS tout seul : lancement manuel uniquement (workflow_dispatch).
+#  - « e2e-local »  : tests Playwright sur le site servi localement, Supabase simulé. Aucun accès distant.
+#  - « charge-test » : tests de charge k6 contre un projet Supabase TEST. Exige l'approbation d'un relecteur sur l'environnement
+#                      « koki-performance-test » (Settings → Environments → Required reviewers) ET une phrase d'autorisation exacte.
+# Jamais la production, jamais le site hébergé sur Vercel (offre Hobby : tests de charge interdits). Voir tests/load/README.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      etape:
+        description: 'e2e-local (sans réseau) ou charge-test (Supabase TEST, validation manuelle requise)'
+        type: choice
+        options: [e2e-local, charge-test]
+        default: e2e-local
+      scenario:
+        description: 'Scénario k6 (étape charge-test)'
+        type: choice
+        options: [public-read, authenticated-read, write-concurrency]
+        default: public-read
+      niveau:
+        description: 'Utilisateurs virtuels (étape charge-test)'
+        type: choice
+        options: ['100', '500', '1000', '5000']
+        default: '100'
+      autorisation:
+        description: 'Phrase exacte OUI-<niveau>-<référence du projet TEST> (étape charge-test)'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance
+  cancel-in-progress: false
+
+jobs:
+  e2e-local:
+    if: ${{ inputs.etape == 'e2e-local' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install Playwright
+        working-directory: tests/e2e
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Run Playwright (site local, Supabase simulé)
+        working-directory: tests/e2e
+        run: npx playwright test
+      - name: Keep reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          retention-days: 30
+          if-no-files-found: ignore
+
+  charge-test:
+    if: ${{ inputs.etape == 'charge-test' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    # Validation manuelle : le job attend l'approbation d'un relecteur désigné pour cet environnement.
+    environment: koki-performance-test
+    env:
+      NIVEAU: ${{ inputs.niveau }}
+      SCENARIO: ${{ inputs.scenario }}
+      SUPABASE_URL: ${{ vars.KOKI_TEST_SUPABASE_URL }}
+      KOKI_TEST_PROJECT_REF: ${{ vars.KOKI_TEST_PROJECT_REF }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOKI_TEST_PUBLISHABLE_KEY }}
+      AUTORISATION_CHARGE: ${{ inputs.autorisation }}
+      ALLOW_WRITES: ${{ vars.KOKI_ALLOW_WRITES }}
+      SHOP_ID: ${{ vars.KOKI_TEST_SHOP_ID }}
+      PRODUCT_ID: ${{ vars.KOKI_TEST_PRODUCT_ID }}
+      VEHICLE_ID: ${{ vars.KOKI_TEST_VEHICLE_ID }}
+      STOCK_INITIAL: ${{ vars.KOKI_TEST_STOCK_INITIAL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Verify safeguards (offline)
+        run: node --test tests/performance-garde-fous.test.cjs
+      - name: Verify the previous level succeeded
+        run: |
+          case "$NIVEAU" in
+            100) ;;
+            500) test -f tests/load/reports/.niveau-100-valide || { echo "Le niveau 100 doit d'abord réussir et être validé par le propriétaire."; exit 1; } ;;
+            1000) test -f tests/load/reports/.niveau-500-valide || { echo "Le niveau 500 doit d'abord réussir et être validé par le propriétaire."; exit 1; } ;;
+            5000) test -f tests/load/reports/.niveau-1000-valide || { echo "Le niveau 1000 doit d'abord réussir et être validé par le propriétaire."; exit 1; } ;;
+          esac
+      - name: Install k6
+        uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1
+      - name: Prepare fictitious accounts (from a TEST-only secret)
+        if: ${{ inputs.scenario != 'public-read' }}
+        env:
+          KOKI_TEST_ACCOUNTS_JSON: ${{ secrets.KOKI_TEST_ACCOUNTS_JSON }}
+        run: |
+          test -n "$KOKI_TEST_ACCOUNTS_JSON" || { echo "Secret KOKI_TEST_ACCOUNTS_JSON manquant (comptes fictifs TEST)."; exit 1; }
+          printf '%s' "$KOKI_TEST_ACCOUNTS_JSON" > tests/load/accounts.json
+      - name: Run k6 (arrêt automatique sur seuils critiques)
+        run: |
+          case "$SCENARIO" in
+            public-read|authenticated-read|write-concurrency) ;;
+            *) echo "Scénario inconnu."; exit 1 ;;
+          esac
+          k6 run "tests/load/scenarios/${SCENARIO}.js"
+      - name: Keep reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rapports-charge-${{ inputs.scenario }}-niveau-${{ inputs.niveau }}
+          path: tests/load/reports/*.json
+          retention-days: 90
+          if-no-files-found: ignore

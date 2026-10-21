@@ -1,0 +1,15 @@
+{
+  "name": "koki-connect-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Tests Playwright locaux de KOKI CONNECT : aucun accès réseau distant, Supabase entièrement simulé (données fictives).",
+  "scripts": {
+    "install:navigateur": "playwright install chromium",
+    "test": "playwright test",
+    "test:mobile": "playwright test --project=mobile",
+    "test:bureau": "playwright test --project=bureau"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0"
+  }
+}
