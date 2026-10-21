@@ -103,7 +103,14 @@ function fermerOpportunites() {
   document.querySelectorAll('body > .section').forEach(section => {
     section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce', 'vue-portail'].includes(section.id);
   });
-  document.querySelector('[onclick="afficherOpportunites()"]').focus();
+  // Retour du focus (clavier, lecteur d'écran) : d'abord le raccourci « Emplois & Opportunités » de l'accueil, à défaut le bouton
+  // d'ouverture. Jamais un élément masqué (closest('[hidden]') inclut l'élément lui-même) ; aucune exception s'il n'y en a pas.
+  const cibles = [].concat(
+    Array.from(document.querySelectorAll('.raccourci[data-recherche="Emplois & Opportunités"]')),
+    Array.from(document.querySelectorAll('[data-clic="afficherOpportunites()"]'))
+  );
+  const cible = cibles.find(el => !el.closest('[hidden]'));
+  if (cible) cible.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
 function afficherMenu() {

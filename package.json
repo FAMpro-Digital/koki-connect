@@ -1,0 +1,16 @@
+{
+  "name": "koki-connect",
+  "private": true,
+  "description": "Site statique Koki Connect. Ce fichier ne sert qu'aux outils de développement : aucune dépendance n'est utilisée en production.",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "lint": "eslint .",
+    "test:e2e": "playwright test --config tests/e2e/playwright.config.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@playwright/test": "1.57.0",
+    "eslint": "9.39.1",
+    "globals": "16.5.0"
+  }
+}

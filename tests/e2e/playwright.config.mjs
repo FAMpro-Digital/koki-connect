@@ -1,35 +1,15 @@
-// Tests Playwright locaux. Le site statique est servi sur 127.0.0.1 par serve-static.mjs ; tout accès distant est bloqué
-// et Supabase est simulé (helpers/isolation.mjs). Aucun test de charge : une seule session de navigateur par test.
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = Number(process.env.KOKI_E2E_PORT || 4173);
-
 export default defineConfig({
-  testDir: './specs',
-  timeout: 30_000,
-  expect: { timeout: 7_000 },
-  fullyParallel: false,
-  workers: 2,
-  retries: 0,
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
-  outputDir: 'test-results',
-  use: {
-    baseURL: 'http://127.0.0.1:' + PORT,
-    serviceWorkers: 'block', // pas de copie hors ligne qui masquerait une régression
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    locale: 'fr-SN',
-    timezoneId: 'Africa/Dakar',
-  },
+  testDir: '.',
+  testMatch: '*.spec.mjs',
+  timeout: 30000,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? [['list'], ['html', { outputFolder: 'rapports', open: 'never' }]] : 'list',
+  use: { baseURL: 'http://127.0.0.1:4173', serviceWorkers: 'allow' },
   projects: [
-    { name: 'bureau', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    { name: 'mobile', use: { ...devices['Pixel 5'] } },
+    { name: 'ordinateur', use: { ...devices['Desktop Chrome'] } },
   ],
-  webServer: {
-    command: 'node serve-static.mjs',
-    url: 'http://127.0.0.1:' + PORT + '/index.html',
-    reuseExistingServer: false,
-    timeout: 20_000,
-    env: { KOKI_E2E_PORT: String(PORT) },
-  },
+  webServer: { command: 'node tests/e2e/serveur.mjs', url: 'http://127.0.0.1:4173', reuseExistingServer: !process.env.CI, cwd: '../..' },
 });

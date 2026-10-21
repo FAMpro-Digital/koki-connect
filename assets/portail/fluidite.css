@@ -41,7 +41,7 @@ img { -webkit-user-drag: none; }
 .barre-retour svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .barre-titre { margin: 0; font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 body.page-pleine .entete-koki, body.page-pleine #portail-sync, body.page-pleine .search,
-body.page-pleine .section > button[onclick="fermerOpportunites()"] { display: none !important; }
+body.page-pleine .section > button[data-clic="fermerOpportunites()"] { display: none !important; }
 /* Le titre de la page est dans la barre : le titre interne reste lisible par les lecteurs d'écran. */
 body.page-pleine :is(#portail-titre, #titre-opportunites, #titre-commerce, #titre-carte, #titre-menu, #titre-notifications, #titre-rubrique) {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
