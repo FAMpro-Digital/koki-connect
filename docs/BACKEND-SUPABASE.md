@@ -8,7 +8,7 @@ Le serveur (fonction `public.koki_business`, tables, règles d'accès, photos) e
 - `supabase/proposals/phase2-transactions.sql`
 - `supabase/proposals/merchant-profiles.sql`
 
-Ces propositions sont testées dans l'admin (PostgreSQL embarqué) et **ne sont pas encore appliquées** sur Supabase. Elles s'appliquent dans cet ordre, d'abord sur un projet de test, selon `supabase/preproduction/` de l'admin. L'application publique les appelle déjà via `assets/business/client.mjs`. `assets/business/config.json` reste à `"enabled": false` tant que l'activation n'est pas validée (la CI le vérifie).
+État de production : les paquets de la fondation, de la phase 2, de l'espace commerçant et de la modernisation Commerces ont été appliqués sur Supabase les 13 et 14/10/2026 (journal dans `supabase/production/README.md` du dépôt admin) ; `assets/business/config.json` est à `"enabled": true`. Toute nouvelle proposition (par exemple `feed-pagine-quotas.sql`) s'applique d'abord sur un projet de TEST, puis en production **uniquement après validation explicite du propriétaire**, avec un paquet à garde (voir `supabase/production/`). L'application publique appelle le serveur via `assets/business/client.mjs`.
 
 ## Connexion par SMS (ajoutée dans l'application publique)
 
