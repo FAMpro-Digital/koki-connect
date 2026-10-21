@@ -38,7 +38,8 @@
       "develop/audit-corrections": false,
       "fix/profil-pro-styles": false,
       "develop/animation-touches": false,
-      "ci/verification-main": false
+      "ci/verification-main": false,
+      "perf/chargement-mobile": false
     }
   },
   "headers": [

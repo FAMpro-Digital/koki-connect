@@ -4,7 +4,7 @@ const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/port
 const edu=fs.readFileSync('assets/portail/education.js','utf8'),bib=fs.readFileSync('assets/portail/bibliotheque.js','utf8'),css=fs.readFileSync('assets/portail/education.css','utf8');
 test('module chargé après la bibliothèque, feuille de style incluse, rubrique branchée',()=>{
  assert.ok(html.indexOf('assets/portail/education.js')>html.indexOf('assets/portail/bibliotheque.js'));
- assert.match(html,/<link rel="stylesheet" href="assets\/portail\/education\.css">/);
+ assert.match(html,/<link rel="stylesheet" href="assets\/portail\/education\.css" media="print" data-differe>/);
  assert.match(app,/async function education\(\)\{if\(window\.KokiEducation\)\{KokiEducation\.accueil\(\);return;\}/);
  assert.match(app,/function educationDetail\(row\)\{if\(window\.KokiEducation\)\{KokiEducation\.ecole\(row\);return;\}/);
  assert.match(edu,/window\.KokiEducation=Object\.freeze\(\{accueil,etablissements,ecole\}\)/);
