@@ -46,7 +46,8 @@
       "test/koki-connect-performance": false,
       "securite/csp-gestionnaires": false,
       "fiabilite/service-worker": false,
-      "tests/qualite-automatisee": false
+      "tests/qualite-automatisee": false,
+      "validation-pr50-with-58": false
     }
   },
   "headers": [
