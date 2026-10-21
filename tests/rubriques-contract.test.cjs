@@ -1,7 +1,7 @@
 // Rubriques coordonnées : l'accueil public et le menu de l'administration partagent le même contrat.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{createHash}=require('node:crypto');
 const R=require('../assets/portail/rubriques-contract.js'),FICHIER='assets/portail/rubriques-contract.js';
-const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8');
+const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/app.js','utf8');
 // Empreinte du contrat : identique dans les deux dépôts (admin : src/rubriques-contract.js).
 const EMPREINTE='f908848b1186e5ac8b497a903494b16204cd0b1049f005763cab564548c8d2a1';
 test('contrat Rubriques : identique dans les deux dépôts',()=>{assert.equal(createHash('sha256').update(fs.readFileSync(FICHIER)).digest('hex'),EMPREINTE);});
@@ -24,5 +24,5 @@ test('Opportunités jeunes : filtres, cartes et catégories conformes au contrat
  const mapping=Function('return '+m[1])();assert.deepEqual(mapping,Object.fromEntries(sous.map(s=>[s.nom,[...s.categories]])));
 });
 test('Santé et Services publics : catégories de la carte présentes',()=>{
- for(const r of R.rubriques.filter(x=>x.lieux)){assert.ok(html.includes('<option>'+r.lieux+'</option>'),r.lieux);if(['Santé','Services publics'].includes(r.lieux))assert.ok(html.includes("KokiPortail.lieux('"+r.lieux+"')"));}
+ for(const r of R.rubriques.filter(x=>x.lieux)){assert.ok(html.includes('<option>'+r.lieux+'</option>'),r.lieux);if(['Santé','Services publics'].includes(r.lieux))assert.ok(html.includes('KokiPortail.lieux('+r.lieux+')'));}
 });

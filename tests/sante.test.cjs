@@ -13,7 +13,7 @@ test('Santé : ouvert maintenant (heure de Koki), garde et horaires',()=>{
  assert.equal(S.horairesTexte(v),'Lun–Sam 08h00–21h00');assert.equal(S.famille(v.genre),'pharmacie');
 });
 test('Application : page Santé reliée à l’accueil',()=>{
- const html=fs.readFileSync('index.html','utf8');
+ const html=require('./_aide.cjs').accueil();
  assert.ok(html.includes('assets/portail/sante-contract.js')&&html.includes('assets/portail/sante.js'));
  assert.equal((html.match(/KokiSante\.ouvrir\(\)/g)||[]).length,3,"tuile, informations utiles et menu");
  const app=fs.readFileSync('assets/portail/app.js','utf8');assert.match(app,/KokiSanteContract\.decode\(x\)/);assert.match(app,/window\.KokiPortail=\{ouvrir,detail,/);

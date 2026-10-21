@@ -1,9 +1,9 @@
 // Transport : feuille de réservation (carte, « Où allez-vous ? », véhicules avec prix, Commander) branchée sur le serveur existant.
 const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
 test('interface Transport : carte, trajet, quatre véhicules avec prix, bouton Commander',()=>{
- const html=fs.readFileSync('index.html','utf8'),v=html.slice(html.indexOf('<section id="vue-transport"'),html.indexOf('<section id="vue-carte"'));
+ const html=require('./_aide.cjs').accueil(),v=html.slice(html.indexOf('<section id="vue-transport"'),html.indexOf('<section id="vue-carte"'));
  assert.match(v,/<h2 id="titre-transport" tabindex="-1">Où allez-vous \?<\/h2>/);
- for(const c of ['Moto','Taxi','Voiture','Minicar'])assert.match(v,new RegExp('data-vehicule="'+c+'"[^>]*onclick="KokiTransport\\.categorie\\(\''+c+'\'\\)"'),c);
+ for(const c of ['Moto','Taxi','Voiture','Minicar'])assert.match(v,new RegExp('data-vehicule="'+c+'"[^>]*data-clic="KokiTransport\\.categorie\\('+c+'\\)"'),c);
  assert.equal((v.match(/data-prix="/g)||[]).length,4);
  for(const id of ['transport-carte','transport-depart','transport-destination','transport-position','transport-demander','transport-chauffeurs','transport-course','transport-demo'])assert.ok(v.includes('id="'+id+'"'),id);
  assert.doesNotMatch(v,/🏍️|🚕|🚗|🚐/,'icônes dessinées, pas d’émojis');

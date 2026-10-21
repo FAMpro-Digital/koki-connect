@@ -68,7 +68,7 @@ test('fiches liées : boutique → produits, commerce → boutiques et services'
 test('interface : retour, onglets, liens externes sûrs, panier et demandes internes conservés',()=>{
  const fs=require('node:fs');const ui=fs.readFileSync('assets/business/catalogue.mjs','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
  for(const label of ['Commerces','Boutiques','Produits','Services'])assert.ok(fs.readFileSync('assets/business/catalogue-state.mjs','utf8').includes(`label:'${label}'`));
- assert.match(ui,/a\.rel='noopener noreferrer'/);assert.match(ui,/history\.pushState/);assert.match(ui,/'← Retour'/);assert.match(fs.readFileSync('index.html','utf8'),/id="vue-commerce"[^>]*>\s*<button type="button" onclick="fermerOpportunites\(\)">← Retour à l’accueil/);
+ assert.match(ui,/a\.rel='noopener noreferrer'/);assert.match(ui,/history\.pushState/);assert.match(ui,/'← Retour'/);assert.match(require('./_aide.cjs').accueil(),/id="vue-commerce"[^>]*>\s*<button type="button" data-clic="fermerOpportunites\(\)">← Retour à l’accueil/);
  assert.doesNotMatch(ui,/innerHTML/,'aucun HTML injecté depuis les données');
  assert.match(rt,/async function addToCart\(/);assert.match(rt,/async function requestService\(/);assert.match(rt,/api\.order\(/,'commande interne conservée');
 });

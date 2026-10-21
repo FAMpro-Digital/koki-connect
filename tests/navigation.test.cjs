@@ -1,7 +1,7 @@
 // Navigation façon application : étapes d'historique par page, retour du téléphone, Accueil, animations, toucher.
 const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
 test('module de navigation chargé après les pages, avec sa feuille de style',()=>{
- const html=fs.readFileSync('index.html','utf8');
+ const html=require('./_aide.cjs').accueil();
  assert.ok(html.indexOf('assets/portail/navigation.js')>html.indexOf('assets/portail/app.js'),'après les pages du portail');
  assert.match(html,/<link rel="stylesheet" href="assets\/portail\/fluidite\.css">/);
  new (require('node:vm').Script)(fs.readFileSync('assets/portail/navigation.js','utf8'));

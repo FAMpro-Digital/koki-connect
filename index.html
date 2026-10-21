@@ -210,9 +210,9 @@
   <header class="entete-koki">
     <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
     <div class="entete-commandes">
-      <button type="button" aria-label="Ouvrir le menu" onclick="afficherMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-      <button type="button" aria-label="Profil utilisateur" onclick="KokiPortail.profil()">👤</button>
-      <button type="button" aria-label="Notifications" onclick="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
+      <button type="button" aria-label="Ouvrir le menu" data-clic="afficherMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" aria-label="Profil utilisateur" data-clic="KokiPortail.profil()">👤</button>
+      <button type="button" aria-label="Notifications" data-clic="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     </div>
     <div class="entete-infos">
       <div><strong>📍 Koki, Louga</strong><p id="date-entete"></p></div>
@@ -220,13 +220,13 @@
         <span id="icone-meteo" aria-hidden="true">🌤️</span> <strong id="temperature-meteo">— °C</strong>
         <p id="condition-meteo">Chargement…</p>
         <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" style="color:inherit; font-size:10px;">Open-Meteo</a>
-        <button id="actualiser-meteo" type="button" onclick="chargerMeteo()" style="border:0; background:transparent; color:inherit; cursor:pointer; font-size:11px;" aria-label="Actualiser la météo de Koki">↻</button>
+        <button id="actualiser-meteo" type="button" data-clic="chargerMeteo()" style="border:0; background:transparent; color:inherit; cursor:pointer; font-size:11px;" aria-label="Actualiser la météo de Koki">↻</button>
       </div>
     </div>
   </header>
 
   <div class="search">
-    <input type="search" aria-label="Que recherchez-vous à Koki ?" oninput="KokiPortail.rechercher(this.value)" placeholder="🔎 Que recherchez-vous à Koki ?">
+    <input type="search" aria-label="Que recherchez-vous à Koki ?" data-saisie="KokiPortail.rechercher(this.value)" placeholder="🔎 Que recherchez-vous à Koki ?">
     <div id="portail-recherche" class="portail-grid"></div>
     <p id="resultat-recherche" role="status" style="margin-top:10px; font-size:14px;"></p>
   </div>
@@ -234,31 +234,31 @@
   <section class="section" id="tableau-de-bord">
     <h2>Votre quotidien à Koki</h2>
     <div class="quick">
-<button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" onclick="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
-<button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" onclick="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
-<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" onclick="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
-<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" onclick="KokiPortail.liste('Opportunités')"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
-<button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" onclick="KokiPortail.liste('Sports & ASC')"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
-<button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
-<button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" onclick="KokiPortail.liste('Événements')"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
-<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
+<button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" data-clic="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
+<button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" data-clic="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
+<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" data-clic="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
+<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" data-clic="KokiPortail.liste(Opportunités)"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
+<button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" data-clic="KokiPortail.liste(Sports &amp; ASC)"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
+<button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
+<button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" data-clic="KokiPortail.liste(Événements)"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
+<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
     </div>
     <div id="service-proche" style="margin-top:18px;"></div>
   </section>
 <p id="portail-sync" class="portail-sync" role="status">Chargement des contenus publiés…</p>
-<section class="section" id="accueil-une"><div class="portail-title"><h2>🔥 À la une à Koki</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Actualités')">Voir plus</button></div><div id="portail-une" class="portail-grid"></div></section>
-<section class="section" id="accueil-actualites"><div class="portail-title"><h2>📰 Actualités de Koki</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Actualités')">Voir toutes les actualités</button></div><div id="portail-actualites" class="portail-grid"></div></section>
-<section class="section" id="accueil-annonces"><div class="portail-title"><h2>📢 Annonces</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Annonces')">Voir toutes les annonces</button></div><div id="portail-annonces" class="portail-grid"></div></section>
-<section class="section" id="accueil-publicites"><div class="portail-title"><h2>📣 Publicités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Publicités')">Voir plus</button></div><div id="portail-publicites" class="portail-grid"></div></section>
-<section class="section" id="accueil-commerces"><div class="portail-title"><h2>🛍️ Commerces & promotions</h2><button class="portail-more" type="button" onclick="afficherCommerce()">Voir plus</button></div><div id="portail-commerces" class="portail-grid"></div></section>
-<section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Opportunités')">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
-<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sport</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Sports & ASC')">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
-<section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" onclick="KokiPortail.liste('Événements')">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
-<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button onclick="afficherRubrique('Numéros utiles')">📞 Numéros utiles et urgences</button><button onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')">🏥 Santé et pharmacies</button><button onclick="KokiPortail.education()">🎓 Écoles</button><button onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')">🏛️ Services publics</button><button onclick="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
+<section class="section" id="accueil-une"><div class="portail-title"><h2>🔥 À la une à Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir plus</button></div><div id="portail-une" class="portail-grid"></div></section>
+<section class="section" id="accueil-actualites"><div class="portail-title"><h2>📰 Actualités de Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir toutes les actualités</button></div><div id="portail-actualites" class="portail-grid"></div></section>
+<section class="section" id="accueil-annonces"><div class="portail-title"><h2>📢 Annonces</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Annonces)">Voir toutes les annonces</button></div><div id="portail-annonces" class="portail-grid"></div></section>
+<section class="section" id="accueil-publicites"><div class="portail-title"><h2>📣 Publicités</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Publicités)">Voir plus</button></div><div id="portail-publicites" class="portail-grid"></div></section>
+<section class="section" id="accueil-commerces"><div class="portail-title"><h2>🛍️ Commerces & promotions</h2><button class="portail-more" type="button" data-clic="afficherCommerce()">Voir plus</button></div><div id="portail-commerces" class="portail-grid"></div></section>
+<section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Opportunités)">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
+<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sport</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Sports &amp; ASC)">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
+<section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Événements)">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
+<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button data-clic="afficherRubrique(Numéros utiles)">📞 Numéros utiles et urgences</button><button data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)">🏥 Santé et pharmacies</button><button data-clic="KokiPortail.education()">🎓 Écoles</button><button data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)">🏛️ Services publics</button><button data-clic="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p></section>
-<section class="section" id="vue-portail" hidden><button class="portail-more" onclick="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-bandeau" class="rb-bandeau" hidden></div><div id="portail-vue"></div></section>
+<section class="section" id="vue-portail" hidden><button class="portail-more" data-clic="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-bandeau" class="rb-bandeau" hidden></div><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
-    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
     <p style="margin-bottom:15px;">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
     <article class="card highlight" aria-labelledby="titre-fampro" style="margin-bottom:20px;">
@@ -270,13 +270,13 @@
       ✉️ <a href="mailto:kokiconnect221@gmail.com">kokiconnect221@gmail.com</a></p>
     </article>
     <div class="opportunites-filtres" role="group" aria-label="Filtrer les opportunités par rubrique">
-      <button type="button" data-filtre="Toutes" aria-pressed="true" onclick="filtrerOpportunites(this.dataset.filtre)">Toutes</button>
-      <button type="button" data-filtre="Emplois" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Emplois</button>
-      <button type="button" data-filtre="Stages" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Stages</button>
-      <button type="button" data-filtre="Formations" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Formations</button>
-      <button type="button" data-filtre="Concours" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Concours</button>
-      <button type="button" data-filtre="Bourses" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Bourses</button>
-      <button type="button" data-filtre="Financements" aria-pressed="false" onclick="filtrerOpportunites(this.dataset.filtre)">Financements</button>
+      <button type="button" data-filtre="Toutes" aria-pressed="true" data-clic="filtrerOpportunites(this.dataset.filtre)">Toutes</button>
+      <button type="button" data-filtre="Emplois" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Emplois</button>
+      <button type="button" data-filtre="Stages" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Stages</button>
+      <button type="button" data-filtre="Formations" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Formations</button>
+      <button type="button" data-filtre="Concours" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Concours</button>
+      <button type="button" data-filtre="Bourses" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Bourses</button>
+      <button type="button" data-filtre="Financements" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Financements</button>
     </div>
     <p id="statut-opportunites" role="status" style="margin-bottom:15px;">6 rubriques affichées.</p>
     <div class="services">
@@ -290,21 +290,21 @@
   </section>
 
   <section id="vue-commerce" class="section" hidden aria-labelledby="titre-commerce">
-    <button type="button" onclick="fermerOpportunites()">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()">← Retour à l’accueil</button>
     <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
-    <div class="market-demo" hidden><label><input id="market-demo" type="checkbox" onchange="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
+    <div class="market-demo" hidden><label><input id="market-demo" type="checkbox" data-change="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
     <p id="market-message" role="status"></p>
     <div id="market-demo-interface" hidden>
     <div class="market-tabs" role="group" aria-label="Démonstration : suivi et espace professionnel">
-      <button type="button" data-market-tab="suivi" aria-pressed="true" onclick="KokiCommerce.onglet('suivi')">Mes commandes et demandes (démo)</button>
-      <button type="button" data-market-tab="pro" aria-pressed="false" onclick="KokiCommerce.onglet('pro')">Espace professionnel (démo)</button>
+      <button type="button" data-market-tab="suivi" aria-pressed="true" data-clic="KokiCommerce.onglet(suivi)">Mes commandes et demandes (démo)</button>
+      <button type="button" data-market-tab="pro" aria-pressed="false" data-clic="KokiCommerce.onglet(pro)">Espace professionnel (démo)</button>
     </div>
-    <form id="market-demande" class="market-panel" hidden onsubmit="event.preventDefault(); KokiCommerce.envoyerDemande()">
+    <form id="market-demande" class="market-panel" hidden data-envoi="KokiCommerce.envoyerDemande()">
       <h3 id="market-demande-titre">Demander un devis</h3>
       <label for="market-besoin">Décrivez votre besoin</label><textarea id="market-besoin" minlength="10" maxlength="2000" required></textarea>
       <label for="market-service-lieu">Lieu d’intervention</label><select id="market-service-lieu" required></select>
-      <button type="button" onclick="KokiCommerce.position('service')">📍 Utiliser ma position</button>
+      <button type="button" data-clic="KokiCommerce.position(service)">📍 Utiliser ma position</button>
       <label for="market-date">Date souhaitée</label><input id="market-date" type="date" required>
       <label for="market-besoin-photo">Photo du besoin (facultative, JPEG/PNG/WebP/HEIC, 10 Mo maximum, réduite automatiquement)</label><input id="market-besoin-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
       <p class="market-small">La photo sera conservée localement avec la demande démo, sans transmission.</p>
@@ -314,13 +314,13 @@
     <div id="market-pro" class="market-panel" hidden>
       <h3>Espace professionnel — démonstration locale</h3>
       <p class="market-small">Ce profil n’est pas un compte connecté. Vos modifications restent sur cet appareil et ne sont pas publiées aux autres utilisateurs.</p>
-      <form onsubmit="event.preventDefault(); KokiCommerce.sauverProfil()">
+      <form data-envoi="KokiCommerce.sauverProfil()">
         <label for="market-pro-type">Profil</label><select id="market-pro-type"><option>Commerçant</option><option>Prestataire de services</option><option>Les deux</option></select>
         <label for="market-pro-nom">Nom de la boutique ou entreprise</label><input id="market-pro-nom" maxlength="100" required>
         <label for="market-pro-description">Présentation</label><textarea id="market-pro-description" maxlength="1000" required></textarea>
         <label for="market-pro-zone">Zone d’intervention</label><input id="market-pro-zone" maxlength="150" value="Koki et environs" required>
         <label for="market-pro-lieu">Localisation</label><select id="market-pro-lieu" required></select>
-        <button type="button" onclick="KokiCommerce.position('professionnel')">📍 Utiliser ma position GPS</button>
+        <button type="button" data-clic="KokiCommerce.position(professionnel)">📍 Utiliser ma position GPS</button>
         <p class="market-small">Placez-vous sur le lieu de votre activité avant de relever sa position.</p>
         <label for="market-pro-tel">Téléphone international (ex. +221…)</label><input id="market-pro-tel" type="tel" maxlength="20">
         <label for="market-pro-logo">Photo ou logo (10 Mo maximum, réduite automatiquement)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
@@ -328,9 +328,9 @@
       </form>
       <hr style="margin:22px 0;">
       <h3 id="market-editeur-titre">Ajouter un produit ou service</h3>
-      <form id="market-editeur" onsubmit="event.preventDefault(); KokiCommerce.sauverOffre()">
+      <form id="market-editeur" data-envoi="KokiCommerce.sauverOffre()">
         <input id="market-offre-id" type="hidden">
-        <label for="market-offre-type">Type d’offre</label><select id="market-offre-type" onchange="KokiCommerce.categoriesOffre()"><option value="produit">Produit</option><option value="service">Service</option></select>
+        <label for="market-offre-type">Type d’offre</label><select id="market-offre-type" data-change="KokiCommerce.categoriesOffre()"><option value="produit">Produit</option><option value="service">Service</option></select>
         <label for="market-offre-nom">Nom</label><input id="market-offre-nom" maxlength="100" required>
         <label for="market-offre-categorie">Catégorie</label><select id="market-offre-categorie"></select>
         <label for="market-offre-description">Description</label><textarea id="market-offre-description" maxlength="1000" required></textarea>
@@ -339,21 +339,21 @@
         <label for="market-offre-ancien">Ancien prix en FCFA (promotion produits, facultatif)</label><input id="market-offre-ancien" type="number" min="0" max="100000000" step="1">
         <label><input id="market-offre-dispo" type="checkbox" checked> Disponible</label>
         <label for="market-offre-photo">Photo du produit ou de la réalisation (10 Mo maximum, réduite automatiquement)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
-        <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" onclick="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
+        <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" data-clic="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
       </form>
       <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
       <h3 style="margin-top:22px;">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
-      <button type="button" onclick="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
+      <button type="button" data-clic="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
     </div>
     </div>
   </section>
 
   <section id="vue-transport" class="section" hidden aria-labelledby="titre-transport">
-    <button type="button" class="tr-retour" onclick="fermerOpportunites()">← Retour à l’accueil</button>
+    <button type="button" class="tr-retour" data-clic="fermerOpportunites()">← Retour à l’accueil</button>
     <div class="tr-app">
       <div class="tr-carte-zone">
         <div id="transport-carte" aria-label="Carte pour choisir le départ et la destination"></div>
-        <button id="transport-position" class="tr-flottant" type="button" onclick="KokiTransport.utiliserPosition()" aria-label="Utiliser ma position comme départ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+        <button id="transport-position" class="tr-flottant" type="button" data-clic="KokiTransport.utiliserPosition()" aria-label="Utiliser ma position comme départ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
       </div>
       <div class="tr-feuille">
         <span class="tr-poignee" aria-hidden="true"></span>
@@ -363,23 +363,23 @@
         <div id="transport-suivi" class="tr-suivi" hidden></div>
         <div id="transport-reservation" class="tr-reservation">
           <div class="tr-trajet">
-            <div class="tr-ligne"><span class="tr-point tr-point-depart" aria-hidden="true"></span><label for="transport-depart">Départ</label><select id="transport-depart" onchange="KokiTransport.changerLieu('depart')"><option value="">Choisir un lieu de départ</option></select></div>
-            <div class="tr-ligne tr-ligne-destination"><span class="tr-point tr-point-destination" aria-hidden="true"></span><label for="transport-destination">Destination</label><select id="transport-destination" onchange="KokiTransport.changerLieu('destination')"><option value="">Choisir une destination</option></select></div>
+            <div class="tr-ligne"><span class="tr-point tr-point-depart" aria-hidden="true"></span><label for="transport-depart">Départ</label><select id="transport-depart" data-change="KokiTransport.changerLieu(depart)"><option value="">Choisir un lieu de départ</option></select></div>
+            <div class="tr-ligne tr-ligne-destination"><span class="tr-point tr-point-destination" aria-hidden="true"></span><label for="transport-destination">Destination</label><select id="transport-destination" data-change="KokiTransport.changerLieu(destination)"><option value="">Choisir une destination</option></select></div>
             <div class="tr-actions">
-              <button id="transport-point-depart" type="button" aria-pressed="false" onclick="KokiTransport.choisirPoint('depart')">Placer le départ sur la carte</button>
-              <button id="transport-point-destination" type="button" aria-pressed="false" onclick="KokiTransport.choisirPoint('destination')">Placer la destination sur la carte</button>
+              <button id="transport-point-depart" type="button" aria-pressed="false" data-clic="KokiTransport.choisirPoint(depart)">Placer le départ sur la carte</button>
+              <button id="transport-point-destination" type="button" aria-pressed="false" data-clic="KokiTransport.choisirPoint(destination)">Placer la destination sur la carte</button>
             </div>
           </div>
           <h3 class="tr-titre">Choisissez votre véhicule</h3>
           <div class="tr-vehicules" role="group" aria-label="Catégorie de véhicule">
-              <button type="button" class="tr-vehicule" data-vehicule="Moto" aria-pressed="true" onclick="KokiTransport.categorie('Moto')"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M5.5 17l4-7h5l4 7M12 10l-2-4H7"/></svg></span><span class="tr-texte"><strong>Moto</strong><span>1 passager · rapide</span></span><span class="tr-prix" data-prix="Moto">—</span></button>
-              <button type="button" class="tr-vehicule" data-vehicule="Taxi" aria-pressed="false" onclick="KokiTransport.categorie('Taxi')"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><path d="M10 4h4v3"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Taxi</strong><span>4 places</span></span><span class="tr-prix" data-prix="Taxi">—</span></button>
-              <button type="button" class="tr-vehicule" data-vehicule="Voiture" aria-pressed="false" onclick="KokiTransport.categorie('Voiture')"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Voiture</strong><span>4 places · confort</span></span><span class="tr-prix" data-prix="Voiture">—</span></button>
-              <button type="button" class="tr-vehicule" data-vehicule="Minicar" aria-pressed="false" onclick="KokiTransport.categorie('Minicar')"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 11h18M7 17v2M17 17v2"/></svg></span><span class="tr-texte"><strong>Minicar</strong><span>Groupes et bagages</span></span><span class="tr-prix" data-prix="Minicar">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Moto" aria-pressed="true" data-clic="KokiTransport.categorie(Moto)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M5.5 17l4-7h5l4 7M12 10l-2-4H7"/></svg></span><span class="tr-texte"><strong>Moto</strong><span>1 passager · rapide</span></span><span class="tr-prix" data-prix="Moto">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Taxi" aria-pressed="false" data-clic="KokiTransport.categorie(Taxi)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><path d="M10 4h4v3"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Taxi</strong><span>4 places</span></span><span class="tr-prix" data-prix="Taxi">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Voiture" aria-pressed="false" data-clic="KokiTransport.categorie(Voiture)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Voiture</strong><span>4 places · confort</span></span><span class="tr-prix" data-prix="Voiture">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Minicar" aria-pressed="false" data-clic="KokiTransport.categorie(Minicar)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 11h18M7 17v2M17 17v2"/></svg></span><span class="tr-texte"><strong>Minicar</strong><span>Groupes et bagages</span></span><span class="tr-prix" data-prix="Minicar">—</span></button>
           </div>
           <p id="transport-estimation" class="tr-estimation" role="status">Choisissez le départ et la destination.</p>
           <div id="transport-chauffeurs" class="tr-chauffeurs"></div>
-          <button id="transport-demander" class="tr-commander" type="button" onclick="KokiTransport.demander()" disabled>Commander</button>
+          <button id="transport-demander" class="tr-commander" type="button" data-clic="KokiTransport.demander()" disabled>Commander</button>
           <p class="tr-aide" id="transport-reservation-info">Prix estimé à vol d’oiseau, confirmé par Koki Connect avant la réservation.</p>
         </div>
         <div id="transport-course" class="tr-course" hidden>
@@ -390,13 +390,13 @@
             <li>En attente</li><li>Acceptée</li><li>Chauffeur en route</li><li>Course en cours</li><li>Terminée</li>
           </ol>
           <div class="tr-actions">
-            <button id="transport-suivant" type="button" class="tr-commander" onclick="KokiTransport.avancer()">Simuler : Acceptée</button>
-            <button type="button" onclick="KokiTransport.reinitialiserCourse()">Effacer la course démo</button>
+            <button id="transport-suivant" type="button" class="tr-commander" data-clic="KokiTransport.avancer()">Simuler : Acceptée</button>
+            <button type="button" data-clic="KokiTransport.reinitialiserCourse()">Effacer la course démo</button>
           </div>
           <p class="tr-aide">Simulation sur cet appareil uniquement. Aucun chauffeur n’est contacté.</p>
         </div>
         <div class="transport-demo">
-          <label><input id="transport-demo" type="checkbox" onchange="KokiTransport.changerMode()">Tester le mode démonstration</label>
+          <label><input id="transport-demo" type="checkbox" data-change="KokiTransport.changerMode()">Tester le mode démonstration</label>
           <p id="transport-mode-info" class="tr-aide">Course fictive sur cet appareil, sans chauffeur réel.</p>
         </div>
       </div>
@@ -404,15 +404,15 @@
   </section>
 
   <section id="vue-carte" class="section" hidden aria-labelledby="titre-carte">
-    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
     <h2 id="titre-carte" tabindex="-1">Carte de la commune de Koki</h2>
     <p style="line-height:1.5; margin-bottom:12px;">Koki et ses villages environnants. Recherchez un lieu ou choisissez une catégorie.</p>
     <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-      <input id="recherche-carte" type="search" aria-label="Rechercher un lieu" placeholder="Village, école, commerce…" oninput="filtrerCarte()" style="padding:12px; flex:1; min-width:180px;">
-      <select id="categorie-carte" aria-label="Catégorie de lieu" onchange="filtrerCarte()" style="padding:12px;">
+      <input id="recherche-carte" type="search" aria-label="Rechercher un lieu" placeholder="Village, école, commerce…" data-saisie="filtrerCarte()" style="padding:12px; flex:1; min-width:180px;">
+      <select id="categorie-carte" aria-label="Catégorie de lieu" data-change="filtrerCarte()" style="padding:12px;">
         <option value="">Tous les lieux</option><option>Villages et quartiers</option><option>Éducation</option><option>Santé</option><option>Services publics</option><option>Commerces</option><option>Lieux religieux</option><option>Sports</option><option>Eau</option>
       </select>
-      <button type="button" onclick="recentrerCarte()" style="padding:12px;">Toute la commune</button>
+      <button type="button" data-clic="recentrerCarte()" style="padding:12px;">Toute la commune</button>
     </div>
     <p id="statut-carte" role="status" style="margin-bottom:10px;"></p>
     <div id="carte-koki" aria-label="Carte interactive de Koki" style="height:440px; border-radius:16px; overflow:hidden; position:relative; z-index:0;"></div>
@@ -421,25 +421,25 @@
   </section>
 
   <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
-    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-menu" tabindex="-1">Menu</h2>
     <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
-      <button type="button" onclick="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Transport" onclick="afficherTransport()"><span>🚕 Transport</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Commerces &amp; Services" onclick="afficherCommerce()"><span>🛍️ Commerces &amp; Services</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Éducation" onclick="KokiPortail.education()"><span>🎓 Éducation</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Emplois &amp; Opportunités" onclick="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Sport" onclick="afficherRubrique('Sports / ASC')"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Santé" onclick="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux('Santé')"><span>🏥 Santé</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Événements" onclick="afficherRubrique('Événements')"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
-      <button type="button" data-rubrique="Services publics" onclick="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux('Services publics')"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Transport" data-clic="afficherTransport()"><span>🚕 Transport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Commerces &amp; Services" data-clic="afficherCommerce()"><span>🛍️ Commerces &amp; Services</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Éducation" data-clic="KokiPortail.education()"><span>🎓 Éducation</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Emplois &amp; Opportunités" data-clic="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Sport" data-clic="afficherRubrique(Sports / ASC)"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Santé" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span>🏥 Santé</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Événements" data-clic="afficherRubrique(Événements)"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Services publics" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
       <p class="menu-sep">Informations</p>
-      <button type="button" onclick="afficherRubrique('Actualités')"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Petites annonces')"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherRubrique('Numéros utiles')"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
-      <button type="button" onclick="KokiPortail.admin()"><span>🔐 Espace administration</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherRubrique(Actualités)"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherRubrique(Petites annonces)"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherRubrique(Numéros utiles)"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="KokiPortail.admin()"><span>🔐 Espace administration</span><span aria-hidden="true">›</span></button>
     </div>
     <article class="card" aria-labelledby="titre-a-propos">
       <h3 id="titre-a-propos">À propos de KOKI CONNECT</h3>
@@ -454,7 +454,7 @@
   </section>
 
   <section id="vue-notifications" class="section" hidden aria-labelledby="titre-notifications">
-    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
     <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
     <p style="margin-bottom:18px; line-height:1.5;">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
     <div id="portail-notifications" class="portail-grid"></div>
@@ -466,263 +466,21 @@
   </section>
 
   <section id="vue-rubrique" class="section" hidden aria-labelledby="titre-rubrique">
-    <button type="button" onclick="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
     <h2 id="titre-rubrique" tabindex="-1"></h2>
     <div class="card"><p>Les informations de cette rubrique seront ajoutées prochainement.</p></div>
   </section>
 
   <nav aria-label="Navigation principale">
-<button type="button" data-nav="accueil" onclick="fermerOpportunites()"><span>🏠</span>Accueil</button>
-<button type="button" data-nav="transport" onclick="afficherTransport()"><span>🚕</span>Transport</button>
-<button type="button" data-nav="boutique" onclick="afficherCommerce()"><span>🛍️</span>Boutique</button>
-<button type="button" data-nav="activite" onclick="KokiActivite.ouvrir()"><span>🧾</span>Activité</button>
-<button type="button" data-nav="profil" onclick="KokiPortail.profil()"><span>👤</span>Profil</button>
+<button type="button" data-nav="accueil" data-clic="fermerOpportunites()"><span>🏠</span>Accueil</button>
+<button type="button" data-nav="transport" data-clic="afficherTransport()"><span>🚕</span>Transport</button>
+<button type="button" data-nav="boutique" data-clic="afficherCommerce()"><span>🛍️</span>Boutique</button>
+<button type="button" data-nav="activite" data-clic="KokiActivite.ouvrir()"><span>🧾</span>Activité</button>
+<button type="button" data-nav="profil" data-clic="KokiPortail.profil()"><span>👤</span>Profil</button>
 </nav>
   <script src="assets/leaflet/chargeur.js"></script>
-  <script>
-    document.getElementById('date-entete').textContent = new Intl.DateTimeFormat('fr-SN', {
-      timeZone: 'Africa/Dakar', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    }).format(new Date());
-    const CENTRE_KOKI = [15.505949, -15.9919614];
-    let servicesKoki = [];
-    let donneesCarte = null;
-    let chargementCarte = null;
-    // Contenus publiés utiles à la carte. Sans connexion au serveur, la carte intégrée reste affichée seule.
-    async function contenusPublies() {
-      try {
-        if (!window.KokiPublicFeed) return [];
-        const flux = await KokiPublicFeed.charger();
-        const C = window.KokiPortailCore;
-        return (flux.contenus || []).filter(x => !C || C.visible(x));
-      } catch (_) { return []; }
-    }
-    // Lieux gérés dans Koki Connect Admin (écran « Lieux de la carte ») et structures de santé positionnées.
-    function lieuxAvecPublications(reference, rows) {
-      const L = window.KokiLieuContract, S = window.KokiSanteContract;
-      const lieux = L ? L.fusionner(reference, rows) : [...reference];
-      if (S) for (const row of rows) {
-        const v = S.decode(row);
-        if (v && !v.archive && v.latitude !== null && v.longitude !== null)
-          lieux.push({ id: 'sante-' + row.id, nom: row.titre, categorie: 'Santé', latitude: v.latitude, longitude: v.longitude, position: v.genre + (row.lieu ? ' · ' + row.lieu : ''), source: 'Koki Connect' });
-      }
-      if (window.KokiServiceContract) for (const row of rows) {
-        const v = KokiServiceContract.decodeService(row);
-        if (v && !v.archive && v.latitude !== null && v.longitude !== null)
-          lieux.push({ id: 'service-' + row.id, nom: row.titre, categorie: 'Services publics', latitude: v.latitude, longitude: v.longitude, position: v.genre + (row.lieu ? ' · ' + row.lieu : ''), source: 'Koki Connect' });
-      }
-      return lieux;
-    }
-    async function chargerDonneesCarte() {
-      if (donneesCarte) return donneesCarte;
-      if (!chargementCarte) chargementCarte = fetch('assets/koki-carte.json').then(reponse => {
-        if (!reponse.ok) throw new Error('Carte indisponible');
-        return reponse.json();
-      }).then(async donnees => {
-        const lieux = lieuxAvecPublications(donnees.lieux, await contenusPublies());
-        donneesCarte = { ...donnees, lieux };
-        servicesKoki = lieux;
-        return donneesCarte;
-      }).catch(erreur => { chargementCarte = null; throw erreur; });
-      return chargementCarte;
-    }
-function obtenirPositionActuelle() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject(new Error('La localisation n’est pas disponible sur cet appareil.')); return; }
-    navigator.geolocation.getCurrentPosition(resolve, erreur => {
-      const message = erreur.code === 1 ? 'Localisation refusée. Autorisez-la dans votre navigateur ou choisissez un départ sur la carte.' : erreur.code === 3 ? 'La localisation prend trop de temps. Réessayez ou choisissez un lieu.' : 'Position indisponible. Choisissez un départ sur la carte.';
-      reject(new Error(message));
-    }, {timeout:10000, maximumAge:60000});
-  });
-}
-async function activerGeolocalisation() {
-  const resultat = document.getElementById('service-proche');
-  if (!navigator.geolocation) { resultat.textContent = 'La localisation n’est pas disponible sur cet appareil.'; return; }
-  resultat.textContent = 'Chargement des lieux de Koki…';
-  try { await chargerDonneesCarte(); } catch (erreur) { resultat.textContent = 'Impossible de charger les lieux. Réessayez plus tard.'; return; }
-  try {
-    const position = await obtenirPositionActuelle();
-    const distance = lieu => {
-      const rad = Math.PI / 180;
-      const a = Math.sin((lieu.latitude-position.coords.latitude)*rad/2)**2 + Math.cos(position.coords.latitude*rad)*Math.cos(lieu.latitude*rad)*Math.sin((lieu.longitude-position.coords.longitude)*rad/2)**2;
-      return 12742 * Math.asin(Math.min(1,Math.sqrt(a)));
-    };
-    resultat.replaceChildren();
-    [...servicesKoki].sort((a,b)=>distance(a)-distance(b)).slice(0,10).forEach(lieu => {
-      const ligne = document.createElement('p');
-      ligne.textContent = lieu.nom + ' — ' + lieu.categorie + ' — ' + distance(lieu).toFixed(2) + ' km à vol d’oiseau ';
-      const lien = document.createElement('a'); lien.textContent = 'Itinéraire';
-      lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude;
-      lien.target = '_blank'; lien.rel = 'noopener'; ligne.append(lien); resultat.append(ligne);
-    });
-  } catch (erreur) { resultat.textContent = erreur.message; }
-}
-function filtrerOpportunites(rubrique) {
-  const vue = document.getElementById('opportunites-jeunes');
-  let visibles = 0;
-  vue.querySelectorAll('[data-rubrique]').forEach(carte => {
-    carte.hidden = rubrique !== 'Toutes' && carte.dataset.rubrique !== rubrique;
-    if (!carte.hidden) visibles++;
-  });
-  vue.querySelectorAll('[data-filtre]').forEach(bouton => {
-    bouton.setAttribute('aria-pressed', String(bouton.dataset.filtre === rubrique));
-  });
-  document.getElementById('statut-opportunites').textContent =
-    visibles === 1 ? '1 rubrique affichée : ' + rubrique + '.' : visibles + ' rubriques affichées.';
-}
-function afficherOpportunites() {
-  if (window.KokiOpportunites) { KokiOpportunites.ouvrir('Toutes'); return; }
-  filtrerOpportunites('Toutes');
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = section.id !== 'opportunites-jeunes';
-  });
-  document.getElementById('titre-opportunites').focus();
-  window.scrollTo(0, 0);
-}
-function fermerOpportunites() {
-  document.querySelector('.search').hidden = false;
-  document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce', 'vue-portail'].includes(section.id);
-  });
-  document.querySelector('[onclick="afficherOpportunites()"]').focus();
-  window.scrollTo(0, 0);
-}
-function afficherMenu() {
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = section.id !== 'vue-menu';
-  });
-  document.getElementById('titre-menu').focus();
-  window.scrollTo(0, 0);
-}
-function afficherNotifications() {
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = section.id !== 'vue-notifications';
-  });
-  document.getElementById('titre-notifications').focus();
-  window.scrollTo(0, 0);
-}
-function afficherRubrique(titre) {
-  if(window.KokiPortail && KokiPortail.rubrique(titre))return;
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
-    section.hidden = section.id !== 'vue-rubrique';
-  });
-  const heading = document.getElementById('titre-rubrique');
-  heading.textContent = titre;
-  heading.focus();
-  window.scrollTo(0, 0);
-}
-function rechercherRubriques(texte) {
-  const normaliser = valeur => valeur.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  let visibles = 0;
-  document.querySelectorAll('[data-recherche]').forEach(bouton => {
-    bouton.hidden = !normaliser(bouton.dataset.recherche).includes(normaliser(texte.trim()));
-    if (!bouton.hidden) visibles++;
-  });
-  document.getElementById('resultat-recherche').textContent = texte.trim() ? visibles + ' rubrique(s) trouvée(s).' : '';
-}
-function decrireMeteo(code, jour) {
-  if (code === 0) return [jour ? '☀️' : '🌙', jour ? 'Ciel dégagé' : 'Nuit dégagée'];
-  if (code === 1 || code === 2) return [jour ? '🌤️' : '☁️', 'Peu nuageux'];
-  if (code === 3) return ['☁️', 'Ciel couvert'];
-  if (code === 45 || code === 48) return ['🌫️', 'Brouillard'];
-  if ([51,53,55,56,57].includes(code)) return ['🌦️', 'Bruine'];
-  if ([61,63,65,66,67,80,81,82].includes(code)) return ['🌧️', 'Pluie'];
-  if ([71,73,75,77,85,86].includes(code)) return ['🌨️', 'Neige'];
-  if ([95,96,99].includes(code)) return ['⛈️', 'Orages'];
-  return ['🌡️', 'Conditions actuelles'];
-}
-let meteoEnCours = false;
-async function chargerMeteo() {
-  if (meteoEnCours) return;
-  meteoEnCours = true;
-  const bouton = document.getElementById('actualiser-meteo');
-  const temperature = document.getElementById('temperature-meteo');
-  const condition = document.getElementById('condition-meteo');
-  bouton.disabled = true;
-  condition.textContent = 'Chargement…';
-  const controleur = new AbortController();
-  const delai = setTimeout(() => controleur.abort(), 10000);
-  try {
-    const reponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=15.505949&longitude=-15.9919614&current=temperature_2m,weather_code,is_day&timezone=Africa%2FDakar', { signal: controleur.signal });
-    if (!reponse.ok) throw new Error('Météo indisponible');
-    const donnees = await reponse.json();
-    const actuelle = donnees.current;
-    if (!actuelle || !Number.isFinite(actuelle.temperature_2m) || !Number.isInteger(actuelle.weather_code)) throw new Error('Données météo invalides');
-    const [icone, description] = decrireMeteo(actuelle.weather_code, actuelle.is_day === 1);
-    document.getElementById('icone-meteo').textContent = icone;
-    temperature.textContent = Math.round(actuelle.temperature_2m) + ' °C';
-    condition.textContent = description;
-    temperature.title = 'Météo de Koki · ' + actuelle.time.replace('T', ' ');
-  } catch (erreur) {
-    temperature.textContent = '— °C';
-    document.getElementById('icone-meteo').textContent = '🌡️';
-    condition.textContent = 'Météo indisponible';
-    temperature.removeAttribute('title');
-  } finally {
-    clearTimeout(delai);
-    bouton.disabled = false;
-    meteoEnCours = false;
-  }
-}
-chargerMeteo();
-setInterval(chargerMeteo, 15 * 60 * 1000);
-let carteKoki = null;
-let marqueursKoki = null;
-let limiteKoki = null;
-async function afficherCarte() {
-  document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => { section.hidden = section.id !== 'vue-carte'; });
-  document.getElementById('titre-carte').focus();
-  window.scrollTo(0,0);
-  const statut = document.getElementById('statut-carte');
-  statut.textContent = 'Chargement de la carte…';
-  try {
-    await chargerDonneesCarte();
-    if (!window.L && window.KokiLeaflet) await window.KokiLeaflet.charger();
-    if (!window.L) throw new Error('Carte indisponible');
-    if (!carteKoki) {
-      carteKoki = L.map('carte-koki').setView(CENTRE_KOKI,12);
-      const fond = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(carteKoki);
-      fond.on('tileerror', () => { statut.textContent = 'Fond de carte indisponible. La liste des lieux reste accessible.'; });
-      limiteKoki = L.geoJSON(donneesCarte.limite,{style:{color:'#087a3d',weight:2,fillOpacity:0.06}}).addTo(carteKoki);
-      marqueursKoki = L.layerGroup().addTo(carteKoki);
-    }
-    carteKoki.invalidateSize();
-    recentrerCarte();
-    filtrerCarte();
-  } catch (erreur) { statut.textContent = 'Impossible de charger la carte. Cliquez sur Carte pour réessayer.'; }
-}
-function recentrerCarte() {
-  if (carteKoki && limiteKoki) carteKoki.fitBounds(limiteKoki.getBounds(),{padding:[12,12]});
-}
-function filtrerCarte() {
-  if (!donneesCarte || !marqueursKoki) return;
-  const normaliser = valeur => valeur.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const recherche = normaliser(document.getElementById('recherche-carte').value.trim());
-  const categorie = document.getElementById('categorie-carte').value;
-  const lieux = donneesCarte.lieux.filter(lieu => (!categorie || lieu.categorie===categorie) && normaliser(lieu.nom).includes(recherche));
-  marqueursKoki.clearLayers();
-  const liste = document.getElementById('liste-carte'); liste.replaceChildren();
-  document.getElementById('statut-carte').textContent = lieux.length + ' lieu(x) référencé(s).';
-  lieux.forEach(lieu => {
-    const popup = document.createElement('div');
-    const titre = document.createElement('strong'); titre.textContent = lieu.nom;
-    const details = document.createElement('p'); details.textContent = lieu.categorie + ' · ' + lieu.position;
-    const lien = document.createElement('a'); lien.textContent = 'Itinéraire'; lien.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lieu.latitude + ',' + lieu.longitude; lien.target='_blank'; lien.rel='noopener';
-    const coordonnees = document.createElement('p');
-    coordonnees.textContent = 'Latitude : ' + lieu.latitude.toFixed(6) + ' · Longitude : ' + lieu.longitude.toFixed(6);
-    popup.append(titre,details);
-    if (lieu.description) { const d = document.createElement('p'); d.textContent = lieu.description; popup.append(d); }
-    popup.append(coordonnees,lien);
-    const marker = L.circleMarker([lieu.latitude,lieu.longitude],{radius:7,color:lieu.categorie==='Villages et quartiers'?'#245d88':'#087a3d',fillOpacity:0.9}).bindPopup(popup).addTo(marqueursKoki);
-    const bouton = document.createElement('button'); bouton.type='button'; bouton.textContent=lieu.nom + ' — ' + lieu.categorie;
-    bouton.onclick=()=>{carteKoki.setView([lieu.latitude,lieu.longitude],16);marker.openPopup();document.getElementById('carte-koki').scrollIntoView({block:'center'});}; liste.append(bouton);
-  });
-}
-</script>
+  <script defer src="assets/portail/accueil.js"></script>
+  <script defer src="assets/portail/actions.js"></script>
 <script defer src="assets/transport/core.js"></script>
   <script defer src="assets/transport/app.js"></script>
   <script defer src="assets/commerce/core.js"></script>
@@ -753,6 +511,6 @@ function filtrerCarte() {
 <script defer src="assets/portail/touches.js"></script>
 <script defer src="assets/portail/styles-differes.js"></script>
   <script type="module" src="assets/business/runtime.mjs"></script>
-<script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='127.0.0.1'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+<script defer src="assets/portail/sw-register.js"></script>
 </body>
 </html>

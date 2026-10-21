@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 require('../assets/portail/lieu-contract.js');
 const L = globalThis.KokiLieuContract;
 const carte = JSON.parse(fs.readFileSync('assets/koki-carte.json', 'utf8'));
-const html = fs.readFileSync('index.html', 'utf8');
+const html = require('./_aide.cjs').accueil();
 const portail = fs.readFileSync('assets/portail/app.js', 'utf8');
 const runtime = fs.readFileSync('assets/business/runtime.mjs', 'utf8');
 const catalogue = fs.readFileSync('assets/business/catalogue.mjs', 'utf8');

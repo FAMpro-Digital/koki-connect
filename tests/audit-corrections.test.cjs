@@ -7,7 +7,7 @@ test('en-têtes de sécurité de l’application publique',()=>{
  assert.equal(h['X-Frame-Options'],'DENY');assert.equal(h['X-Content-Type-Options'],'nosniff');assert.match(h['Permissions-Policy'],/geolocation=\(self\)/);
 });
 test('menu = rubriques de l’accueil, démonstration cachée, ancien tableau local retiré',()=>{
- const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8'),com=fs.readFileSync('assets/commerce/app.js','utf8');
+ const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/app.js','utf8'),com=fs.readFileSync('assets/commerce/app.js','utf8');
  require('../assets/portail/rubriques-contract.js');const R=globalThis.KokiRubriquesContract;
  const bloc=html.slice(html.indexOf('id="vue-menu"'),html.indexOf('id="titre-a-propos"'));const menu=[...bloc.matchAll(/data-rubrique="([^"]+)"/g)].map(m=>m[1].replace('&amp;','&'));assert.deepEqual(menu,R.rubriques.map(r=>r.nom),'même ordre que l’accueil');
  assert.match(html,/<div class="market-demo" hidden>/);assert.match(com,/get\('demo'\)==='1'/);

@@ -1,6 +1,6 @@
 // Éducation moderne : accueil de la rubrique, bibliothèque façon liseuse, établissements ; couleurs Koki Connect.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('assets/portail/app.js','utf8');
+const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/app.js','utf8');
 const edu=fs.readFileSync('assets/portail/education.js','utf8'),bib=fs.readFileSync('assets/portail/bibliotheque.js','utf8'),css=fs.readFileSync('assets/portail/education.css','utf8');
 test('module chargé après la bibliothèque, feuille de style incluse, rubrique branchée',()=>{
  assert.ok(html.indexOf('assets/portail/education.js')>html.indexOf('assets/portail/bibliotheque.js'));
