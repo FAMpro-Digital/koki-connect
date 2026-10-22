@@ -24,3 +24,11 @@ storageState*.json
 
 # Sorties de la collecte (données réelles à relire avant publication)
 collecte/sortie/
+
+# Suite de performance : comptes de test locaux, rapports de charge générés, dépendances Playwright
+tests/load/accounts.json
+tests/load/reports/*.json
+tests/load/reports/*.txt
+tests/e2e/node_modules/
+tests/e2e/playwright-report/
+tests/e2e/test-results/

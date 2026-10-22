@@ -44,6 +44,7 @@
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,
+      "test/koki-connect-performance": false,
       "fiabilite/service-worker": false,
       "tests/qualite-automatisee": false
     }

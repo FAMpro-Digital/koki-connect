@@ -1,0 +1,4 @@
+[
+  { "email": "koki-test-client-01@example.invalid", "password": "<mot de passe de test à définir, jamais réel>" },
+  { "email": "koki-test-client-02@example.invalid", "password": "<mot de passe de test à définir, jamais réel>" }
+]
