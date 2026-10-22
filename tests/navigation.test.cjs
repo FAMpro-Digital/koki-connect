@@ -27,10 +27,18 @@ test('page ouverte en plein écran : barre Retour + titre, bannière et retours 
   assert.match(nav, /document\.body\.classList\.toggle\('page-pleine', ouverte\); barre\.hidden = !ouverte; titreBarre\.textContent = titrePage\(\);/);
   assert.match(nav, /retourBarre\.onclick = \(\) => \{ if \(pile\.length\) history\.back\(\); else if/);
   assert.match(nav, /requestAnimationFrame\(\(\) => \{ if \(!document\.querySelector\('#vue-transport:not\(\[hidden\]\) \.tr-mode-placement'\)\) window\.scrollTo\(0, 0\); \}\);/);
-  assert.match(css, /body\.page-pleine \.entete-koki, body\.page-pleine #portail-sync, body\.page-pleine \.search,\nbody\.page-pleine \.section > button\[onclick="fermerOpportunites\(\)"\] \{ display: none !important; \}/);
-  assert.doesNotMatch(css, /body\.page-pleine button\[onclick="fermerOpportunites\(\)"\]/, 'le bouton Accueil de la barre du bas reste visible');
+  assert.match(css, /body\.page-pleine \.entete-koki, body\.page-pleine #portail-sync, body\.page-pleine \.search,\nbody\.page-pleine \.section > button\[data-clic="fermerOpportunites\(\)"\] \{ display: none !important; \}/);
+  assert.doesNotMatch(css, /body\.page-pleine button\[data-clic="fermerOpportunites\(\)"\]/, 'le bouton Accueil de la barre du bas reste visible');
   assert.match(css, /\.barre-page \{ position: sticky; top: 0;/);
   assert.match(css, /background: #0b5a3c; border-bottom: 4px solid #f28c28;/, 'vert foncé et orange Koki Connect');
   assert.match(css, /\.barre-retour \{[^}]*background: #f28c28; color: #fff;/);
   assert.match(css, /\.barre-titre \{[^}]*color: #fff;/);
+});
+
+test('fluidité : plus aucun sélecteur [onclick] ; la règle ne vise que les boutons Retour enfants directs d’une section, pas la barre du bas', () => {
+  const css = fs.readFileSync('assets/portail/fluidite.css', 'utf8');
+  const index = fs.readFileSync('index.html', 'utf8');
+  assert.doesNotMatch(css, /\[onclick/);
+  assert.match(css, /\.section > button\[data-clic="fermerOpportunites\(\)"\]/);
+  assert.match(index, /<button type="button" data-nav="accueil" data-clic="fermerOpportunites\(\)">/, 'le bouton Accueil du bas reste hors .section');
 });
