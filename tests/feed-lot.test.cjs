@@ -42,3 +42,24 @@ test('repli image par image si la signature par lot échoue', async () => {
   assert.equal(calls.filter((c) => /\/object\/sign\/koki-media\/1111/.test(c.url)).length, 3);
   assert.ok(feed.contenus.every((c) => c.image));
 });
+
+test('hors ligne : le dernier flux public réussi est affiché, sans images temporaires', async () => {
+  const stockage = new Map();
+  const { ctx } = creer(true);
+  ctx.localStorage = { getItem: (k) => (stockage.has(k) ? stockage.get(k) : null), setItem: (k, v) => stockage.set(k, v) };
+  const frais = await ctx.KokiPublicFeed.charger();
+  assert.equal(frais.horsLigne, undefined);
+  assert.ok(frais.contenus[0].image);
+  ctx.fetch = async () => ({ ok: false });
+  const copie = await ctx.KokiPublicFeed.charger();
+  assert.equal(copie.horsLigne, true);
+  assert.equal(copie.contenus.length, 3);
+  assert.ok(copie.contenus.every((c) => c.image === null && c.statut === 'publié'));
+});
+
+test('hors ligne sans copie : l\'erreur est conservée ; copie altérée ou non publiée refusée', async () => {
+  const { ctx } = creer(true);
+  ctx.localStorage = { getItem: () => JSON.stringify({ version: 1, contenus: [{ id: '1', statut: 'brouillon' }] }), setItem() {} };
+  ctx.fetch = async () => ({ ok: false });
+  await assert.rejects(ctx.KokiPublicFeed.charger());
+});

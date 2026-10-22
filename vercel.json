@@ -1,7 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "fix/boutons-retour-focus-accueil": false,
+      "fix/focus-retour-opportunites": false,
       "fix/profil-boutique-liens": false,
       "fix/lisibilite-textes-client": false,
       "develop/phases-2-6": false,
@@ -41,7 +44,9 @@
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,
-      "test/koki-connect-performance": false
+      "test/koki-connect-performance": false,
+      "fiabilite/service-worker": false,
+      "tests/qualite-automatisee": false
     }
   },
   "headers": [
