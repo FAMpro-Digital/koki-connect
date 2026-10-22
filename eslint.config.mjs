@@ -16,7 +16,7 @@ const regles = {
 };
 
 export default [
-  { ignores: ['assets/leaflet/leaflet.js', 'assets/business/vendor/**', 'dist/**', 'node_modules/**', 'tests/e2e/rapports/**'] },
+  { ignores: ['assets/leaflet/leaflet.js', 'assets/business/vendor/**', 'dist/**', 'node_modules/**', 'tests/e2e/rapports/**', 'tests/load/**'] },
   js.configs.recommended,
   { files: ['assets/**/*.js', 'sw.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.serviceworker } }, rules: regles },
   { files: ['assets/**/*.mjs', 'assets/business/business-state.js'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.browser }, rules: regles },
