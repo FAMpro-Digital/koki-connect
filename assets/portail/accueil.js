@@ -103,7 +103,9 @@ function fermerOpportunites() {
   document.querySelectorAll('body > .section').forEach(section => {
     section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce', 'vue-portail'].includes(section.id);
   });
-  document.querySelector('[onclick="afficherOpportunites()"]').focus();
+  // Retour du focus au bouton d'ouverture, s'il est affiché (il peut être absent ou dans une page masquée, ex. le menu).
+  const ouverture = Array.from(document.querySelectorAll('[data-clic="afficherOpportunites()"]')).find(el => !el.closest('[hidden]'));
+  if (ouverture) ouverture.focus();
   window.scrollTo(0, 0);
 }
 function afficherMenu() {

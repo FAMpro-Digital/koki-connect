@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "fix/focus-retour-opportunites": false,
       "fix/profil-boutique-liens": false,
       "fix/lisibilite-textes-client": false,
       "develop/phases-2-6": false,
