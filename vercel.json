@@ -42,6 +42,7 @@
       "fix/profil-pro-styles": false,
       "develop/animation-touches": false,
       "develop/ordre-boutons": false,
+      "develop/commander-carte": false,
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,

@@ -79,6 +79,8 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   zone.replaceChildren();
   if(x.kind==='produits'){
    if(!disponible(x)){zone.append(node('span','Épuisé','cat-pill'));return;}
+   // « Commander » (WhatsApp) toujours avant « Ajouter au panier ».
+   if(ajouterPanier){const w=lienCommande(x,idx,Math.max(1,quantite(x.id)));if(w){const c=contact('Commander',w,'whatsapp');c.setAttribute('aria-label','Commander « '+x.nom+' » sur WhatsApp');zone.append(c);}}
    if(ajouterPanier&&quantite(x.id)>0&&panier){zone.append(compteur(x));return;}
    if(ajouterPanier){const b=button('Ajouter au panier',()=>ajouter(x,1),'cart');b.setAttribute('aria-label','Ajouter « '+x.nom+' » au panier');zone.append(b);return;}
    const w=lienCommande(x,idx,1);if(w)zone.append(contact('Commander sur WhatsApp',w,'whatsapp'));return;
