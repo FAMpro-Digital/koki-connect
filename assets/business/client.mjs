@@ -24,14 +24,21 @@ export function messageInscription(error){const code=String(error?.code||''),sta
 // Adresse de retour acceptée : même origine que la page, en https (ou poste local) ; sinon la page publique actuelle.
 export function lienRetour(retour){try{const url=new URL(retour||location.origin+location.pathname,location.href);if(url.origin!==location.origin)return null;if(!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))return null;url.hash='';return url.href;}catch{return null;}}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
-export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{}}={}){
+export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{},sessionLocale=()=>null}={}){
  let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
  let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
  const scope=()=>`koki.business.pending.${user?.id}`;
  function restore(){pending.clear();try{for(const [k,v] of JSON.parse(storage?.getItem(scope())||'[]'))pending.set(k,v);}catch{}}
  function persist(){try{storage?.setItem(scope(),JSON.stringify([...pending]));}catch{/* Retry remains available in memory. */}}
- async function identity(){requireReady();const {data,error}=await db.auth.getUser();if(error&&HORS_LIGNE.test(String(error.message||error.name||''))){const e=Error(MESSAGE_HORS_LIGNE);e.horsLigne=true;throw e;}if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}else user=data.user;return user;}
+ function sessionHorsLigne(){let l=null;try{l=sessionLocale();}catch{}if(!l?.id||l.is_anonymous)return null;if(user?.id!==l.id){user=l;mediaFolder=null;restore();}else user=l;return user;}
+ async function identity(){requireReady();
+  // Téléphone en mode hors connexion : réponse immédiate avec la session enregistrée (pas d'attente réseau).
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){const l=sessionHorsLigne();if(l)return l;}
+  const {data,error}=await db.auth.getUser();if(error&&HORS_LIGNE.test(String(error.message||error.name||''))){
+  // Sans connexion, le client reste connecté : on garde la session enregistrée sur le téléphone (aucune déconnexion).
+  {const l=sessionHorsLigne();if(l)return l;}
+  const e=Error(MESSAGE_HORS_LIGNE);e.horsLigne=true;throw e;}if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}else user=data.user;return user;}
  async function run(command,input={},operation=command){requireReady();const mutation=!reads.has(command);if(command!=='catalog')await identity();while(busy){if(mutation)throw Error('Une opération est déjà en cours.');await new Promise(resolve=>waiters.push(resolve));}
  const body=structuredClone(input);let item;
  if(mutation){const fingerprint=JSON.stringify(body);item=pending.get(operation);if(item&&(item.command!==command||item.fingerprint!==fingerprint))throw Error('Une demande attend confirmation. Reprenez-la avec les mêmes informations avant de les modifier.');if(!item){item={command,fingerprint,input:structuredClone(body),request_id:uuid()};pending.set(operation,item);persist();}body.request_id=item.request_id;}
