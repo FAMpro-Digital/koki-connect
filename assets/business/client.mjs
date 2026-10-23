@@ -4,6 +4,8 @@
 const CLES_COMPTE=['koki.transport.demo.course.v1','koki.transport.notees.v1'];
 function purgerDonneesCompte(){for(const k of CLES_COMPTE){try{globalThis.localStorage?.removeItem(k);}catch{}try{globalThis.sessionStorage?.removeItem(k);}catch{}}}
 export const HORS_LIGNE=/Failed to fetch|NetworkError|Load failed|fetch failed|Network request failed|AuthRetryableFetchError/i;
+// Erreur passagère (réseau, serveur occupé ou en panne) : jamais une raison de déconnecter le client.
+export const transitoire=e=>!!e&&(HORS_LIGNE.test(String(e.message||e.name||''))||e.name==='AuthRetryableFetchError'||e.name==='AuthUnknownError'||e.status===0||e.status===429||e.status>=500||/timeout|timed out|temporar/i.test(String(e.message||'')));
 export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votre connexion puis réessayez.';
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
@@ -24,8 +26,18 @@ export function messageInscription(error){const code=String(error?.code||''),sta
 // Adresse de retour acceptée : même origine que la page, en https (ou poste local) ; sinon la page publique actuelle.
 export function lienRetour(retour){try{const url=new URL(retour||location.origin+location.pathname,location.href);if(url.origin!==location.origin)return null;if(!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))return null;url.hash='';return url.href;}catch{return null;}}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
-export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{},sessionLocale=()=>null}={}){
- let recovering=false;db?.auth.onAuthStateChange?.(event=>{if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
+export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{},sessionLocale=()=>null,secours={lire:()=>null,ecrire:()=>{},effacer:()=>{}}}={}){
+ let recovering=false,voulue=false,restauration=false;
+ // Jamais de déconnexion automatique : seule la déconnexion demandée par le client ferme le compte.
+ // Copie de secours de la session ; si elle disparaît sans demande du client, on la rétablit une fois.
+ db?.auth.onAuthStateChange?.((event,session)=>{
+  if(session?.refresh_token&&event!=='SIGNED_OUT'){try{secours.ecrire({access_token:session.access_token,refresh_token:session.refresh_token});}catch{}}
+  if(event==='SIGNED_OUT'){
+   if(voulue){try{secours.effacer();}catch{}}
+   else if(!restauration){let c=null;try{c=secours.lire();}catch{}
+    if(c?.refresh_token){restauration=true;setTimeout(async()=>{try{const r=await db.auth.setSession(c);if(r?.error&&!transitoire(r.error))secours.effacer();}catch{}finally{restauration=false;}},0);}}
+  }
+  if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
  let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
  const scope=()=>`koki.business.pending.${user?.id}`;
@@ -35,7 +47,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async function identity(){requireReady();
   // Téléphone en mode hors connexion : réponse immédiate avec la session enregistrée (pas d'attente réseau).
   if(typeof navigator!=='undefined'&&navigator.onLine===false){const l=sessionHorsLigne();if(l)return l;}
-  const {data,error}=await db.auth.getUser();if(error&&HORS_LIGNE.test(String(error.message||error.name||''))){
+  const {data,error}=await db.auth.getUser();if(error&&transitoire(error)){
   // Sans connexion, le client reste connecté : on garde la session enregistrée sur le téléphone (aucune déconnexion).
   {const l=sessionHorsLigne();if(l)return l;}
   const e=Error(MESSAGE_HORS_LIGNE);e.horsLigne=true;throw e;}if(error||!data?.user||data.user.is_anonymous){user=null;pending.clear();throw Error('Connectez-vous avec un compte client permanent.');}if(user?.id!==data.user.id){user=data.user;mediaFolder=null;restore();}else user=data.user;return user;}
@@ -66,7 +78,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async signup(email,password,{retour,professional=false}={}){requireReady();if(professional&&password.length<12)throw Error('Choisissez au moins 12 caractères.');const options=professional?{data:{professional_password_set:true}}:{};const to=lienRetour(retour);if(to)options.emailRedirectTo=to;const {error}=await db.auth.signUp({email:email.trim(),password,options});if(error)throw Error(messageInscription(error));},
  // Nouvel e-mail de confirmation (lien expiré ou perdu). Réponse identique que le compte existe ou non.
  async resendConfirmation(email,{retour}={}){requireReady();const options={};const to=lienRetour(retour);if(to)options.emailRedirectTo=to;const {error}=await db.auth.resend({type:'signup',email:String(email||'').trim(),options});if(error)throw Error(messageInscription(error));},
- async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');const {error}=await db.auth.signOut({scope:'local'});if(error)throw Error('Déconnexion impossible.');try{storage?.removeItem(scope());}catch{}purgerDonneesCompte();user=null;pending.clear();},
+ async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');voulue=true;let error;try{({error}=await db.auth.signOut({scope:'local'}));}finally{voulue=false;}if(error)throw Error('Déconnexion impossible.');try{secours.effacer();}catch{}try{storage?.removeItem(scope());}catch{}purgerDonneesCompte();user=null;pending.clear();},
  pending(){return [...pending.entries()].map(([operation,v])=>({operation,...structuredClone(v)}));},
  retry(operation){const v=pending.get(operation);if(!v)throw Error('Aucune demande à reprendre.');return run(v.command,v.input,operation);},
  catalog:()=>run('catalog'),history:kind=>run('history',{kind}),get:id=>run('get',{id}),

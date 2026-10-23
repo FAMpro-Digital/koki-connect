@@ -9,7 +9,7 @@ test('hors connexion : jamais « TypeError: Failed to fetch » à l’écran',()
 });
 test('coupure pendant la vérification du compte : la demande en attente n’est pas effacée',()=>{
  // Coupure : jamais de pending.clear() avant le retour (session enregistrée) ou l'erreur hors connexion.
- assert.match(client,/if\(error&&HORS_LIGNE\.test\(String\(error\.message\|\|error\.name\|\|''\)\)\)\{[\s\S]*?const e=Error\(MESSAGE_HORS_LIGNE\);e\.horsLigne=true;throw e;\}if\(error\|\|!data\?\.user/);
+ assert.match(client,/if\(error&&transitoire\(error\)\)\{[\s\S]*?const e=Error\(MESSAGE_HORS_LIGNE\);e\.horsLigne=true;throw e;\}if\(error\|\|!data\?\.user/);
  assert.doesNotMatch(client.slice(client.indexOf('async function identity'),client.indexOf('if(error||!data?.user')),/pending\.clear/);
 });
 test('Transport : changer de lieu efface l’ancien message ; plus d’alerte de test « Autour de moi »',()=>{
