@@ -195,12 +195,13 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   add('Zone d’intervention',x.zone);if(x.kind==='produits')add('Stock',disponible(x)?x.stock+' disponible'+(x.stock>1?'s':''):'Épuisé');
   return dl.children.length?dl:null;
  }
- function liens(x,qte){
-  const box=node('div',null,'cat-contact');const c=contacts(x,idx);if(!c){box.append(node('p','Coordonnées indisponibles.'));return box;}
+ function liens(x,qte,apresCommande){
+  const box=node('div',null,'cat-contact');const c=contacts(x,idx);if(!c){box.append(node('p','Coordonnées indisponibles.'));if(apresCommande)box.append(apresCommande);return box;}
   box.append(node('p',x.kind==='professionnels'?'Contacter '+c.vendeur:'Proposé par '+c.vendeur+(x.kind==='produits'&&c.boutique?' · '+c.boutique:''),'cat-seller'));
   const actions=node('div',null,'cat-actions');
   const principal=x.kind==='produits'?lienCommande(x,idx,qte):x.kind==='services'?lienDevis(x,idx):null;
   if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp'));
+  if(apresCommande)actions.append(apresCommande);// « Ajouter au panier » juste après « Commander »
   if(c.appel)actions.append(contact('Appeler le '+c.telephone,c.appel,'call'));
   if(c.whatsapp)actions.append(contact(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp'));
   const carte=lienCarte(x,idx);if(carte)actions.append(lien('Voir sur la carte',carte,'secondary'));
@@ -218,13 +219,14 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const p=prixBloc(x);if(p)corps.append(p);const bd=badge(x);if(bd)corps.append(bd);
   const i=infos(x);if(i)corps.append(i);if(x.description)corps.append(node('p',x.description,'cat-description'));
   let qte=1;const contact=node('div');
-  const dessinerContact=()=>{contact.replaceChildren(liens(x,qte));};
+  const dessinerContact=()=>{contact.replaceChildren(liens(x,qte,boutonPanier));};
   if(x.kind==='produits'&&disponible(x)){
    const w=node('div',null,'cat-qty'),qid=nid('n'),l=node('label','Quantité'),moins=button('−',()=>{if(qte>1){qte--;maj();}},'step'),plus=button('+',()=>{if(qte<Math.min(x.stock,99)){qte++;maj();}},'step'),out=node('output','1');
    l.htmlFor=qid;out.id=qid;moins.setAttribute('aria-label','Diminuer la quantité');plus.setAttribute('aria-label','Augmenter la quantité');
    const maj=()=>{out.textContent=String(qte);dessinerContact();};w.append(l,moins,out,plus);corps.append(w);
   }
-  if(x.kind==='produits'&&disponible(x)&&ajouterPanier){const b=button('Ajouter au panier',async()=>{b.disabled=true;try{await ajouter(x,qte);}finally{b.disabled=false;}},'cart');corps.append(b);}
+  let boutonPanier=null;
+  if(x.kind==='produits'&&disponible(x)&&ajouterPanier){const b=button('Ajouter au panier',async()=>{b.disabled=true;try{await ajouter(x,qte);}finally{b.disabled=false;}},'cart');boutonPanier=b;}
   dessinerContact();corps.append(contact);
   if(x.kind==='services'&&requestService){const zone=node('div');const b=button('Demander ce service dans l’application',async()=>{try{await requestService(x,zone);}catch(e){say(e.message);}},'cart');corps.append(b,zone);}
   // Navigation vers les fiches liées.
