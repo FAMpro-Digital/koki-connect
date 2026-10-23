@@ -21,3 +21,12 @@ Les missions Transport référencent la commande ou demande source, professionne
 Prévoir stockage de photos avec validation serveur, limites, suppression et permissions ; le mode démo accepte JPEG/PNG/WebP jusqu'à 1 Mo et peut atteindre la limite de stockage du navigateur. Pas de comptes ni de synchronisation entre appareils dans cette version.
 
 Extensions : paiements Mobile Money/en ligne confirmés par webhook vérifié et idempotent ; favoris/avis liés aux comptes et transactions ; notifications événementielles ; historique côté serveur ; commissions et abonnements Premium avec grand livre ; promotions sponsorisées identifiées avec dates de validité. Ces fonctions sont des points d'extension, pas des fonctions activées.
+
+## Améliorations du catalogue (octobre 2026)
+
+- **Hors connexion** : la dernière copie du catalogue public est gardée sur l'appareil (`koki.commerce.catalogue`, 1,5 Mo maximum) et affichée avec sa date quand le réseau manque.
+- **Contact sans compte** : « Appeler » et « Écrire sur WhatsApp » sont directs ; « Commander » et l'ajout au panier exigent toujours un compte client.
+- **Ouvert / Fermé** : déduit du texte libre des horaires (`catalogue-extras.mjs`, heure de Dakar). Horaires incompris : aucune pastille.
+- **Favoris** (sur l'appareil), **partage** (`?fiche=<id>` ouvre la fiche), tri « Les plus proches » (position demandée une fois, jamais enregistrée), filtres « Promotions » et « Ouvert maintenant ».
+- **Espace commerçant** : alerte et mise à jour rapide du stock (seuil 3), statistiques sur 30 jours.
+- **Avis, suivi et statistiques** : appellent les fonctions `koki_reviews_list`, `koki_review_save`, `koki_track`, `koki_stats_mine` (proposition SQL du dépôt admin, non appliquée). Tant qu'elles ne sont pas installées, ces trois fonctions sont masquées.

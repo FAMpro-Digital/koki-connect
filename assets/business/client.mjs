@@ -38,6 +38,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
     if(c?.refresh_token){restauration=true;setTimeout(async()=>{try{const r=await db.auth.setSession(c);if(r?.error&&!transitoire(r.error))secours.effacer();}catch{}finally{restauration=false;}},0);}}
   }
   if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
+ const UUID=/^[0-9a-f-]{36}$/,EVENEMENTS=['vue','appel','whatsapp','commander','partage','panier','devis'],deja=new Set();let suiviIndisponible=false;
  let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
  const scope=()=>`koki.business.pending.${user?.id}`;
@@ -54,7 +55,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async function run(command,input={},operation=command){requireReady();const mutation=!reads.has(command);if(command!=='catalog')await identity();while(busy){if(mutation)throw Error('Une opération est déjà en cours.');await new Promise(resolve=>waiters.push(resolve));}
  const body=structuredClone(input);let item;
  if(mutation){const fingerprint=JSON.stringify(body);item=pending.get(operation);if(item&&(item.command!==command||item.fingerprint!==fingerprint))throw Error('Une demande attend confirmation. Reprenez-la avec les mêmes informations avant de les modifier.');if(!item){item={command,fingerprint,input:structuredClone(body),request_id:uuid()};pending.set(operation,item);persist();}body.request_id=item.request_id;}
- busy=true;emit({state:'loading',command});try{const {data,error}=await db.rpc('koki_business',{command,input:body});if(error){const e=Error(HORS_LIGNE.test(String(error.message||''))?MESSAGE_HORS_LIGNE:error.code==='42501'?'Autorisation refusée. Vérifiez votre compte et vos droits.':error.code==='PGRST202'?'Fonctions serveur non activées sur cet environnement.':error.message||'Opération refusée.');e.definitive=!!error.code&&!['57014','08006','08000'].includes(error.code)&&!String(error.code).startsWith('5');throw e;}
+ busy=true;emit({state:'loading',command});try{const {data,error}=await db.rpc('koki_business',{command,input:body});if(error){const e=Error(HORS_LIGNE.test(String(error.message||''))?MESSAGE_HORS_LIGNE:error.code==='42501'?'Autorisation refusée. Vérifiez votre compte et vos droits.':error.code==='PGRST202'?'Fonctions serveur non activées sur cet environnement.':error.message||'Opération refusée.');if(e.message===MESSAGE_HORS_LIGNE)e.horsLigne=true;e.definitive=!!error.code&&!['57014','08006','08000'].includes(error.code)&&!String(error.code).startsWith('5');throw e;}
  if(mutation){pending.delete(operation);persist();}emit({state:'success',command});return data;
  }catch(e){if(mutation&&e.definitive){pending.delete(operation);persist();}emit({state:'error',command,retry:mutation&&pending.has(operation)});throw e;}finally{busy=false;emit({state:'idle',command});waiters.shift()?.();}}
  return {subscribe(listener){listeners.add(listener);return ()=>listeners.delete(listener);},get enabled(){return enabled&&!!db;},get busy(){return busy;},get user(){return user;},get recovering(){return recovering;},identity,run,
@@ -81,7 +82,18 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async logout(){requireReady();if(pending.size)throw Error('Une demande attend confirmation. Reprenez-la avant de vous déconnecter.');voulue=true;let error;try{({error}=await db.auth.signOut({scope:'local'}));}finally{voulue=false;}if(error)throw Error('Déconnexion impossible.');try{secours.effacer();}catch{}try{storage?.removeItem(scope());}catch{}purgerDonneesCompte();user=null;pending.clear();},
  pending(){return [...pending.entries()].map(([operation,v])=>({operation,...structuredClone(v)}));},
  retry(operation){const v=pending.get(operation);if(!v)throw Error('Aucune demande à reprendre.');return run(v.command,v.input,operation);},
- catalog:()=>run('catalog'),history:kind=>run('history',{kind}),get:id=>run('get',{id}),
+ catalog:()=>run('catalog'),
+ // Avis, suivi et statistiques : fonctions serveur facultatives. Tant qu'elles ne sont pas installées (PGRST202), l'application les ignore.
+ async avis(id){if(!enabled||!db||!UUID.test(String(id)))return null;try{const {data,error}=await db.rpc('koki_reviews_list',{p_target:id});if(error)return null;return data&&Number.isFinite(data.total)?data:null;}catch{return null;}},
+ async ajouterAvis(id,note,commentaire=''){requireReady();await identity();if(!UUID.test(String(id))||!Number.isInteger(note)||note<1||note>5)throw Error('Choisissez une note de 1 à 5.');
+  const {error}=await db.rpc('koki_review_save',{p_target:id,p_rating:note,p_comment:String(commentaire).slice(0,500)});
+  if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'Les avis ne sont pas encore ouverts.':error.code==='42501'?'Connectez-vous avec un compte client pour donner un avis.':error.code==='P0001'?error.message:'Avis refusé. Réessayez plus tard.');},
+ suivre(id,evenement){
+  if(!enabled||!db||suiviIndisponible||!UUID.test(String(id))||!EVENEMENTS.includes(evenement))return;
+  const cle=id+':'+evenement;if(['vue','partage'].includes(evenement)){if(deja.has(cle))return;deja.add(cle);}
+  try{Promise.resolve(db.rpc('koki_track',{p_target:id,p_kind:evenement})).then(r=>{if(r?.error?.code==='PGRST202')suiviIndisponible=true;},()=>{});}catch{/* facultatif */}},
+ async statistiques(jours=30){requireReady();await identity();const {data,error}=await db.rpc('koki_stats_mine',{p_days:Math.max(1,Math.min(Number(jours)||30,365))});
+  if(error){if(error.code==='PGRST202')return null;throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:'Statistiques indisponibles.');}return data;},history:kind=>run('history',{kind}),get:id=>run('get',{id}),
  estimate:(category,start,end)=>run('quote',{category,start:{latitude:start.latitude,longitude:start.longitude},end:{latitude:end.latitude,longitude:end.longitude}}),
  nearby:(category,start)=>run('nearby_drivers',{category,start:{latitude:start.latitude,longitude:start.longitude}}),
  reserve:(quote,vehicle)=>run('reserve_ride',{quote_id:quote.quote_id,vehicle_id:vehicle},'reserve'),

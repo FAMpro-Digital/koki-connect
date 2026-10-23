@@ -3,6 +3,7 @@
 // Toutes les règles sont vérifiées par le serveur (koki_business) ; cette interface ne demande
 // jamais d'identifiant technique : ils viennent de l'état chargé depuis le compte connecté.
 import './commerce-contract.js';
+import {niveauStock,produitsStockBas,SEUIL_STOCK_BAS} from './catalogue-extras.mjs';
 const C=globalThis.KokiCommerceContract;
 const node=(tag,text,className)=>{const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(className)e.className=className;return e;};
 let uid=0;const nextId=prefix=>'pro-'+prefix+'-'+(++uid);
@@ -94,7 +95,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  }
  async function guarded(btn,fn){if(btn.disabled)return;btn.disabled=true;host.setAttribute('aria-busy','true');try{await fn();}catch(e){status.textContent=e.message||'Opération impossible.';}finally{btn.disabled=false;host.setAttribute('aria-busy','false');}}
 
- function render(){const {view,params}=stack.at(-1);({accueil,fiche,boutiques,boutique:boutiqueForm,produits,produit:produitForm,services,service:serviceForm})[view](params||{});}
+ function render(){const {view,params}=stack.at(-1);({accueil,fiche,boutiques,boutique:boutiqueForm,produits,produit:produitForm,services,service:serviceForm,statistiques})[view](params||{});}
 
  function accueil(){
   host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3',state.boutiques.some(b=>b.statut!=='Archivé')?'Ma boutique':'Espace professionnel','pro-title'));host.append(head,local);
@@ -117,6 +118,8 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const wait='Disponible après la validation de votre fiche.';
   if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',actif,wait);entry('Ajouter et gérer mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
   if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',actif,wait);
+  if(has('Commerçant')||has('Prestataire de services')){const b=button('Statistiques (30 jours)',()=>go('statistiques'),{kind:'tile'});if(!actif){b.disabled=true;b.title=wait;}menu.append(b);}
+  const bas=produitsStockBas(state.produits);if(has('Commerçant')&&actif&&bas.length){const a=button('⚠ Stock bas : '+bas.length+' produit'+(bas.length>1?'s':''),()=>go('produits'),{kind:'secondary'});a.classList.add('pro-alerte-btn');menu.prepend(a);}
   body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
  }
 
@@ -217,12 +220,48 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function produits(){
   const body=frame('Mes produits');const shops=activeShops();const rows=state.produits.filter(x=>x.statut!=='Archivé');
   body.append(button('Ajouter un produit',()=>go('produit')));
+  const bas=produitsStockBas(rows);
+  if(bas.length){const al=node('div',null,'pro-alerte');al.setAttribute('role','status');al.append(node('strong','⚠ Stock à renouveler'),node('p',bas.map(x=>x.payload.nom+' ('+(x.payload.stock===0?'épuisé':x.payload.stock+' restant'+(x.payload.stock>1?'s':''))+')').join(' · ')));body.append(al);}
   if(!rows.length)body.append(node('p','Aucun produit pour le moment.'));
   for(const x of rows){const shop=state.boutiques.find(b=>b.id===x.parent_id);
    const price=node('p',null,'pro-price');price.append(node('strong',C.formaterPrix(x.payload.prix)));if(x.payload.ancien_prix){const s=node('s',C.formaterPrix(x.payload.ancien_prix));s.setAttribute('aria-label','Ancien prix '+C.formaterPrix(x.payload.ancien_prix));price.append(' ',s);}
    const card=listCard('produits',x,{details:[shops.length>1||shop?.statut!=='Actif'?'Boutique : '+(shop?.payload.nom||'—')+(shop&&shop.statut!=='Actif'?' ('+shop.statut+')':''):null,'Stock : '+x.payload.stock],actions:[button('Modifier le prix ou le stock',()=>go('produit',{id:x.id}),{kind:'secondary'}),archiveButton('produits',x,'Il disparaîtra du catalogue.')]});
-   card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);body.append(card);}
+   card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);
+   const rapide=stockRapide(x);if(rapide)card.querySelector('.pro-actions').before(rapide);body.append(card);}
   archived(body,state.produits);
+ }
+ // Mise à jour rapide du stock depuis la liste : mêmes règles et même enregistrement que le formulaire du produit.
+ function stockRapide(row){
+  if(row.statut==='Archivé'||row.payload.moderation_lock)return null;
+  const p=row.payload,niveau=niveauStock(p.stock);
+  const wrap=node('div',null,'pro-field pro-inline pro-stock-rapide');const id=nextId('st'),l=node('label','Stock');l.htmlFor=id;
+  const champ=node('input');champ.id=id;champ.type='number';champ.inputMode='numeric';champ.min='0';champ.step='1';champ.value=String(p.stock??0);champ.setAttribute('aria-label','Nouveau stock de '+p.nom);
+  if(niveau==='bas'||niveau==='epuise'){const e=node('span',niveau==='epuise'?'Épuisé':'Stock bas','pro-pastille-stock');wrap.append(l,champ,e);}else wrap.append(l,champ);
+  const ok=button('Mettre à jour',()=>guarded(ok,async()=>{
+   const n=champ.value.trim()===''?NaN:Number(champ.value);if(!Number.isInteger(n)||n<0)throw Error('Indiquez un stock entier, 0 ou plus.');
+   if(n===p.stock){status.textContent='Le stock n’a pas changé.';return;}
+   const values={name:p.nom,price:p.prix,stock:n,photos:p.photos||(p.image_path?[p.image_path]:[])};if(p.ancien_prix)values.old_price=p.ancien_prix;if(p.categorie)values.category=p.categorie;if(p.description)values.description=p.description;
+   const errors=C.verifierOffre('produits',{nom:values.name,prix:values.price,ancien_prix:values.old_price,stock:values.stock});if(errors.length)throw Error(errors.join(' '));
+   await api.saveProduct(values,row);await done('Stock de « '+p.nom+' » mis à jour : '+n+'.',0);
+  }),{kind:'secondary'});
+  wrap.append(ok);return wrap;
+ }
+ // Statistiques des 30 derniers jours (vues, appels, WhatsApp, commandes, partages), calculées par le serveur pour le compte connecté.
+ async function statistiques(){
+  const body=frame('Statistiques (30 jours)');const zone=node('div',null,'pro-stats');body.append(zone);zone.append(node('p','Chargement…','pro-hint'));
+  let d=null;try{d=await api.statistiques(30);}catch(e){zone.replaceChildren(node('p',e.message||'Statistiques indisponibles.'));return;}
+  zone.replaceChildren();
+  if(!d||!Array.isArray(d.elements)){zone.append(node('p','Les statistiques seront disponibles prochainement.','pro-hint'));return;}
+  const LIB={vue:'Vues',appel:'Appels',whatsapp:'WhatsApp',commander:'Commandes',partage:'Partages',panier:'Ajouts au panier',devis:'Devis'};
+  const tot=d.totaux||{};const grille=node('div',null,'pro-stats-totaux');
+  for(const k of Object.keys(LIB)){const t=node('div',null,'pro-stat');t.append(node('strong',String(Number(tot[k])||0)),node('span',LIB[k]));grille.append(t);}
+  zone.append(grille);
+  if(!d.elements.length)zone.append(node('p','Aucune activité enregistrée pour le moment.','pro-hint'));
+  for(const e of [...d.elements].sort((a,b)=>(b.vue||0)-(a.vue||0)).slice(0,50)){
+   const c=node('article',null,'pro-card');c.append(node('h4',e.nom||'—'));
+   c.append(node('p',Object.keys(LIB).filter(k=>Number(e[k])>0).map(k=>LIB[k]+' : '+Number(e[k])).join(' · ')||'Aucune activité.'));zone.append(c);
+  }
+  zone.append(node('p','Chiffres indicatifs : une même personne peut être comptée plusieurs fois.','pro-hint'));
  }
  function produitForm({id}){
   const row=state.produits.find(x=>x.id===id)||null,p=row?.payload||{};const shops=activeShops();

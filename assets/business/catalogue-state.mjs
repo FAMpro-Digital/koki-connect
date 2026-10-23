@@ -2,6 +2,7 @@
 // Défense en profondeur : le serveur ne renvoie déjà que les fiches publiables ; ici on ne garde en plus
 // que les champs publics connus et seulement les éléments dont toute la chaîne parente est publiée.
 import './commerce-contract.js';
+import {etatOuverture,distanceKm,positionDe} from './catalogue-extras.mjs';
 const C=globalThis.KokiCommerceContract;
 export const ONGLETS=Object.freeze([{kind:'professionnels',label:'Commerces'},{kind:'boutiques',label:'Boutiques'},{kind:'produits',label:'Produits'},{kind:'services',label:'Services'}]);
 const CHAMPS={
@@ -47,13 +48,15 @@ function recherche(x,idx){const b=idx.boutique(x),v=idx.vendeur(x);return texte(
 export function categories(idx,kind){return [...new Set(idx.liste.filter(x=>x.kind===kind&&x.categorie).map(x=>x.categorie))].sort((a,b)=>a.localeCompare(b,'fr'));}
 export function villages(idx,kind){return [...new Set(idx.liste.filter(x=>x.kind===kind).map(x=>villageDe(x,idx)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));}
 export function disponible(x){return x.kind==='produits'?x.statut==='Disponible'&&Number.isInteger(x.stock)&&x.stock>0:x.kind==='services'?x.statut==='Disponible':true;}
-export function filtrer(idx,{kind='produits',query='',categorie='',village='',disponibles=false,tri='recent'}={}){
+export function filtrer(idx,{kind='produits',query='',categorie='',village='',disponibles=false,tri='recent',promo=false,ouvert=false,favoris=null,position=null,maintenant=new Date()}={}){
  const termes=texte(query).split(/\s+/).filter(Boolean);
- const res=idx.liste.filter(x=>x.kind===kind&&(!categorie||x.categorie===categorie)&&(!village||villageDe(x,idx)===village)&&(!disponibles||disponible(x))&&termes.every(t=>recherche(x,idx).includes(t)));
+ const res=idx.liste.filter(x=>x.kind===kind&&(!categorie||x.categorie===categorie)&&(!village||villageDe(x,idx)===village)&&(!disponibles||disponible(x))
+  &&(!promo||(disponible(x)&&promotion(x)>0))&&(!ouvert||etatOuverture(x,idx,maintenant)===true)&&(!favoris||favoris.has(x.id))&&termes.every(t=>recherche(x,idx).includes(t)));
  const prix=x=>Number.isInteger(x.prix)?x.prix:Infinity;
  if(tri==='prix')res.sort((a,b)=>prix(a)-prix(b)||a.ordre-b.ordre);
  else if(tri==='prix-desc')res.sort((a,b)=>(Number.isInteger(b.prix)?b.prix:-1)-(Number.isInteger(a.prix)?a.prix:-1)||a.ordre-b.ordre);
  else if(tri==='nom')res.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+ else if(tri==='proche'&&position){const d=x=>distanceKm(position,positionDe(x,idx));const val=x=>{const v=d(x);return v===null?Infinity:v;};res.sort((a,b)=>val(a)-val(b)||a.ordre-b.ordre);}
  else res.sort((a,b)=>a.ordre-b.ordre);
  return res;
 }

@@ -3,6 +3,9 @@ import {requireClientAccount} from './client-access.mjs';
 // Recherche, onglets, puces de catégories, promotions, cartes « Ajouter au panier », fiches détaillées avec galerie,
 // Appeler / WhatsApp / Commander sur WhatsApp, panier (une boutique) avec retrait ou livraison, paiement à la réception.
 import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,totalPanier,lienPanierWhatsApp} from './catalogue-state.mjs';
+import {etatOuverture,distanceKm,libelleDistance,positionDe,lireFavoris,basculerFavori,messagePartage,lienPartageWhatsApp,lienFiche,sauverCatalogue,lireCatalogue,libelleDate}from './catalogue-extras.mjs';
+import {lirePosition}from './position-gps.mjs';
+import {transitoire}from './client.mjs';
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 const PAGE=24;
@@ -35,24 +38,40 @@ function prixBloc(x){
 function badge(x){const t=etiquetteDisponibilite(x);if(!t)return null;return node('span',t,'cat-badge '+(disponible(x)?'cat-ok':'cat-off'));}
 
 // panier (facultatif) : {lignes(), ajouter(x,q), changer(id,q), commander(mode,adresse), position?(), note}
-export async function catalogue(host,{api,requireAccount=()=>requireClientAccount(api),addToCart,requestService,raccourcis=[],panier=null,vide='Aucun commerce ou service validé pour le moment.'}){
- let idx=indexCatalogue([]);const f={kind:'produits',query:'',categorie:'',village:'',disponibles:false,tri:'recent'};let limite=PAGE;
+export async function catalogue(host,{api,requireAccount=()=>requireClientAccount(api),addToCart,requestService,raccourcis=[],panier=null,vide='Aucun commerce ou service validé pour le moment.',stockage=(()=>{try{return localStorage;}catch{return null;}})()}){
+ let idx=indexCatalogue([]);const f={kind:'produits',query:'',categorie:'',village:'',disponibles:false,tri:'recent',promo:false,ouvert:false,favoris:null,position:null};let dessinerListe=null,limite=PAGE,horsDepuis=0,mesFavoris=lireFavoris(stockage),maPosition=null;
  const stack=[{view:'liste'}];const images=new Map();
  let mode='retrait',adresse='';const ajouterPanier=panier?(x,q)=>panier.ajouter(x,q):addToCart;
  const message=node('p',null,'cat-message');message.setAttribute('role','status');
  const say=t=>{message.textContent=t;};
  // Les URL de contact ne sont pas exposées dans un lien activable avant vérification.
- function contact(label,url,kind){
+ function contact(label,url,kind,suivi){
   const b=button(label,async()=>{
    if(b.disabled)return;b.disabled=true;
-   try{await requireAccount();window.location.assign(url);}catch(e){say(e.message);}finally{b.disabled=false;}
+   try{await requireAccount();if(suivi)suivre(suivi[0],suivi[1]);window.location.assign(url);}catch(e){say(e.message);}finally{b.disabled=false;}
   },kind);return b;
  }
 
- async function photo(img,path){try{if(!images.has(path))images.set(path,api.image(path));img.src=await images.get(path);}catch{images.delete(path);img.alt='Photo indisponible';img.classList.add('cat-photo-off');}}
+ // Appeler et écrire sur WhatsApp : sans compte (le numéro est déjà affiché). Le compte reste exigé pour commander.
+ function suivre(x,evenement){try{api.suivre?.(x.id,evenement);}catch{/* statistiques facultatives */}}
+ function direct(label,href,kind,x,evenement){const a=lien(label,href,kind);a.addEventListener('click',()=>suivre(x,evenement));return a;}
+ function distanceDe(x){return maPosition?distanceKm(maPosition,positionDe(x,idx)):null;}
+ function pastilleOuverture(x){const o=etatOuverture(x,idx);if(o===null)return null;return node('span',o?'Ouvert':'Fermé','cat-badge '+(o?'cat-ok':'cat-off'));}
+ function coeur(x){
+  const b=node('button',null,'cat-fav');b.type='button';
+  const maj=()=>{const on=mesFavoris.has(x.id);b.textContent=on?'♥':'♡';b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',(on?'Retirer « ':'Ajouter « ')+x.nom+(on?' » des favoris':' » aux favoris'));};
+  b.onclick=ev=>{ev.stopPropagation();mesFavoris=basculerFavori(stockage,x.id);maj();for(const c of host.querySelectorAll('.cat-fav'))if(c!==b&&c._id===x.id)c._maj();if(f.favoris)dessinerListe?.();};
+  b._id=x.id;b._maj=maj;maj();return b;
+ }
+ async function partager(x){
+  const texte=messagePartage(x,idx),url=lienFiche(x.id);
+  try{if(navigator.share){await navigator.share({title:x.nom,text:texte,url});suivre(x,'partage');return;}}catch(e){if(e?.name==='AbortError')return;}
+  suivre(x,'partage');window.open(lienPartageWhatsApp(x,idx),'_blank','noopener');
+ }
+ async function photo(img,path,x){try{if(!images.has(path))images.set(path,api.image(path));img.src=await images.get(path);}catch{images.delete(path);if(x&&img.isConnected)img.replaceWith(tuile(x));else{img.alt='Photo indisponible';img.classList.add('cat-photo-off');}}}
  // Les images se chargent quand elles approchent de l'écran (économie de données mobiles).
- const watcher=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){watcher.unobserve(e.target);photo(e.target,e.target.dataset.path);}},{rootMargin:'300px'}):null;
- function vignette(path,alt,x){if(!path)return tuile(x);const img=node('img');img.alt=alt;img.loading='lazy';img.decoding='async';img.width=320;img.height=240;img.dataset.path=path;if(watcher)watcher.observe(img);else photo(img,path);return img;}
+ const watcher=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){watcher.unobserve(e.target);photo(e.target,e.target.dataset.path,e.target._x);}},{rootMargin:'300px'}):null;
+ function vignette(path,alt,x){if(!path)return tuile(x);const img=node('img');img.alt=alt;img.loading='lazy';img.decoding='async';img.width=320;img.height=240;img.dataset.path=path;img._x=x;if(watcher)watcher.observe(img);else photo(img,path,x);return img;}
 
  function go(view,params){say('');stack.push({view,params});try{history.pushState({...(history.state||{}),kokiCat:stack.length},'');}catch{}render();host.scrollIntoView({block:'start'});}
  function back(){if(stack.length<=1)return;try{if(history.state?.kokiCat===stack.length){history.back();return;}}catch{}stack.pop();render();}
@@ -80,10 +99,10 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   if(x.kind==='produits'){
    if(!disponible(x)){zone.append(node('span','Épuisé','cat-pill'));return;}
    // « Commander » (WhatsApp) toujours avant « Ajouter au panier ».
-   if(ajouterPanier){const w=lienCommande(x,idx,Math.max(1,quantite(x.id)));if(w){const c=contact('Commander',w,'whatsapp');c.setAttribute('aria-label','Commander « '+x.nom+' » sur WhatsApp');zone.append(c);}}
+   if(ajouterPanier){const w=lienCommande(x,idx,Math.max(1,quantite(x.id)));if(w){const c=contact('Commander',w,'whatsapp',[x,'commander']);c.setAttribute('aria-label','Commander « '+x.nom+' » sur WhatsApp');zone.append(c);}}
    if(ajouterPanier&&quantite(x.id)>0&&panier){zone.append(compteur(x));return;}
    if(ajouterPanier){const b=button('Ajouter au panier',()=>ajouter(x,1),'cart');b.setAttribute('aria-label','Ajouter « '+x.nom+' » au panier');zone.append(b);return;}
-   const w=lienCommande(x,idx,1);if(w)zone.append(contact('Commander sur WhatsApp',w,'whatsapp'));return;
+   const w=lienCommande(x,idx,1);if(w)zone.append(contact('Commander sur WhatsApp',w,'whatsapp',[x,'commander']));return;
   }
   if(x.kind==='services')zone.append(button('Demander un devis',()=>go('fiche',{id:x.id}),'dark'));
  }
@@ -94,11 +113,12 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const media=node('span',null,'cat-media');media.append(vignette(x.photos[0],'',x));
   if(promotion(x))media.append(node('span','−'+promotion(x)+' %','cat-promo'));
   b.append(media);const body=node('span',null,'cat-card-body');
-  const meta=[x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?x.categorie:x.kind==='boutiques'?idx.vendeur(x)?.nom:x.categorie,villageDe(x,idx)].filter(Boolean).join(' · ');if(meta)body.append(node('span',meta,'cat-meta'));
+  const km=distanceDe(x);const meta=[x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?x.categorie:x.kind==='boutiques'?idx.vendeur(x)?.nom:x.categorie,villageDe(x,idx),km!==null?'à '+libelleDistance(km):''].filter(Boolean).join(' · ');if(meta)body.append(node('span',meta,'cat-meta'));
   if(x.kind==='services'&&idx.vendeur(x))body.append(node('span',idx.vendeur(x).nom,'cat-meta cat-meta-fort'));
   body.append(node('span',x.nom,'cat-card-title'));const p=prixBloc(x);if(p)body.append(p);
   if(x.kind==='services'){const bd=badge(x);if(bd)body.append(bd);}
-  b.append(body);b.onclick=()=>go('fiche',{id:x.id});a.append(b);
+  if(x.kind!=='produits'){const po=pastilleOuverture(x);if(po)body.append(po);}
+  b.append(body);b.onclick=()=>go('fiche',{id:x.id});a.append(b);a.append(coeur(x));
   const zone=node('div',null,'cat-card-actions');actionsCarte(x,zone);if(zone.childElementCount)a.append(zone);a._zone=zone;a._x=x;
   return a;
  }
@@ -142,6 +162,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   bar.append(recherche);if(panier)bar.append(cartBtn);shell.append(bar);
   if(raccourcis.length){const rapides=node('div',null,'cat-shortcuts');for(const r of raccourcis)rapides.append(button(r.label,r.action,'link'));shell.append(rapides);}
   shell.append(message);
+  if(horsDepuis)shell.append(node('p','Hors connexion : catalogue enregistré le '+libelleDate(horsDepuis)+'. Les prix et le stock ont peut-être changé.','cat-offline'));
   // Onglets : Produits / Services / Boutiques / Commerces.
   const tabs=node('div',null,'cat-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Rubriques du catalogue');shell.append(tabs);
   const promo=node('section',null,'cat-promos');promo.setAttribute('aria-label','Promotions');shell.append(promo);
@@ -156,7 +177,8 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    barre.hidden=!n;barre.replaceChildren(node('span',n+' article'+(n>1?'s':'')+' · '+C.formaterPrix(totalPanier(ls))),node('span','Panier →','cat-cartbar-go'));barre.setAttribute('aria-label','Voir le panier : '+n+' article'+(n>1?'s':'')+', '+C.formaterPrix(totalPanier(ls)));
    for(const card of host.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);if(panier)recapitulatif(aside);};
   function dessiner(){
-   const n=compter(idx,f);tabs.replaceChildren();
+   f.favoris=f.mesFavoris?mesFavoris:null;
+   const n=compter(idx,{...f,promo:false,ouvert:false});tabs.replaceChildren();
    for(const kind of ORDRE){const o=ONGLETS.find(x=>x.kind===kind);const b=node('button',null,'cat-tab');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(kind===f.kind));b.append(node('span',o.label),node('span',String(n[kind]),'cat-tab-n'));b.setAttribute('aria-label',o.label+' ('+n[kind]+')');b.onclick=()=>{if(f.kind===kind)return;f.kind=kind;f.categorie='';f.village='';limite=PAGE;dessiner();};tabs.append(b);}
    // Promotions : seulement sur l'onglet Produits, sans recherche ni filtre.
    promo.replaceChildren();const promos=f.kind==='produits'&&!f.query&&!f.categorie&&!f.village?promotions(idx):[];promo.hidden=!promos.length;
@@ -167,11 +189,19 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    filtres.replaceChildren();
    if(vils.length>1||f.village)select(filtres,'Village ou quartier',[{value:'',label:'Tous'},...vils],f.village,v=>{f.village=v;limite=PAGE;dessiner();});
    if(f.kind==='produits'||f.kind==='services'){
-    select(filtres,'Trier',[{value:'recent',label:'Plus récents'},{value:'prix',label:'Prix croissant'},{value:'prix-desc',label:'Prix décroissant'},{value:'nom',label:'Nom'}],f.tri,v=>{f.tri=v;dessiner();});
     const l=node('label',null,'cat-toggle'),c=node('input');c.type='checkbox';c.checked=f.disponibles;c.onchange=()=>{f.disponibles=c.checked;limite=PAGE;dessiner();};l.append(c,' Disponibles seulement');filtres.append(l);
    }
-   if(f.query||f.categorie||f.village||f.disponibles)filtres.append(button('Effacer les filtres',()=>{Object.assign(f,{query:'',categorie:'',village:'',disponibles:false});q.value='';limite=PAGE;dessiner();},'link'));
-   const res=filtrer(idx,f);const nom={produits:['produit','produits'],services:['prestataire','prestataires'],boutiques:['boutique','boutiques'],professionnels:['commerce','commerces']}[f.kind];
+   // Tri : « Les plus proches » demande la position du téléphone (une seule fois, jamais enregistrée).
+   const triOptions=f.kind==='produits'||f.kind==='services'?[{value:'recent',label:'Plus récents'},{value:'prix',label:'Prix croissant'},{value:'prix-desc',label:'Prix décroissant'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}]:[{value:'recent',label:'Plus récents'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}];
+   select(filtres,'Trier',triOptions,f.tri,async v=>{
+    if(v==='proche'&&!maPosition){say('Recherche de votre position…');try{const p=await lirePosition();maPosition={latitude:p.latitude,longitude:p.longitude};say('');}catch(e){say(e.message);f.tri='recent';dessiner();return;}}
+    f.tri=v;limite=PAGE;dessiner();});
+   const bascule=(libelle,cle)=>{const l=node('label',null,'cat-toggle'),c=node('input');c.type='checkbox';c.checked=!!f[cle];c.onchange=()=>{f[cle]=c.checked;limite=PAGE;dessiner();};l.append(c,' '+libelle);filtres.append(l);};
+   if(f.kind==='produits')bascule('Promotions seulement','promo');
+   bascule('Ouvert maintenant','ouvert');
+   bascule('Mes favoris'+(mesFavoris.size?' ('+mesFavoris.size+')':''),'mesFavoris');
+   if(f.query||f.categorie||f.village||f.disponibles||f.promo||f.ouvert||f.mesFavoris)filtres.append(button('Effacer les filtres',()=>{Object.assign(f,{query:'',categorie:'',village:'',disponibles:false,promo:false,ouvert:false,mesFavoris:false});q.value='';limite=PAGE;dessiner();},'link'));
+   const res=filtrer(idx,{...f,position:maPosition});const nom={produits:['produit','produits'],services:['prestataire','prestataires'],boutiques:['boutique','boutiques'],professionnels:['commerce','commerces']}[f.kind];
    compte.textContent=res.length+' '+nom[res.length>1?1:0];
    grille.replaceChildren();plus.replaceChildren();grille.dataset.kind=f.kind;
    if(!res.length)grille.append(node('p',idx.liste.length?'Aucun résultat. Essayez un autre mot ou retirez un filtre.':vide,'cat-empty'));
@@ -179,7 +209,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    if(res.length>limite)plus.append(button('Voir plus ('+(res.length-limite)+')',()=>{limite+=PAGE;dessiner();}));
    majPanier();
   }
-  dessiner();
+  dessinerListe=dessiner;dessiner();
  }
 
  function galerie(x){
@@ -202,13 +232,33 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   box.append(node('p',x.kind==='professionnels'?'Contacter '+c.vendeur:'Proposé par '+c.vendeur+(x.kind==='produits'&&c.boutique?' · '+c.boutique:''),'cat-seller'));
   const actions=node('div',null,'cat-actions');
   const principal=x.kind==='produits'?lienCommande(x,idx,qte):x.kind==='services'?lienDevis(x,idx):null;
-  if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp'));
+  if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp',[x,x.kind==='produits'?'commander':'devis']));
   if(apresCommande)actions.append(apresCommande);// « Ajouter au panier » juste après « Commander »
-  if(c.appel)actions.append(contact('Appeler le '+c.telephone,c.appel,'call'));
-  if(c.whatsapp)actions.append(contact(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp'));
+  if(c.appel)actions.append(direct('Appeler le '+c.telephone,c.appel,'call',x,'appel'));
+  if(c.whatsapp)actions.append(direct(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp',x,'whatsapp'));
   const carte=lienCarte(x,idx);if(carte)actions.append(lien('Voir sur la carte',carte,'secondary'));
   if(!c.appel&&!c.whatsapp)box.append(node('p','Numéro non communiqué.'));
   box.append(actions);return box;
+ }
+
+ // Avis des clients : visibles seulement quand le serveur les propose (api.avis renvoie null sinon).
+ function sectionAvis(x){
+  const box=node('section',null,'cat-avis');box.hidden=true;
+  (async()=>{
+   let d=null;try{d=await api.avis?.(x.id);}catch{}
+   if(!d||!box.isConnected)return;
+   box.hidden=false;box.replaceChildren();
+   const etoiles=n=>'★'.repeat(Math.round(n))+'☆'.repeat(5-Math.round(n));
+   const t=node('h4','Avis des clients');box.append(t);
+   if(d.total>0){const r=node('p',null,'cat-avis-moy');r.append(node('strong',etoiles(d.moyenne)+' '+String(d.moyenne).replace('.',',')+' / 5'),' · '+d.total+' avis');r.setAttribute('aria-label','Note moyenne '+d.moyenne+' sur 5, '+d.total+' avis');box.append(r);}
+   else box.append(node('p','Aucun avis pour le moment. Soyez le premier à donner le vôtre.','cat-hint'));
+   const liste=node('ul',null,'cat-avis-liste');for(const a of d.avis||[]){const li=node('li');li.append(node('strong',etoiles(a.note)),' ',node('span',a.auteur||'Client','cat-meta'));if(a.commentaire)li.append(node('p',a.commentaire));liste.append(li);}if(liste.children.length)box.append(liste);
+   const form=node('form',null,'cat-avis-form');const lab=node('label','Votre note');const sel=node('select');lab.htmlFor=sel.id=nid('note');for(const n of [5,4,3,2,1]){const o=node('option',n+' / 5 '+'★'.repeat(n));o.value=String(n);sel.append(o);}
+   const zone=node('textarea');zone.maxLength=500;zone.rows=3;zone.placeholder='Votre commentaire (facultatif)';zone.setAttribute('aria-label','Votre commentaire');
+   const envoi=button('Publier mon avis',async()=>{envoi.disabled=true;try{await requireAccount();await api.ajouterAvis(x.id,Number(sel.value),zone.value.trim());say('Merci, votre avis est enregistré.');zone.value='';api.avis(x.id).then(n=>{if(n){d=n;}}).catch(()=>{});}catch(e){say(e.message);}finally{envoi.disabled=false;}},'secondary');
+   form.append(lab,sel,zone,envoi);form.onsubmit=e=>e.preventDefault();box.append(form);
+  })();
+  return box;
  }
 
  function fiche(id){
@@ -219,6 +269,10 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const corps=node('div',null,'cat-detail-body');art.append(corps);
   const h=node('h3',x.nom,'cat-title');h.tabIndex=-1;corps.append(h);queueMicrotask(()=>h.focus({preventScroll:true}));
   const p=prixBloc(x);if(p)corps.append(p);const bd=badge(x);if(bd)corps.append(bd);
+  if(x.kind!=='produits'){const po=pastilleOuverture(x);if(po)corps.append(po);}
+  {const km=distanceDe(x);if(km!==null)corps.append(node('p','À '+libelleDistance(km)+' de vous','cat-meta'));}
+  {const rangee=node('div',null,'cat-share');const fav=coeur(x);fav.classList.add('cat-fav-fiche');fav.append(' ',node('span','Favori'));rangee.append(fav,button('Partager',()=>partager(x),'secondary'));corps.append(rangee);}
+  suivre(x,'vue');
   const i=infos(x);if(i)corps.append(i);if(x.description)corps.append(node('p',x.description,'cat-description'));
   let qte=1;const contact=node('div');
   const dessinerContact=()=>{contact.replaceChildren(liens(x,qte,boutonPanier));};
@@ -240,10 +294,16 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   if(x.kind==='boutiques')groupe('Produits de la boutique',idx.enfants(x.id,'produits'));
   if(x.kind==='professionnels'){groupe('Boutiques',idx.enfants(x.id,'boutiques'));groupe('Services',idx.enfants(x.id,'services'));}
   if(lies.children.length)art.append(lies);
+  art.append(sectionAvis(x));
   majPanier=()=>{for(const card of art.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);};
  }
 
- async function charger(){host.replaceChildren(node('p','Chargement du catalogue…','cat-count'));idx=indexCatalogue(await api.catalog());if(stack.at(-1).view==='fiche'&&!idx.get(stack.at(-1).params.id))stack.length=1;render();}
+ // Hors connexion : dernière copie du catalogue (contenu public), avec la date affichée.
+ async function charger(){host.replaceChildren(node('p','Chargement du catalogue…','cat-count'));
+  let rows;horsDepuis=0;
+  try{rows=await api.catalog();if(Array.isArray(rows))sauverCatalogue(stockage,rows);}
+  catch(e){const c=e?.horsLigne||transitoire(e)?lireCatalogue(stockage):null;if(!c)throw e;rows=c.rows;horsDepuis=c.date;}
+  idx=indexCatalogue(rows);if(stack.at(-1).view==='fiche'&&!idx.get(stack.at(-1).params.id))stack.length=1;render();}
  await charger();
  return {recharger:charger,ouvrir:id=>{if(idx?.get(id))go('fiche',{id});},get index(){return idx;}};
 }
