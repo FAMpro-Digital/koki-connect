@@ -26,7 +26,7 @@ test('chaque action référencée dans la page existe dans le registre', () => {
       total++;
     }
   }
-  assert.equal(total, 88);
+  assert.equal(total, 89); // + bouton Urgences de l’accueil
 });
 
 test('le registre exécute la même instruction qu\'avant (this, event, repli)', () => {

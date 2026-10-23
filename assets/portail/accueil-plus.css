@@ -1,0 +1,45 @@
+/* Accueil : tuiles lisibles, titres de sections alignés, Urgences, carte « Reprendre », « À la une », en-tête. Couleurs Koki : orange, vert foncé, blanc. */
+
+/* 1. Tuiles : les mots ne sont plus coupés en deux ; la taille s'adapte à la largeur de l'écran. */
+.raccourci { padding: 16px 3px; }
+.raccourci strong { overflow-wrap: normal !important; word-break: normal; hyphens: manual; font-size: clamp(10px, 2.85vw, 12px); line-height: 1.2; display: block; }
+.raccourci span { font-size: clamp(26px, 7.5vw, 30px); }
+
+/* 3. Titres de sections : titre à gauche, « Voir plus » toujours à droite, même taille. */
+.portail-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
+.portail-title h2 { margin: 0; min-width: 0; }
+.portail-title .portail-more { flex: 0 0 auto; margin: 0 0 0 auto; white-space: nowrap; }
+
+/* 4. Urgences : bouton rouge visible sous la recherche. */
+.accueil-rapide { display: grid; gap: 10px; margin-top: 10px; }
+.accueil-rapide[hidden] { display: none; }
+.urgences-bouton { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; width: 100%; box-sizing: border-box; padding: 10px 14px; border: 0; border-radius: 14px; background: #b91c1c; color: #fff; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 3px 10px #b91c1c33; }
+.urgences-bouton:focus-visible { outline: 3px solid #17201b; outline-offset: 3px; }
+
+/* 5. Carte « Reprendre » : course ou commande en cours. */
+.carte-reprendre { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #fff; border: 2px solid #e06a00; box-shadow: 0 3px 12px #143b1014; }
+.carte-reprendre[hidden] { display: none; }
+.carte-reprendre .reprendre-icone { font-size: 28px; }
+.carte-reprendre .reprendre-texte { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.carte-reprendre .reprendre-texte small { color: #a64b00; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
+.carte-reprendre .reprendre-texte strong { overflow-wrap: anywhere; }
+.carte-reprendre .reprendre-texte span { color: #4b525a; font-size: 14px; overflow-wrap: anywhere; }
+.carte-reprendre button { flex: 0 0 auto; min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: #e06a00; color: #1a0e00; font: inherit; font-weight: 700; cursor: pointer; }
+
+/* 6. « À la une » : bandeau qui défile sous la recherche ; masqué tant qu'il n'y a rien à la une. */
+#accueil-une.une-vide { display: none !important; }
+#portail-une { display: flex; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scrollbar-width: none; }
+#portail-une::-webkit-scrollbar { display: none; }
+#portail-une > * { flex: 0 0 min(88%, 420px); scroll-snap-align: start; }
+#portail-une > :only-child { flex-basis: 100%; }
+.une-points { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.une-points[hidden] { display: none; }
+.une-points span { width: 8px; height: 8px; border-radius: 50%; background: #c9d3cd; }
+.une-points span[aria-current="true"] { background: #087a3d; width: 20px; border-radius: 4px; }
+
+/* 8. En-tête : profil en icône, pastille de notifications. */
+.bouton-pastille { position: relative; }
+.pastille-notifs { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: #e06a00; color: #fff; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; border: 2px solid #fff; }
+.pastille-notifs[hidden] { display: none; }
+
+@media (prefers-reduced-motion: no-preference) { #portail-une { scroll-behavior: smooth; } }

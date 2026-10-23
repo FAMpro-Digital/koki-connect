@@ -42,5 +42,14 @@ async function ouvrir(){
  const liens=n('div',undefined,'act-liens');liens.append(b('🚕 Réserver une course',()=>afficherTransport(),'act-bouton'),b('🛍️ Aller à la boutique',()=>afficherCommerce(),'act-bouton act-bouton-clair'));s.append(liens);
  suivi.append(s);
 }
-window.KokiActivite=Object.freeze({ouvrir});
+// Premier suivi en cours (course d'abord, puis commande ou demande) pour la carte « Reprendre » de l'accueil.
+function enCours(a){
+ if(!a||!a.connecte)return null;
+ const course=(a.courses||[]).find(r=>ACTIVES.includes(r.statut));
+ if(course)return {icone:'🚕',titre:'Course '+(course.payload?.categorie||'en cours'),detail:course.statut==='En attente'?'Recherche d’un chauffeur…':'Suivre le chauffeur et voir votre code',statut:course.statut,type:'course'};
+ const r=[...(a.commandes||[]),...(a.demandes||[])].find(x=>EN_COURS_COMMERCE.includes(x.statut));
+ if(!r)return null;
+ return {icone:(a.commandes||[]).includes(r)?'🛍️':'🛠️',titre:r.payload?.nom||((a.commandes||[]).includes(r)?'Commande en cours':'Demande en cours'),detail:(r.payload?.total!=null?r.payload.total+' FCFA · ':'')+date(r.created_at),statut:r.statut,type:'commerce'};
+}
+window.KokiActivite=Object.freeze({ouvrir,enCours});
 })();
