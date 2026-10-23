@@ -122,6 +122,9 @@ function afficherMenu() {
   window.scrollTo(0, 0);
 }
 function afficherNotifications() {
+  try { localStorage.setItem('koki.notifs.vu', String(Date.now())); } catch (erreur) { /* pastille non mise à jour */ }
+  const pastille = document.getElementById('pastille-notifs'); if (pastille) pastille.hidden = true;
+  const boutonNotifications = document.getElementById('bouton-notifications'); if (boutonNotifications) boutonNotifications.setAttribute('aria-label', 'Notifications');
   document.querySelector('.search').hidden = true;
   document.querySelectorAll('body > .section').forEach(section => {
     section.hidden = section.id !== 'vue-notifications';
@@ -182,11 +185,24 @@ async function chargerMeteo() {
     temperature.textContent = Math.round(actuelle.temperature_2m) + ' °C';
     condition.textContent = description;
     temperature.title = 'Météo de Koki · ' + actuelle.time.replace('T', ' ');
+    try { localStorage.setItem('koki.meteo', JSON.stringify({ code: actuelle.weather_code, jour: actuelle.is_day === 1, temperature: actuelle.temperature_2m, enregistre: Date.now() })); } catch (e) { /* facultatif */ }
   } catch (erreur) {
-    temperature.textContent = '— °C';
-    document.getElementById('icone-meteo').textContent = '🌡️';
-    condition.textContent = 'Météo indisponible';
-    temperature.removeAttribute('title');
+    // Service injoignable : dernière valeur connue (moins de 12 h) avec l'heure de mise à jour, sinon « indisponible ».
+    let derniere = null;
+    try { derniere = JSON.parse(localStorage.getItem('koki.meteo') || 'null'); } catch (e) { derniere = null; }
+    if (derniere && Number.isFinite(derniere.temperature) && Number.isInteger(derniere.code) && Date.now() - derniere.enregistre < 12 * 3600 * 1000) {
+      const [icone, description] = decrireMeteo(derniere.code, derniere.jour);
+      const heure = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Dakar' }).format(new Date(derniere.enregistre));
+      document.getElementById('icone-meteo').textContent = icone;
+      temperature.textContent = Math.round(derniere.temperature) + ' °C';
+      condition.textContent = description + ' · à ' + heure;
+      temperature.title = 'Dernière météo connue (hors connexion)';
+    } else {
+      temperature.textContent = '— °C';
+      document.getElementById('icone-meteo').textContent = '🌡️';
+      condition.textContent = 'Météo indisponible';
+      temperature.removeAttribute('title');
+    }
   } finally {
     clearTimeout(delai);
     bouton.disabled = false;

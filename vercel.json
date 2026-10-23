@@ -45,6 +45,7 @@
       "develop/commander-carte": false,
       "develop/session-persistante": false,
       "develop/commerce-ameliorations": false,
+      "develop/accueil-ameliorations": false,
       "ci/verification-main": false,
       "perf/chargement-mobile": false,
       "securite/csp-gestionnaires": false,
