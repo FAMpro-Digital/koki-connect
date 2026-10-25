@@ -44,13 +44,13 @@
       }).catch(erreur => { chargementCarte = null; throw erreur; });
       return chargementCarte;
     }
-function obtenirPositionActuelle() {
+function obtenirPositionActuelle(options = {}) {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) { reject(new Error('La localisation n’est pas disponible sur cet appareil.')); return; }
     navigator.geolocation.getCurrentPosition(resolve, erreur => {
       const message = erreur.code === 1 ? 'Localisation refusée. Autorisez-la dans votre navigateur ou choisissez un départ sur la carte.' : erreur.code === 3 ? 'La localisation prend trop de temps. Réessayez ou choisissez un lieu.' : 'Position indisponible. Choisissez un départ sur la carte.';
       reject(new Error(message));
-    }, {timeout:10000, maximumAge:60000});
+    }, {timeout:10000, maximumAge:60000, ...options});
   });
 }
 async function activerGeolocalisation() {
