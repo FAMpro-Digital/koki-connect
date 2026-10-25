@@ -1,4 +1,5 @@
-import {renderNotifications,disablePush} from './notifications.mjs';
+import {mountNotificationPrompt} from './notification-prompt.mjs';
+import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
 import {isProcessedImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver,searchCatalogue,catalogueCategories,searchDrivers} from './business-state.js';
@@ -31,7 +32,7 @@ function localCartStorage(){try{return localStorage;}catch{return null;}}
 function observe(rows,status){const changes=observer.observe(rows);if(changes.length){status.textContent=changes.map(x=>x.kind+' : '+x.status).join(' · ');window.dispatchEvent(new CustomEvent('koki-business-status',{detail:changes}));}}
 // Même règle que assets/portail/feed.js : Supabase LOCAL seulement pour une page servie depuis cet ordinateur.
 export function backendAutorise(c,hostname){if(!c||typeof c.publishableKey!=='string'||!c.publishableKey.startsWith('sb_publishable_'))return false;if(/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(c.url))return c.local!==true;return c.local===true&&(hostname==='127.0.0.1'||hostname==='localhost')&&/^http:\/\/(127\.0\.0\.1|localhost):54321$/.test(c.url);}
-async function initialise(){if(configuration)return configuration;configuration=Promise.all([lireConfig('assets/business/config.json','koki-cache-config','Configuration indisponible.'),lireConfig('assets/portail/backend.json','koki-cache-backend','Serveur indisponible.')]).then(async([flags,c])=>{if(!backendAutorise(c,globalThis.location?.hostname))throw Error('Configuration publique invalide.');modules={commerce:moduleActif(flags,'commerce'),transport:moduleActif(flags,'transport')};db=flags.enabled===true?(await sdk()).createClient(c.url,c.publishableKey,{auth:{storageKey:'koki-public-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;api=createBusinessClient(db,{enabled:flags.enabled===true,storage:retryStorage(),sessionLocale:sessionEnregistree,secours:copieSecours,beforeLogout:()=>disablePush(db)});return api;}).catch(e=>{configuration=null;throw e;});return configuration;}
+async function initialise(){if(configuration)return configuration;configuration=Promise.all([lireConfig('assets/business/config.json','koki-cache-config','Configuration indisponible.'),lireConfig('assets/portail/backend.json','koki-cache-backend','Serveur indisponible.')]).then(async([flags,c])=>{if(!backendAutorise(c,globalThis.location?.hostname))throw Error('Configuration publique invalide.');modules={commerce:moduleActif(flags,'commerce'),transport:moduleActif(flags,'transport')};db=flags.enabled===true?(await sdk()).createClient(c.url,c.publishableKey,{auth:{storageKey:'koki-public-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;db?.auth.onAuthStateChange?.((event,session)=>{if(event==='SIGNED_IN')setTimeout(()=>{document.getElementById('koki-notification-prompt')?.remove();inviterNotifications();},500);if(event==='SIGNED_OUT')document.getElementById('koki-notification-prompt')?.remove();});api=createBusinessClient(db,{enabled:flags.enabled===true,storage:retryStorage(),sessionLocale:sessionEnregistree,secours:copieSecours,beforeLogout:()=>disablePush(db)});return api;}).catch(e=>{configuration=null;throw e;});return configuration;}
 // Dossier photo anonyme fourni par le serveur : le chemin publié ne contient pas l'identifiant du compte.
 async function upload(result){const file=result?.file||result;if(!isProcessedImage(file))throw Error('Compressez la photo avant son téléversement.');await api.identity();const folder=await api.mediaFolder();const ext=file.type==='image/webp'?'webp':file.type==='image/png'?'png':'jpg';const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('koki-media').upload(path,file,{contentType:file.type,upsert:false});if(error)throw Error('Téléversement impossible. Votre image précédente est conservée.');return path;}
 function container(module){const section=document.getElementById('vue-'+(module==='transport'?'transport':'commerce'));let box=document.getElementById('business-'+module);if(!box){box=node('section');box.id='business-'+module;box.className='business-panel';const ancre=module==='transport'?section.querySelector('.tr-app')||section.querySelector('.transport-demo'):section.querySelector('.market-demo');ancre.after(box);}return box;}
@@ -215,3 +216,11 @@ window.KokiNotifications={async ouvrir(){const host=document.getElementById('not
 window.addEventListener?.('koki-notifications-open',()=>window.KokiNotifications.ouvrir());
 globalThis.navigator?.serviceWorker?.addEventListener('message',e=>{if(e.data?.type==='koki-notifications-open')window.afficherNotifications?.();});
 if(new URLSearchParams(location.search).get('notifications')==='1')queueMicrotask(()=>window.afficherNotifications?.());
+
+function inviterNotifications(){
+ return mountNotificationPrompt({signedIn:()=>!!sessionEnregistree()&&!sessionEnregistree().is_anonymous,openAccount:()=>window.KokiPortail?.profil?.(),activate:async(key,permission)=>{if(await permission!=='granted')return false;await initialise();if(!db)return false;return enablePush(db,key,permission);}}).catch(()=>{});
+}
+if(globalThis.document?.body&&window.addEventListener){
+ window.addEventListener('koki-push-enabled',()=>document.getElementById('koki-notification-prompt')?.remove());
+ setTimeout(()=>inviterNotifications(),4000);
+}

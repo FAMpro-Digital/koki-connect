@@ -1,6 +1,14 @@
 // Les réponses personnelles restent en mémoire : aucun stockage hors ligne.
 const element=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
 export function decodeKey(value){const bytes=atob(value.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-value.length%4)%4));return Uint8Array.from(bytes,c=>c.charCodeAt(0));}
+export async function enablePush(db,vapidPublicKey,permission=Notification.requestPermission()){
+ if(await permission!=='granted')return false;
+ const reg=await navigator.serviceWorker.ready;
+ const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(vapidPublicKey)});
+ const json=sub.toJSON();const {error}=await db.rpc('koki_push_register',{p_endpoint:json.endpoint,p_p256dh:json.keys.p256dh,p_auth:json.keys.auth});
+ if(error){await sub.unsubscribe();throw error;}
+ window.dispatchEvent(new Event('koki-push-enabled'));return true;
+}
 export async function disablePush(db){
  if(!('serviceWorker' in navigator))return;
  const registration=await navigator.serviceWorker.getRegistration();
@@ -40,11 +48,7 @@ export async function renderNotifications(host,db,{vapidPublicKey='',smsEnabled=
  else if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))settings.append(element('p','Sur iPhone : ajoutez Koki Connect à l’écran d’accueil, puis ouvrez son icône pour activer les notifications.'));
  else{
   settings.append(button('Activer les notifications sur cet appareil',async()=>{
-   // Demande directement après le clic ; aucun appel réseau avant l'autorisation iOS.
-   if(await Notification.requestPermission()!=='granted'){status.textContent='Autorisation refusée. Vous pouvez la modifier dans les réglages du téléphone.';return;}
-   const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(vapidPublicKey)});
-   const json=sub.toJSON();const {error}=await db.rpc('koki_push_register',{p_endpoint:json.endpoint,p_p256dh:json.keys.p256dh,p_auth:json.keys.auth});
-   if(error){await sub.unsubscribe();throw error;}status.textContent='Notifications activées sur cet appareil.';
+   if(!await enablePush(db,vapidPublicKey)){status.textContent='Autorisation refusée. Vous pouvez la modifier dans les réglages du téléphone.';return;}status.textContent='Notifications activées sur cet appareil.';
   }),button('Désactiver sur cet appareil',async()=>{await disablePush(db);status.textContent='Notifications désactivées sur cet appareil.';}));
  }
  if(smsEnabled){
