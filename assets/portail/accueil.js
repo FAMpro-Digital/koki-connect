@@ -122,6 +122,7 @@ function afficherMenu() {
   window.scrollTo(0, 0);
 }
 function afficherNotifications() {
+  window.dispatchEvent(new Event('koki-notifications-open'));
   try { localStorage.setItem('koki.notifs.vu', String(Date.now())); } catch (erreur) { /* pastille non mise à jour */ }
   const pastille = document.getElementById('pastille-notifs'); if (pastille) pastille.hidden = true;
   const boutonNotifications = document.getElementById('bouton-notifications'); if (boutonNotifications) boutonNotifications.setAttribute('aria-label', 'Notifications');

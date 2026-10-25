@@ -51,7 +51,8 @@
       "securite/csp-gestionnaires": false,
       "test/koki-connect-performance": false,
       "fiabilite/service-worker": false,
-      "tests/qualite-automatisee": false
+      "tests/qualite-automatisee": false,
+      "feature/notifications-sms-push": false
     }
   },
   "headers": [
