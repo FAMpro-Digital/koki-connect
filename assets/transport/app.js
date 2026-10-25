@@ -3,7 +3,7 @@
   const core = KokiTransportCore;
   const $ = id => document.getElementById('transport-' + id);
   const etat = { demo: false, categorie: 'Moto', depart: null, destination: null, choisi: null, chauffeurs: [], estimation: null, course: null, prix: {}, reel: null };
-  let generationPrix = 0, minuterie = null;
+  let generationPrix = 0, minuterie = null, positionDemandee = false, positionEnCours = false;
   let configuration = null, initialisation = null, carte = null, points = null, cible = null;
   const cleCourse = 'koki.transport.demo.course.v1';
   // Replace this repository with authenticated driver and ride APIs when available.
@@ -193,7 +193,9 @@
     document.getElementById('titre-transport').focus();
     document.getElementById('vue-transport').scrollIntoView({block:'start'});
     message('Chargement de Transport…');
-    try { await initialiser(); await carteInitialiser(); actualiser(); await window.KokiBusiness?.show('transport',etat.demo); actualiser(); message(''); await suivre(); }
+    try { await initialiser(); await carteInitialiser(); actualiser(); await window.KokiBusiness?.show('transport',etat.demo); actualiser(); message(''); await suivre();
+      if (!positionDemandee && !etat.depart && !etat.demo && !courseActive()) { positionDemandee = true; void utiliserPosition(true); }
+    }
     catch(e) { message(e.message); }
   }
   function changerLieu(type) {
@@ -204,18 +206,21 @@
     etat[type]=lieu?{nom:lieu.nom,latitude:lieu.latitude,longitude:lieu.longitude}:null;
     etat.choisi=null; message(''); actualiser();
   }
-  async function utiliserPosition() {
-    if (courseActive()) return;
-    const bouton=$('position');bouton.disabled=true;message('Recherche de votre position…');
+  async function utiliserPosition(automatique = false) {
+    if (courseActive() || positionEnCours) return;
+    positionEnCours = true;
+    const departInitial = etat.depart;
+    const bouton=$('position');bouton.disabled=true;message('Votre position sert à définir le départ et trouver un chauffeur proche. Autorisez la localisation sur votre appareil…');
     try {
-      const position=await obtenirPositionActuelle();
-      if (courseActive()) return;
+      const position=await obtenirPositionActuelle({enableHighAccuracy:true,maximumAge:30000});
+      if (courseActive() || etat.depart !== departInitial || (automatique && (etat.demo || document.getElementById('vue-transport').hidden))) return;
+      if (!core.pointValide(position.coords)) throw Error('Position GPS invalide. Choisissez votre départ sur la carte.');
       etat.depart={nom:'Ma position actuelle',latitude:position.coords.latitude,longitude:position.coords.longitude};
       pointOption('depart',etat.depart);etat.choisi=null;
       if(carte)carte.setView([etat.depart.latitude,etat.depart.longitude],15);
       actualiser();message('Position utilisée comme départ (précision estimée : ' + Math.round(position.coords.accuracy) + ' m).');
     } catch(e) { message(e.message); }
-    finally { bouton.disabled=!!courseActive(); }
+    finally { positionEnCours=false; bouton.disabled=!!courseActive(); }
   }
   function changerMode() {
     etat.demo=$('demo').checked;etat.choisi=null;etat.reel=null;etat.prix={};etat.prixCle=null;cible=null;

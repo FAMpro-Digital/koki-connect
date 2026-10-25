@@ -31,7 +31,7 @@ const principal=fs.readFileSync('assets/portail/accueil.js','utf8');new vm.Scrip
 assert.equal((html.match(/navigator.geolocation.getCurrentPosition/g)||[]).length,1);
 assert(html.includes('data-recherche="Transport"'));assert(!html.includes('data-recherche="Autour de moi"'));
 assert(html.includes('async function activerGeolocalisation()'));
-const gps=principal.slice(principal.indexOf('function obtenirPositionActuelle()'),principal.indexOf('async function activerGeolocalisation()'));
+const gps=principal.slice(principal.indexOf('function obtenirPositionActuelle('),principal.indexOf('async function activerGeolocalisation()'));
 (async()=>{
  let requests=0;
  const success={coords:{latitude:koki.latitude,longitude:koki.longitude,accuracy:10}};
