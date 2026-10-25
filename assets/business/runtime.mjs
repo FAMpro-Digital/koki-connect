@@ -224,3 +224,15 @@ if(globalThis.document?.body&&window.addEventListener){
  window.addEventListener('koki-push-enabled',()=>document.getElementById('koki-notification-prompt')?.remove());
  setTimeout(()=>inviterNotifications(),4000);
 }
+
+// API des publications : la session est rafraîchie par le client partagé, jamais un jeton copié.
+window.KokiSocialAPI=async args=>{
+ await initialise();if(!db)throw Error('Interactions momentanément indisponibles.');
+ if(args.p_action&&args.p_action!=='read'){
+  const {data,error}=await db.auth.getUser();
+  if(error||!data?.user||data.user.is_anonymous){const e=Error('Connectez-vous pour aimer ou commenter.');e.code='LOGIN';throw e;}
+ }
+ const {data,error}=await db.rpc('koki_content_social',args);
+ if(error)throw Error(error.code==='42501'?'Connectez-vous pour participer.':/Trop de commentaires/.test(error.message)?'Trop de commentaires. Réessayez plus tard.':'Impossible de charger ou enregistrer les interactions. Réessayez.');
+ return data;
+};

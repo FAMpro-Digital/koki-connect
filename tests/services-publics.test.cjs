@@ -29,6 +29,6 @@ test('application : rubrique dédiée, fiches hors de l’accueil, carte et rech
  assert.equal((html.match(/KokiServicesPublics\.ouvrir\(\)/g)||[]).length,3);
  assert.match(html,/categorie: 'Services publics', latitude: v\.latitude/);
  assert.match(app,/KokiServiceContract\.decodeService\(x\)\|\|KokiServiceContract\.decodeDemarche\(x\)\)\)return true;return false;\}/);
- assert.match(app,/KokiServicesPublics\.detail\(x\);return;\}/);assert.match(app,/'📄 Démarche'/);
+ assert.match(app,/return KokiServicesPublics\.detail\(x\);\}/);assert.match(app,/'📄 Démarche'/);
  assert.doesNotMatch(sp,/innerHTML/);assert.match(sp,/le service concerné fait foi/);
 });

@@ -21,7 +21,7 @@ test('application : agenda dédié, événements terminés ou archivés retirés
  assert.match(html,/<script defer src="assets\/portail\/evenement-contract\.js"><\/script>\s*<script defer src="assets\/portail\/evenements\.js"><\/script>/);
  assert.match(app,/function evenementPasse\(x\)/);assert.match(app,/!offreFermee\(x\)&&!evenementPasse\(x\)/);
  assert.match(app,/if\(type==='Événements'&&window\.KokiEvenements\)\{KokiEvenements\.ouvrir\(\);return;\}/);
- assert.match(app,/if\(x\.type==='Événements'&&window\.KokiEvenements\)\{KokiEvenements\.detail\(x\);return;\}/);
+ assert.match(app,/if\(x\.type==='Événements'&&window\.KokiEvenements\)\{return KokiEvenements\.detail\(x\);\}/);
  assert.doesNotMatch(ev,/innerHTML/);assert.match(ev,/Ajouter à mon agenda/);assert.match(ev,/wa\.me\/\?text=/);
  global.KokiPortailCore={visible:x=>x.statut==='publié'};const flux={contenus:[row('2026-10-15T08:00:00Z',{}),row('2026-10-20T08:00:00Z',{}),row('2026-10-14T08:00:00Z',{}),row('2026-10-21T08:00:00Z',{archive:true}),{...row('2026-10-22T08:00:00Z',{}),statut:'brouillon'},row('2026-10-25T08:00:00Z',null)]};
  global.window=global;global.document={};require('../assets/portail/evenements.js');
