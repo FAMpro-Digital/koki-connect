@@ -17,8 +17,32 @@ function actifs(){return visibles().filter(x=>!fiche(x));}
 function date(v){return new Date(v).toLocaleString('fr-FR',{timeZone:'Africa/Dakar',dateStyle:'medium',timeStyle:'short'});}
 function ouvrir(titre){document.querySelector('.search').hidden=true;document.querySelectorAll('body > .section').forEach(s=>s.hidden=s.id!=='vue-portail');$('portail-titre').textContent=titre;bandeau($('portail-bandeau'),PAGES_RUBRIQUES[titre]);$('portail-vue').replaceChildren();$('portail-titre').focus();window.scrollTo(0,0);return $('portail-vue');}
 function photo(x,parent){if(x.image&&(/^data:image\/(png|jpeg|webp);base64,/.test(x.image)||KokiPublicFeed.imagePermise(x.image))){const img=n('img');img.src=x.image;img.alt=x.titre;img.loading='lazy';parent.append(img);}}
-function card(x){const e=n('article');e.className='portail-card'+(x.type==='Publicités'?' portail-ad':'');if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');if(x.type==='Publicités')e.append(n('strong','Sponsorisé · '+(x.emplacement||'Carte sponsorisée')));photo(x,e);e.append(n('p',x.categorie+' · '+date(x.publication)),n('h3',x.titre),n('p',x.resume));if(x.evenement)e.append(n('p',date(x.evenement)+' · '+x.lieu));if(x.source)e.append(n('p','Source / auteur : '+x.source));e.append(b('Lire la suite',()=>detail(x)),b(fav.includes(x.id)?'Retirer des favoris':'♡ Ajouter aux favoris',()=>{fav=fav.includes(x.id)?fav.filter(id=>id!==x.id):[...fav,x.id];save('koki.portail.favoris',fav);e.replaceWith(card(x));}));return e;}
-function detail(x){if(x.type==='Opportunités'&&window.KokiOpportunites){KokiOpportunites.detail(x);return;}if(x.type==='Événements'&&window.KokiEvenements){KokiEvenements.detail(x);return;}if(window.KokiSport&&window.KokiSportContract){if(KokiSportContract.decodeMatch(x)){KokiSport.match(x.id);return;}if(KokiSportContract.decodeEquipe(x)){KokiSport.equipe(x.id);return;}}if(KokiEducationContract.decode(x)){educationDetail(x);return;}if(window.KokiLivreContract&&KokiLivreContract.decode(x)&&window.KokiBibliotheque){KokiBibliotheque.detail(x);return;}if(window.KokiSanteContract&&KokiSanteContract.decode(x)&&window.KokiSante){KokiSante.detail(x);return;}if(window.KokiServiceContract&&(KokiServiceContract.decodeService(x)||KokiServiceContract.decodeDemarche(x))&&window.KokiServicesPublics){KokiServicesPublics.detail(x);return;}if(window.KokiNumeroContract&&KokiNumeroContract.decode(x)){numerosUtiles();return;}const box=ouvrir(x.titre),article=card(x);article.querySelectorAll('button').forEach(e=>e.remove());article.append(n('p',x.texte||x.resume));box.append(article,b('Retour à la liste',()=>liste(x.type)));}
+function card(x,full=false){
+ const e=n('article');e.className='portail-card'+(x.type==='Publicités'?' portail-ad':'')+(full?' publication-detail':'');
+ if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');
+ if(x.type==='Publicités')e.append(n('strong','Sponsorisé · '+(x.emplacement||'Carte sponsorisée')));
+ const imageBox=n('div');photo(x,imageBox);if(imageBox.firstChild){const img=imageBox.firstChild;const link=b('',()=>full?window.KokiSocial.zoom(img):detail(x));link.className='publication-photo-link';link.setAttribute('aria-label',full?'Agrandir la photo de '+x.titre:'Lire '+x.titre);link.append(img);e.append(link);}
+ const heading=n('h3');if(full)heading.textContent=x.titre;else{const link=b(x.titre,()=>detail(x));link.className='publication-title';heading.append(link);}
+ e.append(n('p',x.categorie+' · '+date(x.publication)),heading,n('p',x.resume));
+ if(x.evenement)e.append(n('p',date(x.evenement)+' · '+x.lieu));if(x.source)e.append(n('p','Source / auteur : '+x.source));
+ if(full){if(x.texte&&x.texte!==x.resume)e.append(n('p',x.texte));}
+ else e.append(b('Lire la suite',()=>detail(x)),b(fav.includes(x.id)?'Retirer des favoris':'♡ Ajouter aux favoris',()=>{fav=fav.includes(x.id)?fav.filter(id=>id!==x.id):[...fav,x.id];save('koki.portail.favoris',fav);e.replaceWith(card(x));}),window.KokiSocial.actions(x,()=>detail(x,true)));
+ return e;
+}
+let detailGeneration=0;
+async function detail(x,focusComments=false){
+ const generation=++detailGeneration,scroll=window.scrollY;
+ await detailBase(x);
+ if(generation!==detailGeneration||$('vue-portail').hidden||fiche(x))return;
+ const box=$('portail-vue');
+ const retour=()=>{fermerOpportunites();requestAnimationFrame(()=>window.scrollTo(0,scroll));};
+ const top=b('← Retour à l’accueil',retour);top.className='publication-retour';box.prepend(top);
+ box.append(window.KokiSocial.actions(x,()=>section.scrollIntoView({block:'start',behavior:'smooth'})));
+ const section=n('section');box.append(section);window.KokiSocial.comments(x,section);
+ const bottom=b('Retour à l’accueil',retour);bottom.className='publication-retour';box.append(bottom);
+ if(focusComments){section.scrollIntoView({block:'start'});section.querySelector('textarea')?.focus();}
+}
+function detailBase(x){if(x.type==='Opportunités'&&window.KokiOpportunites){return KokiOpportunites.detail(x);}if(x.type==='Événements'&&window.KokiEvenements){return KokiEvenements.detail(x);}if(window.KokiSport&&window.KokiSportContract){if(KokiSportContract.decodeMatch(x)){return KokiSport.match(x.id);}if(KokiSportContract.decodeEquipe(x)){return KokiSport.equipe(x.id);}}if(KokiEducationContract.decode(x)){return educationDetail(x);}if(window.KokiLivreContract&&KokiLivreContract.decode(x)&&window.KokiBibliotheque){return KokiBibliotheque.detail(x);}if(window.KokiSanteContract&&KokiSanteContract.decode(x)&&window.KokiSante){return KokiSante.detail(x);}if(window.KokiServiceContract&&(KokiServiceContract.decodeService(x)||KokiServiceContract.decodeDemarche(x))&&window.KokiServicesPublics){return KokiServicesPublics.detail(x);}if(window.KokiNumeroContract&&KokiNumeroContract.decode(x)){return numerosUtiles();}const box=ouvrir(x.titre);box.append(card(x,true));}
 function remplir(id,xs,message){const box=$(id);box.replaceChildren();if(!xs.length)box.append(n('p',message||'Aucun contenu publié pour le moment.'));else xs.forEach(x=>box.append(card(x)));}
 // Opportunités jeunes : chaque rubrique est alimentée par les contenus « Opportunités » publiés dans Koki Connect Admin.
 const rubriquesOpportunites={Emplois:['Emploi'],Stages:['Stage'],Formations:['Formation'],Concours:['Concours'],Bourses:['Bourse'],Financements:['Financement','Appel à projets']};

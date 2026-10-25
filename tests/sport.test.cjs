@@ -32,7 +32,7 @@ test('rubrique branchée : Sports moderne, fiches hors accueil, recherche et dé
  assert.match(html,/<link rel="stylesheet" href="assets\/portail\/sport\.css" media="print" data-differe>/);
  assert.match(app,/async function liste\(type\)\{if\(type==='Sports & ASC'&&window\.KokiSport\)\{KokiSport\.accueil\(\);return;\}/);
  assert.match(app,/function fiche\(x\)\{if\(x\.type==='Sports & ASC'&&window\.KokiSportContract\)return !!\(KokiSportContract\.decodeEquipe\(x\)\|\|KokiSportContract\.decodeMatch\(x\)\);/);
- assert.match(app,/if\(KokiSportContract\.decodeMatch\(x\)\)\{KokiSport\.match\(x\.id\);return;\}/);
+ assert.match(app,/if\(KokiSportContract\.decodeMatch\(x\)\)\{return KokiSport\.match\(x\.id\);\}/);
  assert.match(sp,/window\.KokiSport=Object\.freeze\(\{accueil,equipe,match\}\)/);assert.doesNotMatch(sp,/innerHTML/);
  assert.match(css,/--sp-vert-fonce: #0b5a3c; --sp-vert: #087a3d; --sp-orange: #f28c28;/);
 });
