@@ -154,7 +154,7 @@ async function espacePro(host,connected){
  const [fiches,chauffeurs]=await Promise.all([modules.commerce?api.mine('professionnels'):[],modules.transport?api.mine('chauffeurs'):[]]);
  // Un client déjà connecté doit aussi définir un mot de passe avant sa première fiche professionnelle.
  // Ce marqueur facilite le parcours ; il ne confère aucun rôle ni aucune autorisation.
- if((t||fiches.length||chauffeurs.length)&&!api.user?.user_metadata?.professional_password_set){
+ if(Pro.premiereCreationSansMotDePasse(t,api.user,fiches,chauffeurs)){
   const f=form(host,'Définir mon mot de passe professionnel',[['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
    if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
    try{await api.setProfessionalPassword(x.password.value);}finally{x.password.value='';x.confirm.value='';}await espacePro(host,true);
