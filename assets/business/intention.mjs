@@ -35,3 +35,10 @@ const cleBrouillon=(uid,forme)=>'koki.brouillon.'+forme+'.v1.'+uid;
 export function lireBrouillon(storage,uid,forme,now=Date.now()){if(!uid)return null;try{const d=JSON.parse(storage?.getItem(cleBrouillon(uid,forme))||'null');if(d&&d.valeurs&&typeof d.valeurs==='object'&&Number.isFinite(d.at)&&now-d.at<DUREE)return d;}catch{}return null;}
 export function ecrireBrouillon(storage,uid,forme,valeurs,etape=0,now=Date.now()){if(!uid)return false;try{storage?.setItem(cleBrouillon(uid,forme),JSON.stringify({valeurs,etape,at:now}));return true;}catch{return false;}}
 export function effacerBrouillon(storage,uid,forme){if(!uid)return;try{storage?.removeItem(cleBrouillon(uid,forme));}catch{}}
+
+// Le marqueur concerne uniquement la première création professionnelle.
+// Les comptes avec une fiche existante ne sont pas à réinscrire : les anciens
+// comptes peuvent avoir un mot de passe sans posséder ce marqueur récent.
+export function premiereCreationSansMotDePasse(type,user,professionnels=[],chauffeurs=[]){
+ return !!type && professionnels.length===0 && chauffeurs.length===0 && !user?.user_metadata?.professional_password_set;
+}
