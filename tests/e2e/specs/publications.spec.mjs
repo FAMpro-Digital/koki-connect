@@ -47,3 +47,10 @@ test('visiteur invité à se connecter pour participer',async({page})=>{
  await expect(card.getByRole('button',{name:'Me connecter',exact:true})).toBeVisible();
  await expect(card.getByRole('button',{name:'♡ J’aime',exact:true})).toHaveAttribute('aria-pressed','false');
 });
+test('texte chargé à la demande et retour possible après échec',async({page})=>{
+ await page.evaluate(async()=>{window.KokiPublicFeed.detail=async id=>({id,texte:'Texte complet demandé au serveur'});await window.KokiPortail.detail({id:'33333333-3333-4333-8333-333333333333',titre:'Article léger',type:'Actualités',categorie:'Vie locale',resume:'Résumé',publication:'2026-10-01T12:00:00Z',detail_required:true});});
+ await expect(page.getByText('Texte complet demandé au serveur',{exact:true})).toBeVisible();
+ await page.evaluate(async()=>{window.KokiPublicFeed.detail=async()=>{throw Error('Réseau');};await window.KokiPortail.detail({id:'33333333-3333-4333-8333-333333333333',titre:'Article léger',detail_required:true});});
+ await expect(page.getByText('Impossible de charger le texte complet. Vérifiez votre connexion.')).toBeVisible();
+ await page.getByRole('button',{name:'Retour à l’accueil',exact:true}).click();await expect(page.locator('#vue-portail')).toBeHidden();
+});

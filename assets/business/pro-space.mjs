@@ -252,7 +252,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   let d=null;try{d=await api.statistiques(30);}catch(e){zone.replaceChildren(node('p',e.message||'Statistiques indisponibles.'));return;}
   zone.replaceChildren();
   if(!d||!Array.isArray(d.elements)){zone.append(node('p','Les statistiques seront disponibles prochainement.','pro-hint'));return;}
-  const LIB={vue:'Vues',appel:'Appels',whatsapp:'WhatsApp',commander:'Commandes',partage:'Partages',panier:'Ajouts au panier',devis:'Devis'};
+  const LIB={vue:'Vues',appel:'Appels',whatsapp:'WhatsApp',commander:'Clics sur Commander',partage:'Partages',panier:'Ajouts au panier',devis:'Devis'};
   const tot=d.totaux||{};const grille=node('div',null,'pro-stats-totaux');
   for(const k of Object.keys(LIB)){const t=node('div',null,'pro-stat');t.append(node('strong',String(Number(tot[k])||0)),node('span',LIB[k]));grille.append(t);}
   zone.append(grille);
@@ -261,7 +261,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    const c=node('article',null,'pro-card');c.append(node('h4',e.nom||'—'));
    c.append(node('p',Object.keys(LIB).filter(k=>Number(e[k])>0).map(k=>LIB[k]+' : '+Number(e[k])).join(' · ')||'Aucune activité.'));zone.append(c);
   }
-  zone.append(node('p','Chiffres indicatifs : une même personne peut être comptée plusieurs fois.','pro-hint'));
+  zone.append(node('p','Chiffres indicatifs : depuis la mise à jour de sécurité, chaque action est comptée au plus une fois par compte, fiche et jour. Les visites sans connexion ne sont plus comptées. Ces clics ne représentent pas des commandes payées ; les anciennes données peuvent contenir des doublons.','pro-hint'));
  }
  function produitForm({id}){
   const row=state.produits.find(x=>x.id===id)||null,p=row?.payload||{};const shops=activeShops();

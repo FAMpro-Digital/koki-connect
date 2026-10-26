@@ -171,7 +171,7 @@
     if (!configuration) return;
     const active = !!courseActive();
     ['depart','destination','position','point-depart','point-destination'].forEach(id => $(id).disabled = active);
-    $('mode-info').textContent = etat.demo ? 'Démonstration : chauffeurs et tarifs fictifs. Aucun appel, message ou réservation n’est envoyé.' : 'Course fictive sur cet appareil, sans chauffeur réel.';
+    $('mode-info').textContent = etat.demo ? 'Démonstration : chauffeurs et tarifs fictifs. Aucun appel, message ou réservation n’est envoyé.' : 'Connectez-vous pour obtenir un tarif et réserver auprès d’un chauffeur disponible.';
     $('reservation-info').textContent = etat.demo ? 'Démonstration : la course reste sur cet appareil.' : 'Prix estimé à vol d’oiseau, confirmé par Koki Connect avant la réservation.';
     etat.estimation = null;
     if (etat.reel && etat.reel.cle !== cleTrajet() + etat.categorie) etat.reel = null;

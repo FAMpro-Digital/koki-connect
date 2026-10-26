@@ -16,7 +16,7 @@ function visibles(){return C.trier(contenus.filter(x=>C.visible(x)&&!offreFermee
 function actifs(){return visibles().filter(x=>!fiche(x));}
 function date(v){return new Date(v).toLocaleString('fr-FR',{timeZone:'Africa/Dakar',dateStyle:'medium',timeStyle:'short'});}
 function ouvrir(titre){document.querySelector('.search').hidden=true;document.querySelectorAll('body > .section').forEach(s=>s.hidden=s.id!=='vue-portail');$('portail-titre').textContent=titre;bandeau($('portail-bandeau'),PAGES_RUBRIQUES[titre]);$('portail-vue').replaceChildren();$('portail-titre').focus();window.scrollTo(0,0);return $('portail-vue');}
-function photo(x,parent){if(x.image&&(/^data:image\/(png|jpeg|webp);base64,/.test(x.image)||KokiPublicFeed.imagePermise(x.image))){const img=n('img');img.src=x.image;img.alt=x.titre;img.loading='lazy';parent.append(img);}}
+function photo(x,parent){if(x.image&&(/^data:image\/(png|jpeg|webp);base64,/.test(x.image)||KokiPublicFeed.imagePermise(x.image))){const img=n('img');img.src=x.image;img.alt=x.titre;img.loading='lazy';if(x.image_path){img.dataset.imagePath=x.image_path;img.onerror=async()=>{img.onerror=null;try{const url=await KokiPublicFeed.renouvelerImage(x.image_path);if(url)img.src=url;}catch{}};}parent.append(img);}}
 function card(x,full=false){
  const e=n('article');e.className='portail-card'+(x.type==='Publicités'?' portail-ad':'')+(full?' publication-detail':'');
  if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');
@@ -32,6 +32,8 @@ function card(x,full=false){
 let detailGeneration=0;
 async function detail(x,focusComments=false){
  const generation=++detailGeneration,scroll=window.scrollY;
+ if(x.detail_required){try{x={...x,...await KokiPublicFeed.detail(x.id)};}catch{if(generation!==detailGeneration)return;const box=ouvrir(x.titre);box.append(n('p','Impossible de charger le texte complet. Vérifiez votre connexion.'),b('Réessayer',()=>detail(x,focusComments)),b('Retour à l’accueil',()=>fermerOpportunites()));return;}}
+ if(generation!==detailGeneration)return;
  await detailBase(x);
  if(generation!==detailGeneration||$('vue-portail').hidden||fiche(x))return;
  const box=$('portail-vue');
