@@ -57,7 +57,8 @@
       "feature/notifications-sms-push": false,
       "develop/desarchiver-commercant": false,
       "develop/boutique-des-envoi-fiche": false,
-      "fix/retour-un-seul-appui": false
+      "fix/retour-un-seul-appui": false,
+      "fix/profil-appui-repete": false
     }
   },
   "headers": [

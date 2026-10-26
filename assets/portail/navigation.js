@@ -69,6 +69,12 @@
     const titreRemplace = enregistrements.find(r => r.target === titre && r.type === 'childList' && r.removedNodes.length);
     const changement = maintenant !== courante || (maintenant === 'vue-portail' && !!titreRemplace);
     if (!changement) return;
+    // Même page portail réaffichée (appui répété sur l'onglet Profil, Activité…) : le titre ne change pas, donc aucune
+    // nouvelle étape d'historique ; la page reprend simplement le haut de l'écran.
+    if (maintenant === 'vue-portail' && courante === 'vue-portail' && titreRemplace && titreRemplace.removedNodes[0]
+      && titreRemplace.removedNodes[0].textContent === titre.textContent) {
+      scrollCourant = 0; requestAnimationFrame(() => window.scrollTo(0, 0)); return;
+    }
     if (maintenant === null) { retourAccueil(); return; }
     // Page portail quittée : on garde ses éléments (avec leurs actions) pour la réafficher au retour.
     let noeuds = null, ancienTitre = null;
