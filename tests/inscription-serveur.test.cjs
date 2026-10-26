@@ -10,7 +10,7 @@ test('inscription refusée par le serveur (signup_disabled) : message clair, plu
 });
 test('codes Supabase Auth traduits sans détail technique',async()=>{
  const {messageInscription}=await charger();
- for(const [e,attendu] of [[{code:'over_email_send_rate_limit',status:429},/Patientez/],[{status:429},/Patientez/],[{code:'weak_password'},/trop faible/],[{code:'user_already_exists'},/existe déjà/],[{code:'email_address_invalid'},/vérifiez-la/],[{code:'email_address_not_authorized'},/ne peut pas être envoyé/],[{code:'inconnu'},/Inscription impossible/],[null,/Inscription impossible/]]){const m=messageInscription(e);assert.match(m,attendu);assert.doesNotMatch(m,/instance|Signups|422|supabase/i);}
+ for(const [e,attendu] of [[{code:'over_email_send_rate_limit',status:429},/Patientez/],[{status:429},/Patientez/],[{code:'weak_password'},/au moins 8 caractères/],[{code:'user_already_exists'},/existe déjà/],[{code:'email_address_invalid'},/vérifiez-la/],[{code:'email_address_not_authorized'},/ne peut pas être envoyé/],[{code:'inconnu'},/Inscription impossible/],[null,/Inscription impossible/]]){const m=messageInscription(e);assert.match(m,attendu);assert.doesNotMatch(m,/instance|Signups|422|supabase/i);}
 });
 test('inscription réussie : e-mail nettoyé et lien de confirmation vers la page publique',async()=>{
  globalThis.location={origin:'https://koki-connect.vercel.app',pathname:'/'};
