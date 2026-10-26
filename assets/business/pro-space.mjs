@@ -68,6 +68,11 @@ async function gps(host,initial,status){
 // intention : profil choisi avant l'inscription (« Commerçant » ou « Prestataire de services ») → formulaire ouvert directement.
 // brouillon : {lire(), ecrire(valeurs,etape), effacer()} — sauvegarde locale de la fiche en cours (par compte).
 // fin() : appelé quand le parcours d'inscription est terminé (fiche envoyée ou déjà existante).
+// Logo ou photo du compte professionnel : première photo de la fiche, à défaut celle d'une boutique.
+export function logoCompte(fiche,boutiques=[]){
+ const un=r=>{const p=r?.payload;if(!p)return null;const l=Array.isArray(p.photos)?p.photos.find(x=>typeof x==='string'&&x):null;return l||(typeof p.image_path==='string'&&p.image_path)||null;};
+ return un(fiche)||(boutiques||[]).filter(b=>b?.statut!=='Archivé').map(un).find(Boolean)||null;
+}
 export async function proSpace(host,api,outer,{upload,imageSelection,intention=null,brouillon=null,fin=()=>{}}={}){
  // Messages affichés au plus près de l'écran en cours (et repris dans la zone de statut générale).
  const local=node('p',null,'pro-message');local.setAttribute('role','status');
@@ -98,9 +103,16 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
 
  function render(){const {view,params}=stack.at(-1);({accueil,fiche,boutiques,boutique:boutiqueForm,produits,produit:produitForm,services,service:serviceForm,statistiques})[view](params||{});}
 
+ function identite(){
+  const p=state.profile.payload,bloc=node('div',null,'pro-identite'),av=node('span',null,'pro-logo');av.setAttribute('aria-hidden','true');av.textContent=String(p.nom||'K').trim().charAt(0).toUpperCase()||'K';
+  const chemin=logoCompte(state.profile,state.boutiques);
+  if(chemin){const img=node('img');img.alt='Logo de '+p.nom;img.loading='lazy';api.image(chemin).then(u=>{img.src=u;img.onload=()=>{av.replaceChildren(img);av.removeAttribute('aria-hidden');};}).catch(()=>{});}
+  const t=node('div');t.append(node('strong',p.nom),node('span',[p.type,p.village].filter(Boolean).join(' · '),'pro-hint'));bloc.append(av,t);return bloc;
+ }
  function accueil(){
   host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3',state.boutiques.some(b=>b.statut!=='Archivé')?'Ma boutique':'Espace professionnel','pro-title'));host.append(head,local);
   if(state.profile)fin();
+  if(state.profile)head.after(identite());
   if(!state.profile&&intention&&!intentionVue){intentionVue=true;open=true;queueMicrotask(()=>go('fiche',{profil:intention},{racine:true}));}
   const reprise=!state.profile&&brouillon?.lire();
   if(!open&&!state.profile){head.append(node('p','Vous êtes commerçant ou prestataire à Koki ? Présentez votre activité, vos produits et vos services.'),button('Ouvrir mon espace professionnel',()=>{open=true;render();}));return;}

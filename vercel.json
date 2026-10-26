@@ -58,7 +58,8 @@
       "develop/desarchiver-commercant": false,
       "develop/boutique-des-envoi-fiche": false,
       "fix/retour-un-seul-appui": false,
-      "fix/profil-appui-repete": false
+      "fix/profil-appui-repete": false,
+      "develop/logo-profil-pro": false
     }
   },
   "headers": [

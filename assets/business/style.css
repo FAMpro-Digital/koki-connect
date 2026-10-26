@@ -218,3 +218,6 @@
 #vue-commerce .business-panel .pro-stat strong,#profil-pro .pro-stat strong{font-size:24px;color:#a64b00}
 
 #vue-commerce .business-panel .pro-archive{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #dde7e0}#profil-pro .pro-archive{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #dde7e0}
+#vue-commerce .business-panel .pro-identite,#profil-pro .pro-identite{display:flex;align-items:center;gap:12px;margin:8px 0 12px;padding:10px;border:1px solid #f28c28;border-radius:14px;background:#fff}
+#vue-commerce .business-panel .pro-logo,#profil-pro .pro-logo{flex:0 0 auto;width:56px;height:56px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;color:#0b5a3c;border:3px solid #f28c28;font-weight:800;font-size:22px}
+#vue-commerce .business-panel .pro-logo img,#profil-pro .pro-logo img{width:100%;height:100%;object-fit:cover;display:block}
