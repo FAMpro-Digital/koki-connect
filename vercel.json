@@ -56,7 +56,8 @@
       "tests/qualite-automatisee": false,
       "feature/notifications-sms-push": false,
       "develop/desarchiver-commercant": false,
-      "develop/boutique-des-envoi-fiche": false
+      "develop/boutique-des-envoi-fiche": false,
+      "fix/retour-un-seul-appui": false
     }
   },
   "headers": [

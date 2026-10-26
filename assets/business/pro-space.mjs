@@ -82,15 +82,15 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  const has=t=>state.profile&&(state.profile.payload.type===t||state.profile.payload.type==='Les deux');
  const activeShops=()=>state.boutiques.filter(b=>b.statut==='Actif');
  // Navigation : chaque écran est une entrée d'historique, le bouton retour du téléphone revient à l'écran précédent.
- function go(view,params={}){local.textContent='';stack.push({view,params});try{history.pushState({...(history.state||{}),kokiPro:stack.length},'');}catch{}render();host.scrollIntoView({block:'start'});}
+ function go(view,params={},{racine=false}={}){if(!host.isConnected)return;local.textContent='';if(racine)stack.splice(0,stack.length,{view,params});else{stack.push({view,params});try{history.pushState({...(history.state||{}),kokiPro:stack.length},'');}catch{}}render();host.scrollIntoView({block:'start'});}
  function back(){if(stack.length>1){try{if(history.state?.kokiPro===stack.length){history.back();return;}}catch{}stack.pop();render();}}
  const onPop=e=>{if(!host.isConnected){window.removeEventListener('popstate',onPop);return;}const depth=e.state?.kokiPro||1;if(depth<stack.length){stack.length=Math.max(1,depth);render();}};
  window.addEventListener('popstate',onPop);
- async function done(message,steps=1){status.textContent=message;await load();const target=Math.max(1,stack.length-steps);if(target<stack.length){try{if(history.state?.kokiPro===stack.length){history.go(target-stack.length);stack.length=target;render();return;}}catch{}stack.length=target;}render();}
+ async function done(message,steps=1){status.textContent=message;await load();if(stack.length===1&&stack[0].view!=='accueil'){stack[0]={view:'accueil',params:{}};render();return;}const target=Math.max(1,stack.length-steps);if(target<stack.length){try{if(history.state?.kokiPro===stack.length){history.go(target-stack.length);stack.length=target;render();return;}}catch{}stack.length=target;}render();}
  function frame(title){
   host.replaceChildren();const bar=node('div',null,'pro-bar');
   if(stack.length>1)bar.append(button('← Retour',back,{kind:'back'}));
-  else bar.append(button('← Retour à ma boutique',()=>{stack.length=1;render();},{kind:'back'}));
+  else if(stack[0].view==='accueil')bar.append(button('← Retour à ma boutique',()=>{stack.length=1;render();},{kind:'back'}));
   const h=node('h3',title,'pro-title');h.tabIndex=-1;bar.append(h);host.append(bar,local);queueMicrotask(()=>{if(stack.length>1)h.focus({preventScroll:true});});
   const body=node('div',null,'pro-body');host.append(body);return body;
  }
@@ -101,7 +101,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function accueil(){
   host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3',state.boutiques.some(b=>b.statut!=='Archivé')?'Ma boutique':'Espace professionnel','pro-title'));host.append(head,local);
   if(state.profile)fin();
-  if(!state.profile&&intention&&!intentionVue){intentionVue=true;open=true;queueMicrotask(()=>go('fiche',{profil:intention}));}
+  if(!state.profile&&intention&&!intentionVue){intentionVue=true;open=true;queueMicrotask(()=>go('fiche',{profil:intention},{racine:true}));}
   const reprise=!state.profile&&brouillon?.lire();
   if(!open&&!state.profile){head.append(node('p','Vous êtes commerçant ou prestataire à Koki ? Présentez votre activité, vos produits et vos services.'),button('Ouvrir mon espace professionnel',()=>{open=true;render();}));return;}
   const body=node('div',null,'pro-body');host.append(body);
