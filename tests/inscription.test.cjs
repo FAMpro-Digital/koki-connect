@@ -65,7 +65,7 @@ for(const type of ['Commerçant','Prestataire','Chauffeur'])test(type+' : inscri
  await bouton(host,'Créer mon compte professionnel').onclick();await tick();
  const f=formulaire(host,'inscription');champ(f,'Adresse e-mail').value='pro@exemple.sn';
  await envoyer(f);assert.equal(api.appels.length,0);
- champ(f,'Mot de passe (12 caractères minimum)').value='Mot-de-passe-solide';champ(f,'Confirmer le mot de passe').value='autre-mot-de-passe';
+ champ(f,'Mot de passe (8 caractères minimum)').value='Mot-de-passe-solide';champ(f,'Confirmer le mot de passe').value='autre-mot-de-passe';
  await envoyer(f);assert.equal(api.appels.length,0);
  champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';await envoyer(f);
  assert.deepEqual(api.appels,[['signup','pro@exemple.sn','Mot-de-passe-solide']]);assert.ok(formulaire(host,'connexion-pro'));
