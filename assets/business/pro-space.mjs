@@ -1,3 +1,4 @@
+import {registrationPhoto,clearRegistrationPhoto} from './registration-photo.mjs';
 // Espace professionnel « Commerces & Services » (téléphone d'abord).
 // Fiche en plusieurs étapes, boutique(s), produits et services, prix, stocks et disponibilités.
 // Toutes les règles sont vérifiées par le serveur (koki_business) ; cette interface ne demande
@@ -44,14 +45,14 @@ function photosField(host,{existing=[],api,upload,imageSelection,status}){
  const selections=[];const slots=node('div');fs.append(slots);
  const addSlot=()=>{if(selections.length+existing.length>=C.maxPhotos)return;selections.push(imageSelection(slots,status,{label:'Nouvelle photo '+(selections.length+1)}));more.hidden=selections.length+existing.length>=C.maxPhotos;};
  const more=button('Ajouter une autre photo',addSlot,{kind:'secondary'});fs.append(more);host.append(fs);addSlot();
- const uploaded=new Map();
+ const uploaded=new Map();let draftPath;const draft=existing.length?Promise.resolve(null):registrationPhoto(api.user);draft.then(file=>{if(file){const img=node('img');img.alt='Logo choisi lors de l’inscription';const url=URL.createObjectURL(file);img.onload=()=>URL.revokeObjectURL(url);img.src=url;grid.append(img);}});
  return {
   count(){return kept.filter(k=>k.keep.checked).length+selections.filter(s=>s.input.files.length).length;},
   async collect(){
    if(this.count()>C.maxPhotos)throw Error('Cinq photos maximum : retirez-en une.');
    const paths=kept.filter(k=>k.keep.checked).map(k=>k.path);
    for(const s of selections){const file=await s.get();if(!file)continue;if(!upload)throw Error('Envoi de photos indisponible.');if(!uploaded.has(file))uploaded.set(file,await upload(file));paths.push(uploaded.get(file));}
-   return paths;
+   if(!paths.length){const file=await draft;if(file){if(!draftPath)draftPath=await upload(file);paths.push(draftPath);}}return paths;
   }
  };
 }
@@ -125,7 +126,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
 
  function fiche({edit,profil}){
   // Les valeurs en attente de validation sont reprises pour continuer la saisie.
- const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,description:draft.description}:{};const row=edit?state.profile:null;
+ const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,village:draft.village,description:draft.description}:{};const row=edit?state.profile:null;
   const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
   const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
   let step=0;const total=5;let photos=null,where=null;
@@ -163,7 +164,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    else{const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
      const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
      if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
-     if(!row&&!values.photos.length)throw Error('Ajoutez un logo ou une photo de votre activité.');const saved=await api.saveProfile(values,row);if(!row){brouillon?.effacer();fin();}
+     if(!row&&!values.photos.length)throw Error('Ajoutez un logo ou une photo de votre activité.');const saved=await api.saveProfile(values,row);if(!row){await clearRegistrationPhoto(api.user);brouillon?.effacer();fin();}
      await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
     });nav.append(send);}
    if(!edit&&brouillon){const save=button('Enregistrer le brouillon',()=>{try{read();}catch{}garder();status.textContent='Brouillon enregistré sur cet appareil : vous pourrez reprendre votre fiche plus tard depuis l’Espace professionnel.';},{kind:'secondary'});nav.append(save);}
