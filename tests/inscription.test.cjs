@@ -67,7 +67,7 @@ for(const type of ['Commerçant','Prestataire','Chauffeur'])test(type+' : inscri
  await envoyer(f);assert.equal(api.appels.length,0);
  champ(f,'Mot de passe (8 caractères minimum)').value='Mot-de-passe-solide';champ(f,'Confirmer le mot de passe').value='autre-mot-de-passe';
  await envoyer(f);assert.equal(api.appels.length,0);
- champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';champ(f,type==='Chauffeur'?'Nom du chauffeur':'Nom de la boutique ou du prestataire').value='Activité TEST';champ(f,'Numéro de téléphone').value='771234567';champ(f,'Domaine d’activité ou type de transport').value='Transport';champ(f,'Adresse ou quartier').value='Koki centre';if(type!=='Chauffeur')champ(f,'Village ou localité').value='Koki';champ(f,'Présentation de votre activité').value='Présentation TEST';await envoyer(f);
+ champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';assert.equal(f.elements?.name,undefined);await envoyer(f);
  assert.deepEqual(api.appels,[['signup','pro@exemple.sn','Mot-de-passe-solide']]);assert.ok(formulaire(host,'connexion-pro'));
 });
 test('professionnel : connexion par mot de passe et récupération',async()=>{

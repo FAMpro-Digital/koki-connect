@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "develop/parcours-pro-simple": false,
       "fix/message-mot-de-passe": false,
       "fix/boutons-retour-focus-accueil": false,
       "fix/focus-retour-opportunites": false,

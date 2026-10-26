@@ -40,7 +40,7 @@ test('interface : aucun identifiant technique demandé, statuts expliqués, reto
  const labels=[...ui.matchAll(/label:'([^']+)'/g)].map(m=>m[1]);assert.ok(labels.length>20);
  for(const l of labels)assert.doesNotMatch(l,/identifiant|\bid\b|uuid|référence technique/i,l);
  assert.match(ui,/history\.pushState/);assert.match(ui,/addEventListener\('popstate'/);assert.match(ui,/'← Retour'/);assert.match(ui,/Retour à ma boutique/);
- assert.match(ui,/C\.explicationStatut/);assert.match(ui,/Étape '\+\(step\+1\)\+' sur '\+total/);
+ assert.match(ui,/C\.explicationStatut/);assert.doesNotMatch(ui,/Étape '\+\(step\+1\)/,'fiche sur un seul écran');assert.match(ui,/Quatre informations suffisent/);
  const C=require('../assets/business/commerce-contract.js');
  for(const kind of Object.keys(C.statuts))for(const s of C.statuts[kind])assert.ok(C.explicationStatut(kind,s).length>10,kind+' '+s);
  const css=fs.readFileSync('assets/business/style.css','utf8');assert.match(css,/pro-field input[^{]*\{font-size:16px;min-height:48px\}/,'champs à 16 px : pas de zoom automatique sur iPhone');

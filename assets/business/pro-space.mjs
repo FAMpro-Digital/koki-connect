@@ -106,8 +106,8 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   if(!open&&!state.profile){head.append(node('p','Vous êtes commerçant ou prestataire à Koki ? Présentez votre activité, vos produits et vos services.'),button('Ouvrir mon espace professionnel',()=>{open=true;render();}));return;}
   const body=node('div',null,'pro-body');host.append(body);
   if(!state.profile){
-   body.append(node('p','Créez votre fiche en 5 étapes. Elle sera vérifiée par l’administration de Koki Connect avant d’apparaître dans le catalogue.'));
-   const steps=node('ol',null,'pro-steps');for(const s of ['Votre activité','Vos numéros','Où vous trouver','Horaires et présentation','Photos et envoi'])steps.append(node('li',s));body.append(steps,button(reprise?'Reprendre ma fiche (brouillon)':'Créer ma fiche professionnelle',()=>go('fiche')));
+   body.append(node('p','Créez votre fiche sur un seul écran : nom, catégorie, téléphone et village. Elle sera vérifiée par l’administration de Koki Connect avant d’apparaître dans le catalogue.'));
+   body.append(button(reprise?'Reprendre ma fiche (brouillon)':'Créer ma fiche professionnelle',()=>go('fiche')));
    if(reprise)body.append(node('p','Brouillon enregistré sur cet appareil le '+new Date(reprise.at).toLocaleString('fr-FR')+'. Les photos sont à ajouter au moment de l’envoi.','pro-hint'));return;
   }
   const p=state.profile,card=node('article',null,'pro-card');
@@ -121,57 +121,61 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',actif,wait);
   if(has('Commerçant')||has('Prestataire de services')){const b=button('Statistiques (30 jours)',()=>go('statistiques'),{kind:'tile'});if(!actif){b.disabled=true;b.title=wait;}menu.append(b);}
   const bas=produitsStockBas(state.produits);if(has('Commerçant')&&actif&&bas.length){const a=button('⚠ Stock bas : '+bas.length+' produit'+(bas.length>1?'s':''),()=>go('produits'),{kind:'secondary'});a.classList.add('pro-alerte-btn');menu.prepend(a);}
+  if(has('Commerçant')&&actif&&!state.boutiques.some(b=>b.statut!=='Archivé'))menu.prepend(button('Créer ma boutique en ligne',()=>go('boutique')));
   body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
+  if(has('Commerçant')){const shops=state.boutiques.filter(b=>b.statut!=='Archivé'),shopOn=shops.some(b=>b.statut==='Actif');
+   const etapes=node('ol',null,'pro-steps');for(const [fait,txt] of [[true,'Compte créé'],[actif,actif?'Fiche validée':'Fiche envoyée : validation par l’administration en cours'],[shops.length>0,shops.length?(shopOn?'Boutique validée':'Boutique envoyée : validation en cours'):(actif?'Créer ma boutique avec le bouton vert ci-dessus':'Créer ma boutique (dès que la fiche est validée)')],[state.produits.some(x=>x.statut!=='Archivé'),'Ajouter mes produits (dès que la boutique est validée)']])etapes.append(node('li',(fait?'✅ ':'⏳ ')+txt));
+   body.append(node('h4','Où j’en suis'),etapes);}
  }
 
  function fiche({edit,profil}){
+  // Un seul écran : quatre informations obligatoires, le reste est facultatif et repliable.
   // Les valeurs en attente de validation sont reprises pour continuer la saisie.
  const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,village:draft.village,description:draft.description}:{};const row=edit?state.profile:null;
   const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
   const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
-  let step=0;const total=5;let photos=null,where=null;
-  // Brouillon (nouvelle fiche seulement) : reprise des valeurs et de l'étape ; le profil choisi avant l'inscription est proposé.
-  if(!edit){if(profil)v.profile=profil;const d=brouillon?.lire();if(d){Object.assign(v,d.valeurs);step=Math.min(Math.max(0,d.etape|0),total-2);}}
-  const garder=()=>{if(!edit)brouillon?.ecrire({...v},step);};
+  // Brouillon (nouvelle fiche seulement) : reprise des valeurs ; le profil choisi avant l'inscription est proposé.
+  if(!edit){if(profil)v.profile=profil;const d=brouillon?.lire();if(d)Object.assign(v,d.valeurs);}
   const body=frame(edit?'Modifier ma fiche':'Créer ma fiche');
-  const progress=node('p',null,'pro-progress');progress.setAttribute('aria-live','polite');const panel=node('form',null,'pro-form');panel.noValidate=true;body.append(progress,panel);
+  const panel=node('form',null,'pro-form');panel.noValidate=true;body.append(panel);
+  if(!edit)panel.append(node('p','Quatre informations suffisent pour commencer. Le reste est facultatif et se complète à tout moment.','pro-hint'));
+  const fields={};
+  fields.name=input(panel,{label:'Nom de votre commerce ou activité',value:v.name,required:true,attrs:{maxlength:'180',autocomplete:'organization'}});
+  fields.profile=choice(panel,{legend:'Vous proposez',name:'type',value:v.profile,values:[{value:'Commerçant',label:'Des produits (commerce)'},{value:'Prestataire de services',label:'Des services (métier)'},{value:'Les deux',label:'Les deux'}]});
+  fields.category=input(panel,{label:'Catégorie ou métier principal',value:v.category,required:true,list:[...C.categoriesCommerce,...C.metiers],hint:'Exemple : Alimentation, Couture, Plomberie.',attrs:{maxlength:'100'}});
+  fields.phone=input(panel,{label:'Téléphone',type:'tel',value:v.phone,required:true,hint:'Exemple : 77 123 45 67. Le +221 est ajouté automatiquement.',attrs:{autocomplete:'tel'}});
+  fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,options:[{value:'',label:'Choisissez…'},...state.localites]});
+  const plus=node('details',null,'pro-autre');plus.open=!!edit;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));panel.append(plus);
+  fields.address=input(plus,{label:'Adresse ou repère',value:v.address,hint:'Exemple : près du marché central.',attrs:{maxlength:'500'}});
+  fields.zone=input(plus,{label:'Zone d’intervention (services)',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
+  fields.hours=input(plus,{label:'Horaires d’ouverture',value:v.hours,hint:'Exemple : lundi–samedi 8 h–20 h.',attrs:{maxlength:'500'}});
+  fields.description=input(plus,{label:'Présentation de votre activité',type:'textarea',value:v.description,attrs:{maxlength:'2000'}});
+  const same=node('label',null,'pro-check'),cb=node('input');cb.type='checkbox';cb.checked=v.sameWhatsapp;same.append(cb,' Mon WhatsApp est ce même numéro');plus.append(same);
+  const wa=node('div');plus.append(wa);const draw=()=>{wa.replaceChildren();fields.whatsapp=cb.checked?null:input(wa,{label:'Numéro WhatsApp',type:'tel',value:v.whatsapp,required:true});};cb.onchange=draw;draw();
+  let where=null;gps(plus,v.location,status).then(g=>{where=g;});
+  const photos=photosField(plus,{existing:p.photos||[],api,upload,imageSelection,status});
+  if(row?.statut==='Actif')panel.append(node('p','Si vous changez le nom, l’activité, un numéro ou les photos, ces changements seront vérifiés avant publication. En attendant, votre fiche reste visible avec les informations déjà validées.','pro-hint'));
+  const read=()=>{
+   v.name=fields.name.value.trim();v.profile=fields.profile.value;v.category=fields.category.value.trim();
+   if(!v.name||!v.category)throw Error('Indiquez le nom et la catégorie de votre activité.');
+   const t=C.normaliserTelephone(fields.phone.value);if(!t)throw Error('Téléphone invalide. Exemple : 77 123 45 67.');v.phone=t;
+   v.village=fields.village.value;if(!v.village)throw Error('Choisissez votre village ou quartier.');
+   v.sameWhatsapp=cb.checked;if(!v.sameWhatsapp){const w=C.normaliserTelephone(fields.whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');v.whatsapp=w;}
+   v.address=fields.address.value.trim();if(v.address&&v.address.length<3)throw Error('Adresse trop courte.');
+   v.zone=fields.zone.value.trim();v.hours=fields.hours.value.trim();if(v.hours&&v.hours.length<3)throw Error('Horaires trop courts.');
+   v.description=fields.description.value.trim();v.location=where?.value||null;
+  };
   const nav=node('div',null,'pro-nav');body.append(nav);
-  function show(){
-   progress.textContent='Étape '+(step+1)+' sur '+total;panel.replaceChildren();nav.replaceChildren();
-   const fields={};
-   if(step===0){panel.append(node('h4','Votre activité'));fields.name=input(panel,{label:'Nom de votre commerce ou activité',value:v.name,required:true,attrs:{maxlength:'180',autocomplete:'organization'}});
-    const c=choice(panel,{legend:'Vous proposez',name:'type',value:v.profile,values:[{value:'Commerçant',label:'Des produits (commerce)'},{value:'Prestataire de services',label:'Des services (métier)'},{value:'Les deux',label:'Les deux'}]});fields.profile=c;
-    fields.category=input(panel,{label:'Catégorie ou métier principal',value:v.category,required:true,list:[...C.categoriesCommerce,...C.metiers],hint:'Exemple : Alimentation, Couture, Plomberie.',attrs:{maxlength:'100'}});}
-   if(step===1){panel.append(node('h4','Vos numéros'));fields.phone=input(panel,{label:'Téléphone',type:'tel',value:v.phone,required:true,hint:'Exemple : 77 123 45 67. Le +221 est ajouté automatiquement.',attrs:{autocomplete:'tel'}});
-    const same=node('label',null,'pro-check'),cb=node('input');cb.type='checkbox';cb.checked=v.sameWhatsapp;same.append(cb,' Mon WhatsApp est ce même numéro');panel.append(same);
-    const wa=node('div');panel.append(wa);fields.same=cb;const draw=()=>{wa.replaceChildren();if(!cb.checked)fields.whatsapp=input(wa,{label:'Numéro WhatsApp',type:'tel',value:v.whatsapp,required:true});else fields.whatsapp=null;};cb.onchange=draw;draw();}
-   if(step===2){panel.append(node('h4','Où vous trouver'));fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,options:[{value:'',label:'Choisissez…'},...state.localites]});
-    fields.address=input(panel,{label:'Adresse ou repère',value:v.address,hint:'Exemple : près du marché central.',attrs:{maxlength:'500'}});
-    if(v.profile!=='Commerçant')fields.zone=input(panel,{label:'Zone d’intervention',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
-    gps(panel,v.location,status).then(g=>{where=g;});}
-   if(step===3){panel.append(node('h4','Horaires et présentation'));fields.hours=input(panel,{label:'Horaires d’ouverture',value:v.hours,hint:'Exemple : lundi–samedi 8 h–20 h.',attrs:{maxlength:'500'}});fields.description=input(panel,{label:'Présentation de votre activité',type:'textarea',value:v.description,attrs:{maxlength:'2000'}});}
-   if(step===4){panel.append(node('h4','Logo ou photo et envoi'));photos=photosField(panel,{existing:p.photos||[],api,upload,imageSelection,status});
-    const recap=node('dl',null,'pro-recap');for(const [k,val] of [['Nom',v.name],['Activité',v.profile],['Catégorie',v.category],['Téléphone',C.afficherTelephone(v.phone)],['WhatsApp',C.afficherTelephone(v.sameWhatsapp?v.phone:v.whatsapp)],['Village ou quartier',v.village],['Horaires',v.hours||'—'],['Position GPS',v.location?'Renseignée':'Non renseignée']]){recap.append(node('dt',k),node('dd',val));}panel.append(recap);
-    if(row?.statut==='Actif')panel.append(node('p','Si vous changez le nom, l’activité, un numéro ou les photos, ces changements seront vérifiés avant publication. En attendant, votre fiche reste visible avec les informations déjà validées.','pro-hint'));}
-   const read=()=>{
-    if(step===0){v.name=fields.name.value.trim();v.profile=fields.profile.value;v.category=fields.category.value.trim();if(!v.name||!v.category)throw Error('Indiquez le nom et la catégorie de votre activité.');}
-    if(step===1){const t=C.normaliserTelephone(fields.phone.value);if(!t)throw Error('Téléphone invalide. Exemple : 77 123 45 67.');v.phone=t;v.sameWhatsapp=fields.same.checked;if(!v.sameWhatsapp){const w=C.normaliserTelephone(fields.whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');v.whatsapp=w;}}
-    if(step===2){v.village=fields.village.value;if(!v.village)throw Error('Choisissez votre village ou quartier.');v.address=fields.address.value.trim();if(fields.zone)v.zone=fields.zone.value.trim();v.location=where?.value||null;if(v.address&&v.address.length<3)throw Error('Adresse trop courte.');}
-    if(step===3){v.hours=fields.hours.value.trim();v.description=fields.description.value.trim();if(v.hours&&v.hours.length<3)throw Error('Horaires trop courts.');}
-   };
-   if(step>0)nav.append(button('Étape précédente',()=>{try{read();}catch{}step--;garder();show();},{kind:'secondary'}));
-   if(step<total-1){const next=button('Continuer',()=>{try{read();step++;status.textContent='';garder();show();}catch(err){status.textContent=err.message;}});nav.append(next);}
-   else{const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
-     const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
-     if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
-     if(!row&&!values.photos.length)throw Error('Ajoutez un logo ou une photo de votre activité.');const saved=await api.saveProfile(values,row);if(!row){await clearRegistrationPhoto(api.user);brouillon?.effacer();fin();}
-     await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
-    });nav.append(send);}
-   if(!edit&&brouillon){const save=button('Enregistrer le brouillon',()=>{try{read();}catch{}garder();status.textContent='Brouillon enregistré sur cet appareil : vous pourrez reprendre votre fiche plus tard depuis l’Espace professionnel.';},{kind:'secondary'});nav.append(save);}
-   panel.onsubmit=e=>e.preventDefault();
-   queueMicrotask(()=>panel.querySelector('input,select,textarea')?.focus({preventScroll:true}));
-  }
-  show();
+  const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
+   try{read();}catch(err){plus.open=true;throw err;}
+   const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
+   if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
+   const saved=await api.saveProfile(values,row);if(!row){await clearRegistrationPhoto(api.user);brouillon?.effacer();fin();}
+   await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
+  });nav.append(send);
+  if(!edit&&brouillon){const save=button('Enregistrer le brouillon',()=>{try{read();}catch{}brouillon.ecrire({...v},0);status.textContent='Brouillon enregistré sur cet appareil : vous pourrez reprendre votre fiche plus tard depuis l’Espace professionnel.';},{kind:'secondary'});nav.append(save);}
+  panel.onsubmit=e=>{e.preventDefault();send.click();};
+  queueMicrotask(()=>panel.querySelector('input,select,textarea')?.focus({preventScroll:true}));
  }
 
  function listCard(kind,row,{details=[],actions=[]}){
@@ -200,14 +204,16 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function boutiqueForm({id}){
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
   const body=frame(row?'Modifier la boutique':'Nouvelle boutique');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
-  const name=input(f,{label:'Nom de la boutique',value:p.nom||'',required:true,attrs:{maxlength:'180'}});
-  const category=input(f,{label:'Catégorie',value:p.categorie||pro.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
+  const name=input(f,{label:'Nom de la boutique',value:p.nom||pro.nom||'',required:true,attrs:{maxlength:'180'}});
   const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',options:[{value:'',label:'Choisissez…'},...state.localites]});
-  const address=input(f,{label:'Adresse ou repère',value:p.adresse||'',attrs:{maxlength:'500'}});
-  const hours=input(f,{label:'Horaires d’ouverture',value:p.horaires||pro.horaires||'',hint:'Exemple : tous les jours 9 h–19 h.',attrs:{maxlength:'500'}});
-  const whatsapp=input(f,{label:'WhatsApp de la boutique',type:'tel',value:p.whatsapp||'',hint:'Laissez vide pour utiliser le numéro de votre fiche.'});
-  const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
-  let where=null;gps(f,p.localisation,status).then(g=>{where=g;});const photos=photosField(f,{existing:p.photos||[],api,upload,imageSelection,status});
+  if(!row)f.append(node('p','Nom et village suffisent : vous pourrez ajouter le reste plus tard.','pro-hint'));
+  const plus=node('details',null,'pro-autre');plus.open=!!row;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));f.append(plus);
+  const category=input(plus,{label:'Catégorie',value:p.categorie||pro.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
+  const address=input(plus,{label:'Adresse ou repère',value:p.adresse||pro.adresse||'',attrs:{maxlength:'500'}});
+  const hours=input(plus,{label:'Horaires d’ouverture',value:p.horaires||pro.horaires||'',hint:'Exemple : tous les jours 9 h–19 h.',attrs:{maxlength:'500'}});
+  const whatsapp=input(plus,{label:'WhatsApp de la boutique',type:'tel',value:p.whatsapp||'',hint:'Laissez vide pour utiliser le numéro de votre fiche.'});
+  const description=input(plus,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
+  let where=null;gps(plus,p.localisation,status).then(g=>{where=g;});const photos=photosField(plus,{existing:p.photos||[],api,upload,imageSelection,status});
   const send=button(row?'Enregistrer la boutique':'Envoyer pour validation');body.append(send);
   send.onclick=()=>guarded(send,async()=>{
    const values={name:name.value.trim(),village:village.value,photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Choisissez le village ou quartier.');
