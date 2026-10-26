@@ -144,7 +144,7 @@ const nc=(t,x,c)=>{const e=node(t,x);e.className=c;return e;};
 // Espace pro replié en une ligne pour les clients ; ouvert dès qu'une activité est choisie.
 function replie(host,t){host.querySelector?.('h3')?.remove();const d=node('details');d.className='pro-replie';d.open=!!t;const s=node('summary');s.append(nc('span','💼','pro-replie-icone'),node('span','Vous êtes commerçant, prestataire ou chauffeur ?'));d.append(s);host.append(d);return d;}
 async function espacePro(host,connected){
- host.replaceChildren(node('h3','Mon espace professionnel'));const status=node('p');status.setAttribute('role','status');host.append(status);
+ const mon=host.kokiMontage=(host.kokiMontage||0)+1;host.replaceChildren(node('h3','Mon espace professionnel'));const status=node('p');status.setAttribute('role','status');host.append(status);
  const t=Pro.lire(proStorage());
  if(!connected){
   const d=replie(host,t);
@@ -153,6 +153,7 @@ async function espacePro(host,connected){
   return;
  }
  const [fiches,chauffeurs]=await Promise.all([modules.commerce?api.mine('professionnels'):[],modules.transport?api.mine('chauffeurs'):[]]);
+ if(host.kokiMontage!==mon)return; // un montage plus récent a pris la place : pas de doublon, pas d'entrée d'historique en trop
  // Un client déjà connecté doit aussi définir un mot de passe avant sa première fiche professionnelle.
  // Ce marqueur facilite le parcours ; il ne confère aucun rôle ni aucune autorisation.
  if(Pro.premiereCreationSansMotDePasse(t,api.user,fiches,chauffeurs)){
