@@ -18,7 +18,7 @@ export function normalizePhone(value){const v=C.normaliserTelephone(value);if(!v
 export function messageInscription(error){const code=String(error?.code||''),status=error?.status;
  if(code==='signup_disabled'||code==='email_provider_disabled')return 'Les inscriptions ne sont pas encore ouvertes sur Koki Connect. Réessayez plus tard ou contactez Koki Connect.';
  if(code==='over_email_send_rate_limit'||code==='over_request_rate_limit'||status===429)return 'Trop de demandes d’inscription pour le moment. Patientez quelques minutes puis réessayez.';
- if(code==='weak_password')return 'Mot de passe jugé trop faible : choisissez au moins 8 caractères en mélangeant lettres, chiffres et symboles.';
+ if(code==='weak_password')return 'Mot de passe refusé : choisissez au moins 8 caractères. Aucune combinaison de lettres, chiffres ou symboles n’est imposée par le formulaire.';
  if(code==='user_already_exists'||code==='email_exists')return 'Un compte existe déjà avec cette adresse : connectez-vous ou utilisez « Mot de passe oublié ».';
  if(code==='email_address_invalid'||code==='validation_failed')return 'Adresse e-mail refusée : vérifiez-la et réessayez.';
  if(code==='email_address_not_authorized')return 'L’e-mail de confirmation ne peut pas être envoyé à cette adresse pour le moment. Contactez Koki Connect.';
