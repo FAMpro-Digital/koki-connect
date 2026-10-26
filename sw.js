@@ -7,7 +7,7 @@
 // Les livres téléchargés vivent dans un cache séparé (koki-livres-v1) géré par la page.
 // Pour forcer le renouvellement de tous les fichiers gardés : incrémenter VERSION.
 'use strict';
-const VERSION='v2';
+const VERSION='v3';
 const SHELL='koki-shell-'+VERSION,RUNTIME='koki-runtime-'+VERSION,MAX_RUNTIME=120;
 const EXTRAS=['assets/leaflet/leaflet.js','assets/leaflet/leaflet.css'];
 // Fichiers de l'application : la liste est lue dans index.html (rien à maintenir à la main).
