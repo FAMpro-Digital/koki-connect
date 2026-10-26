@@ -122,7 +122,9 @@ function parcoursPro(module){
 async function versProfil(){await window.KokiPortail?.profil?.();}
 async function ouvrirEspace(){
  await versProfil();
- document.getElementById(api?.user?'profil-pro':'profil-compte')?.scrollIntoView({block:'start'});
+ const cible=()=>document.getElementById(api?.user?'profil-pro':'profil-compte');
+ cible()?.scrollIntoView({block:'start'});
+ requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>cible()?.scrollIntoView({block:'start'}),0)));
 }
 function lienProfil(texte){const p=node('p',null);p.className='lien-profil';p.append(node('span',texte+' '));const b=node('button','Ouvrir Profil');b.type='button';b.onclick=()=>versProfil();p.append(b);return p;}
 // Connexion sur place : un panneau repliable dans la rubrique, ouvert automatiquement quand une action l'exige.

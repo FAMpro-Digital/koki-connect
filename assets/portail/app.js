@@ -30,6 +30,9 @@ function card(x,full=false){
  return e;
 }
 let detailGeneration=0;
+// Après un changement de page, navigation.js remet l'écran en haut au prochain affichage : on attend qu'il ait fini
+// avant d'aller sur la zone demandée (sinon « Commenter » laisse l'utilisateur tout en haut de la publication).
+function apresAffichage(fn){requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(fn,0)));}
 async function detail(x,focusComments=false){
  const generation=++detailGeneration,scroll=window.scrollY;
  if(x.detail_required){try{x={...x,...await KokiPublicFeed.detail(x.id)};}catch{if(generation!==detailGeneration)return;const box=ouvrir(x.titre);box.append(n('p','Impossible de charger le texte complet. Vérifiez votre connexion.'),b('Réessayer',()=>detail(x,focusComments)),b('Retour à l’accueil',()=>fermerOpportunites()));return;}}
@@ -39,10 +42,11 @@ async function detail(x,focusComments=false){
  const box=$('portail-vue');
  const retour=()=>{fermerOpportunites();requestAnimationFrame(()=>window.scrollTo(0,scroll));};
  const top=b('← Retour à l’accueil',retour);top.className='publication-retour';box.prepend(top);
- box.append(window.KokiSocial.actions(x,()=>section.scrollIntoView({block:'start',behavior:'smooth'})));
+ box.append(window.KokiSocial.actions(x,()=>{section.scrollIntoView({block:'start',behavior:'smooth'});section.querySelector('textarea')?.focus({preventScroll:true});}));
  const section=n('section');box.append(section);window.KokiSocial.comments(x,section);
  const bottom=b('Retour à l’accueil',retour);bottom.className='publication-retour';box.append(bottom);
- if(focusComments){section.scrollIntoView({block:'start'});section.querySelector('textarea')?.focus();}
+ section.style.scrollMarginTop='72px';
+ if(focusComments)apresAffichage(()=>{if(generation!==detailGeneration)return;section.scrollIntoView({block:'start'});section.querySelector('textarea')?.focus({preventScroll:true});});
 }
 function detailBase(x){if(x.type==='Opportunités'&&window.KokiOpportunites){return KokiOpportunites.detail(x);}if(x.type==='Événements'&&window.KokiEvenements){return KokiEvenements.detail(x);}if(window.KokiSport&&window.KokiSportContract){if(KokiSportContract.decodeMatch(x)){return KokiSport.match(x.id);}if(KokiSportContract.decodeEquipe(x)){return KokiSport.equipe(x.id);}}if(KokiEducationContract.decode(x)){return educationDetail(x);}if(window.KokiLivreContract&&KokiLivreContract.decode(x)&&window.KokiBibliotheque){return KokiBibliotheque.detail(x);}if(window.KokiSanteContract&&KokiSanteContract.decode(x)&&window.KokiSante){return KokiSante.detail(x);}if(window.KokiServiceContract&&(KokiServiceContract.decodeService(x)||KokiServiceContract.decodeDemarche(x))&&window.KokiServicesPublics){return KokiServicesPublics.detail(x);}if(window.KokiNumeroContract&&KokiNumeroContract.decode(x)){return numerosUtiles();}const box=ouvrir(x.titre);box.append(card(x,true));}
 function remplir(id,xs,message){const box=$(id);box.replaceChildren();if(!xs.length)box.append(n('p',message||'Aucun contenu publié pour le moment.'));else xs.forEach(x=>box.append(card(x)));}
