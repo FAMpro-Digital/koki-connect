@@ -59,7 +59,8 @@
       "develop/boutique-des-envoi-fiche": false,
       "fix/retour-un-seul-appui": false,
       "fix/profil-appui-repete": false,
-      "develop/logo-profil-pro": false
+      "develop/logo-profil-pro": false,
+      "fix/profil-pro-en-haut": false
     }
   },
   "headers": [

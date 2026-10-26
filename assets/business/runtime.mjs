@@ -143,13 +143,13 @@ function choixActivite(host,actuel,intro){
 const nc=(t,x,c)=>{const e=node(t,x);e.className=c;return e;};
 // Espace pro replié en une ligne pour les clients ; ouvert dès qu'une activité est choisie.
 function replie(host,t){host.querySelector?.('h3')?.remove();const d=node('details');d.className='pro-replie';d.open=!!t;const s=node('summary');s.append(nc('span','💼','pro-replie-icone'),node('span','Vous êtes commerçant, prestataire ou chauffeur ?'));d.append(s);host.append(d);return d;}
-let logoProfil=null;
+let logoProfil=null,aFichePro=false;
 function logoEntete(tete){
  const chemin=logoProfil,a=tete.querySelector('.pf-avatar');if(!chemin||!a||!api?.image)return;
  const img=nc('img','','pf-avatar-img');img.alt='Logo de votre activité';api.image(chemin).then(u=>{img.src=u;img.onload=()=>a.replaceChildren(img);}).catch(()=>{});
 }
 async function espacePro(host,connected){
- logoProfil=null;
+ logoProfil=null;aFichePro=false;
  const mon=host.kokiMontage=(host.kokiMontage||0)+1;host.replaceChildren(node('h3','Mon espace professionnel'));const status=node('p');status.setAttribute('role','status');host.append(status);
  const t=Pro.lire(proStorage());
  if(!connected){
@@ -160,7 +160,7 @@ async function espacePro(host,connected){
  }
  const [fiches,chauffeurs]=await Promise.all([modules.commerce?api.mine('professionnels'):[],modules.transport?api.mine('chauffeurs'):[]]);
  if(host.kokiMontage!==mon)return;
- logoProfil=logoCompte(fiches[0]);
+ logoProfil=logoCompte(fiches[0]);aFichePro=fiches.length>0||chauffeurs.length>0;
  // un montage plus récent a pris la place : pas de doublon, pas d'entrée d'historique en trop
  // Un client déjà connecté doit aussi définir un mot de passe avant sa première fiche professionnelle.
  // Ce marqueur facilite le parcours ; il ne confère aucun rôle ni aucune autorisation.
@@ -198,7 +198,10 @@ async function espaceProfil(host){
  const pro=node('section');pro.id='profil-pro';pro.className='profil-pro';const fin=node('div');fin.className='pf-fin';
  const liens=raccourcis();host.append(tete,compte,liens,pro,fin);fin.before(privacyPanel());
  const service=modules.commerce?apiDe('commerce'):apiDe('transport');
- accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);tete.hidden=false;liens.hidden=false;host.classList.remove('profil-boutique');try{await espacePro(pro,connected&&service.enabled);if(connected)logoEntete(tete);if(connected&&modules.commerce){const boutiques=await api.mine('boutiques');const marchand=boutiques.some(b=>b.statut!=='Archivé');tete.hidden=marchand;liens.hidden=marchand;host.classList.toggle('profil-boutique',marchand);}}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
+ accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);tete.hidden=false;liens.hidden=false;host.classList.remove('profil-boutique');try{await espacePro(pro,connected&&service.enabled);if(connected)logoEntete(tete);
+  // Un professionnel arrive directement sur ses options : les raccourcis clients passent après son espace.
+  if(aFichePro)pro.after(liens);else compte.after(liens);
+  if(connected&&modules.commerce){const boutiques=await api.mine('boutiques');const marchand=boutiques.some(b=>b.statut!=='Archivé');tete.hidden=marchand;liens.hidden=marchand;host.classList.toggle('profil-boutique',marchand);}}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
   connecte:(box,u,qui)=>entete(tete,u,qui),deconnexion:fin});
  // Avant connexion (ou service en préparation), le choix d'activité est déjà proposé.
  if(!api?.user)await espacePro(pro,false);
