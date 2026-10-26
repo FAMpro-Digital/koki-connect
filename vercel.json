@@ -55,7 +55,8 @@
       "fiabilite/service-worker": false,
       "tests/qualite-automatisee": false,
       "feature/notifications-sms-push": false,
-      "develop/desarchiver-commercant": false
+      "develop/desarchiver-commercant": false,
+      "develop/boutique-des-envoi-fiche": false
     }
   },
   "headers": [
