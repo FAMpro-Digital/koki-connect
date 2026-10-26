@@ -39,7 +39,7 @@ test('câblage : profil, inscription, retour du lien, renvoi, brouillons, statut
  assert.match(rt,/function retourDeLien/);assert.match(rt,/window\.KokiPortail\.profil\(\)/,'sans type : les trois catégories');
  assert.match(ui,/Recevoir un nouveau lien/);assert.match(cl,/db\.auth\.resend\(\{type:'signup'/);assert.match(cl,/emailRedirectTo=to/);
  assert.match(pro,/'En attente de validation'/);assert.match(pro,/Enregistrer le brouillon/);assert.match(pro,/Reprendre ma fiche \(brouillon\)/);
- assert.match(pro,/\}\);nav\.append\(send\);\}\n {3}if\(!edit&&brouillon\)/,'le brouillon ne remplace jamais le bouton d’envoi');
+ assert.match(pro,/\}\);nav\.append\(send\);\n {2}if\(!edit&&brouillon\)/,'le brouillon ne remplace jamais le bouton d’envoi');
 });
 test('chauffeur refusé : statut « Inscription refusée » et motif de l’administration affichés',()=>{
  const ui=fs.readFileSync('assets/business/ui.mjs','utf8');
