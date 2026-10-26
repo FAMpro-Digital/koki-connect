@@ -114,17 +114,17 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const title=node('div',null,'pro-card-head');title.append(node('h4',p.payload.nom),badge('professionnels',p.statut,p));card.append(title,node('p',p.payload.type+(p.payload.village?' · '+p.payload.village:'')),explanation('professionnels',p));
   if(!['Suspendu','Archivé'].includes(p.statut))card.append(button('Modifier ma fiche',()=>go('fiche',{edit:true}),{kind:'secondary'}));
   if(!state.boutiques.some(b=>b.statut!=='Archivé'))body.append(card);else{const infos=node('details');infos.append(node('summary','Informations professionnelles'),card);body.append(infos);for(const boutique of state.boutiques.filter(b=>b.statut!=='Archivé'))body.append(listCard('boutiques',boutique,{details:[boutique.payload.adresse],actions:[]}));}
-  const actif=p.statut==='Actif',menu=node('div',null,'pro-menu');
+  const actif=p.statut==='Actif',envoyee=['En attente','Actif'].includes(p.statut),menu=node('div',null,'pro-menu');
   const entry=(label,count,view,enabled,reason)=>{const b=button(label+' ('+count+')',()=>go(view),{kind:'tile'});if(!enabled){b.disabled=true;b.title=reason;}menu.append(b);};
   const wait='Disponible après la validation de votre fiche.';
-  if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',actif,wait);entry('Ajouter et gérer mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
-  if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',actif,wait);
+  if(has('Commerçant')){entry('Mes boutiques',state.boutiques.filter(b=>b.statut!=='Archivé').length,'boutiques',envoyee,wait);entry('Ajouter et gérer mes produits',state.produits.filter(x=>x.statut!=='Archivé').length,'produits',actif&&activeShops().length>0,activeShops().length?wait:'Disponible quand une boutique est validée.');}
+  if(has('Prestataire de services'))entry('Mes services',state.services.filter(x=>x.statut!=='Archivé').length,'services',envoyee,wait);
   if(has('Commerçant')||has('Prestataire de services')){const b=button('Statistiques (30 jours)',()=>go('statistiques'),{kind:'tile'});if(!actif){b.disabled=true;b.title=wait;}menu.append(b);}
   const bas=produitsStockBas(state.produits);if(has('Commerçant')&&actif&&bas.length){const a=button('⚠ Stock bas : '+bas.length+' produit'+(bas.length>1?'s':''),()=>go('produits'),{kind:'secondary'});a.classList.add('pro-alerte-btn');menu.prepend(a);}
-  if(has('Commerçant')&&actif&&!state.boutiques.some(b=>b.statut!=='Archivé'))menu.prepend(button('Créer ma boutique en ligne',()=>go('boutique')));
-  body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':wait,'pro-hint'));
+  if(has('Commerçant')&&envoyee&&!state.boutiques.some(b=>b.statut!=='Archivé'))menu.prepend(button('Créer ma boutique en ligne',()=>go('boutique')));
+  body.append(menu);if(!actif)body.append(node('p',p.statut==='Refusé'?'Corrigez votre fiche pour la renvoyer en validation.':envoyee?'Votre fiche est en cours de validation. Vous pouvez déjà créer votre boutique ; les produits et les statistiques s’ouvrent après validation.':wait,'pro-hint'));
   if(has('Commerçant')){const shops=state.boutiques.filter(b=>b.statut!=='Archivé'),shopOn=shops.some(b=>b.statut==='Actif');
-   const etapes=node('ol',null,'pro-steps');for(const [fait,txt] of [[true,'Compte créé'],[actif,actif?'Fiche validée':'Fiche envoyée : validation par l’administration en cours'],[shops.length>0,shops.length?(shopOn?'Boutique validée':'Boutique envoyée : validation en cours'):(actif?'Créer ma boutique avec le bouton vert ci-dessus':'Créer ma boutique (dès que la fiche est validée)')],[state.produits.some(x=>x.statut!=='Archivé'),'Ajouter mes produits (dès que la boutique est validée)']])etapes.append(node('li',(fait?'✅ ':'⏳ ')+txt));
+   const etapes=node('ol',null,'pro-steps');for(const [fait,txt] of [[true,'Compte créé'],[actif,actif?'Fiche validée':'Fiche envoyée : validation par l’administration en cours'],[shops.length>0,shops.length?(shopOn?'Boutique validée':'Boutique envoyée : validation en cours'):(envoyee?'Créer ma boutique avec le bouton vert ci-dessus':'Créer ma boutique (dès que la fiche est envoyée)')],[state.produits.some(x=>x.statut!=='Archivé'),'Ajouter mes produits (dès que la boutique est validée)']])etapes.append(node('li',(fait?'✅ ':'⏳ ')+txt));
    body.append(node('h4','Où j’en suis'),etapes);}
  }
 

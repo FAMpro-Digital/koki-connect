@@ -9,3 +9,8 @@ test('espace pro : chaque élément archivé a un bouton Désarchiver',()=>{
  for(const v of ['state.boutiques','state.produits','state.services'])assert.ok(ui.includes('archived(body,'+v+')'),v);
  assert.match(ui,/repasse en validation par l’administration/);
 });
+test('boutique et services accessibles dès que la fiche est envoyée (En attente), produits après validation',()=>{
+ assert.match(ui,/envoyee=\['En attente','Actif'\]\.includes\(p\.statut\)/);
+ assert.match(ui,/'boutiques',envoyee,wait/);assert.match(ui,/'services',envoyee,wait/);
+ assert.match(ui,/'produits',actif&&activeShops\(\)\.length>0/);
+});
