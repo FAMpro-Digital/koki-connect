@@ -139,3 +139,5 @@ nav[aria-label="Navigation principale"] button:active span { animation: koki-reb
   .koki-touche { display: none; }
   nav[aria-label="Navigation principale"] button:active span { animation: none; }
 }
+.profil-espace .pf-avatar{overflow:hidden}
+.profil-espace .pf-avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
