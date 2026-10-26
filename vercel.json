@@ -54,7 +54,8 @@
       "test/koki-connect-performance": false,
       "fiabilite/service-worker": false,
       "tests/qualite-automatisee": false,
-      "feature/notifications-sms-push": false
+      "feature/notifications-sms-push": false,
+      "develop/desarchiver-commercant": false
     }
   },
   "headers": [

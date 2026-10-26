@@ -199,7 +199,10 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   for(const b of rows)body.append(listCard('boutiques',b,{details:[[b.payload.categorie,b.payload.village].filter(Boolean).join(' · '),b.payload.adresse,b.payload.horaires&&'Horaires : '+b.payload.horaires],actions:[...(['Fermé'].includes(b.statut)?[]:[button('Modifier',()=>go('boutique',{id:b.id}),{kind:'secondary'})]),archiveButton('boutiques',b,'Ses produits ne seront plus visibles.')]}));
   archived(body,state.boutiques);
  }
- function archived(body,rows){const old=rows.filter(r=>r.statut==='Archivé');if(!old.length)return;const d=node('details',null,'pro-archives');d.append(node('summary','Éléments archivés ('+old.length+')'));for(const r of old)d.append(node('p',r.payload.nom));body.append(d);}
+ function archived(body,rows){const old=rows.filter(r=>r.statut==='Archivé');if(!old.length)return;const d=node('details',null,'pro-archives');d.append(node('summary','Éléments archivés ('+old.length+')'));
+  for(const r of old){const li=node('div',null,'pro-archive');li.append(node('span',r.payload.nom));
+   const b=button('Désarchiver',()=>guarded(b,async()=>{await api.unarchive(r);await done('« '+r.payload.nom+' » est désarchivé'+(rows===state.boutiques?'e : la boutique repasse en validation par l’administration.':' : il est masqué, rendez-le disponible depuis sa fiche.'),0);}),{kind:'secondary'});li.append(b);d.append(li);}
+  body.append(d);}
 
  function boutiqueForm({id}){
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
