@@ -62,11 +62,11 @@ test('la délégation appelle l\'action de l\'élément le plus proche et bloque
   ecouteurs.click({ target: { closest: () => null } }); // clic hors action : sans effet
 });
 
-test('vercel.json : CSP actuelle inchangée + politique stricte en Report-Only (sans unsafe-inline pour les scripts)', () => {
+test('vercel.json : CSP stricte appliquée et en Report-Only (sans unsafe-inline pour les scripts)', () => {
   const v = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
   const h = Object.fromEntries(v.headers[0].headers.map((x) => [x.key, x.value]));
   const script = (s) => (s.match(/script-src[^;]*/) || [''])[0];
-  assert.match(script(h['Content-Security-Policy']), /unsafe-inline/, 'la politique appliquée ne change pas dans cette PR');
+  assert.equal(script(h['Content-Security-Policy']), "script-src 'self'");
   assert.equal(script(h['Content-Security-Policy-Report-Only']), "script-src 'self'");
   assert.equal(h['Content-Security-Policy-Report-Only'].replace(script(h['Content-Security-Policy-Report-Only']), ''), h['Content-Security-Policy'].replace(script(h['Content-Security-Policy']), ''), 'seules les directives de script diffèrent');
 });

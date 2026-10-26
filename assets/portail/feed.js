@@ -25,5 +25,6 @@ async function charger(){try{const flux=await chargerReseau();garderCopie(flux);
 // Le serveur ne signe que les fichiers de livres gratuits publiés (politique livres_public_read).
 function fichierPermis(value){try{const u=new URL(value);return !!config&&u.origin===config.url&&/^\/storage\/v1\/object\/sign\/koki-livres\/[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(u.pathname);}catch(_){return false;}}
 async function signerFichier(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(String(path)))throw Error('Fichier non disponible');const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const signed=await request(c.url+'/storage/v1/object/sign/koki-livres/'+path,{method:'POST',headers,body:JSON.stringify({expiresIn:300})});const url=c.url+'/storage/v1'+signed.signedURL;if(!fichierPermis(url))throw Error('Lien de téléchargement refusé');return url;}
-root.KokiPublicFeed={charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
+async function renouvelerImage(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(String(path)))return null;const c=await settings(),row={image_path:path};await signerUne(c,{apikey:c.publishableKey,'Content-Type':'application/json'},row);return row.image;}
+root.KokiPublicFeed={renouvelerImage,charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
 })(globalThis);
