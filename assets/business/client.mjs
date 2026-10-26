@@ -110,6 +110,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  saveProduct:(values,row)=>run('save_product',{...values,...(row?{id:row.id,revision:row.revision,parent_id:row.parent_id}:{})},'pro:produits:'+(row?.id||'nouveau')),
  saveService:(values,row)=>run('save_service',{...values,...(row?{id:row.id,revision:row.revision,parent_id:row.parent_id}:{})},'pro:services:'+(row?.id||'nouveau')),
  setAvailability:(row,statut)=>run('set_availability',{id:row.id,revision:row.revision,status:statut},'pro:dispo:'+row.id),
- archive:row=>run('archive',{id:row.id,revision:row.revision},'pro:archive:'+row.id)
+ archive:row=>run('archive',{id:row.id,revision:row.revision},'pro:archive:'+row.id),
+ unarchive:row=>run('unarchive',{id:row.id,revision:row.revision},'pro:unarchive:'+row.id)
  };
 }
