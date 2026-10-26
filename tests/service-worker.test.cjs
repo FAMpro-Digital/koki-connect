@@ -36,7 +36,7 @@ const HTML = '<link rel="stylesheet" href="assets/a.css"><script defer src="asse
 test('installation : les fichiers de index.html sont installés d\'avance, un fichier manquant ne bloque rien', async () => {
   const sw = creer({ reseau: async (p) => (p.endsWith('/index.html') ? new Reponse(HTML) : p.endsWith('/a.css') ? new Reponse('', { ok: false }) : new Reponse('x')) });
   await sw.attendre('install');
-  const shell = sw.magasin.get('koki-shell-v2');
+  const shell = sw.magasin.get('koki-shell-v3');
   for (const u of ['index.html', 'assets/a.js', 'assets/logo.webp', 'manifest.webmanifest', 'assets/leaflet/leaflet.js', 'assets/leaflet/leaflet.css'])
     assert.ok(shell.has(new URL(u, ORIGINE + '/').href), u);
   assert.ok(!shell.has(new URL('assets/a.css', ORIGINE + '/').href), 'le fichier en échec est ignoré, sans erreur');
@@ -50,13 +50,13 @@ test('jamais gardé : autre origine, backend.json, config, réponses privées ou
   const gardes = [...sw.magasin.values()].flatMap((m) => [...m.keys()]);
   assert.deepEqual(gardes, []);
   await sw.requete(new Requete('assets/public.js'));
-  assert.equal([...sw.magasin.get('koki-runtime-v2').keys()].length, 1);
+  assert.equal([...sw.magasin.get('koki-runtime-v3').keys()].length, 1);
 });
 
 test('cache runtime borné : les plus anciennes entrées sont retirées', async () => {
   const sw = creer({ reseau: async () => new Reponse('ok') });
   for (let i = 0; i < 135; i++) await sw.requete(new Requete(`assets/f${i}.js`));
-  const cles = [...sw.magasin.get('koki-runtime-v2').keys()];
+  const cles = [...sw.magasin.get('koki-runtime-v3').keys()];
   assert.equal(cles.length, 120);
   assert.ok(!cles.some((u) => u.endsWith('/f0.js')) && cles.some((u) => u.endsWith('/f134.js')));
 });
@@ -78,12 +78,12 @@ test('un fichier du shell mis à jour en ligne remplace la copie d\'origine (pas
   await sw.attendre('install');
   version = 2;
   await sw.requete(new Requete('assets/a.js'));
-  assert.equal((await sw.magasin.get('koki-shell-v2').get(new URL('assets/a.js', ORIGINE + '/').href)).corps, 'v2');
+  assert.equal((await sw.magasin.get('koki-shell-v3').get(new URL('assets/a.js', ORIGINE + '/').href)).corps, 'v2');
 });
 
 test('activation : anciennes versions de caches supprimées, cache des livres conservé', async () => {
   const sw = creer({ reseau: async () => new Reponse('ok') });
-  for (const n of ['koki-shell-v1', 'koki-runtime-v1', 'koki-livres-v1', 'koki-shell-v2']) sw.magasin.set(n, new Map());
+  for (const n of ['koki-shell-v1', 'koki-runtime-v1', 'koki-livres-v1', 'koki-shell-v3']) sw.magasin.set(n, new Map());
   await sw.attendre('activate');
-  assert.deepEqual([...sw.magasin.keys()].sort(), ['koki-livres-v1', 'koki-shell-v2']);
+  assert.deepEqual([...sw.magasin.keys()].sort(), ['koki-livres-v1', 'koki-shell-v3']);
 });
