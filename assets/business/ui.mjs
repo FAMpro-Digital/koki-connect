@@ -21,11 +21,11 @@ export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=
   box.append(node('p','Espace '+choix+' : compte avec adresse e-mail et mot de passe.'));
   const changer=next=>{courriel=box.querySelector?.('input[type=email]')?.value||courriel;vue=next;status.textContent='';return render();};
   if(vue==='inscription'){
-   const f=form(box,'Créer mon compte professionnel',[['email','Adresse e-mail','email',courriel],['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
+   const f=form(box,'Créer mon compte professionnel',[['email','Adresse e-mail','email',courriel],['password','Mot de passe (8 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
     if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
     courriel=x.email.value.trim();try{await api.signup(courriel,x.password.value,{retour:retour(),professional:true});}finally{x.password.value='';x.confirm.value='';}
     vue='connexion';await render();status.textContent='Compte créé : confirmez votre adresse avec le lien reçu par e-mail, puis connectez-vous avec votre mot de passe.';
-   },status);f.f.dataset.vue='inscription';f.inputs.password.minLength=12;f.inputs.confirm.minLength=12;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Créer mon compte professionnel';
+   },status);f.f.dataset.vue='inscription';f.inputs.password.minLength=8;f.inputs.confirm.minLength=8;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Créer mon compte professionnel';
   }else if(vue==='oubli'||vue==='renvoi'){
    const f=form(box,vue==='oubli'?'Réinitialiser mon mot de passe':'Recevoir un nouveau lien de confirmation',[['email','Adresse e-mail','email',courriel]],async x=>{
     courriel=x.email.value.trim();if(vue==='oubli'){const u=new URL(retour()||location.href);u.searchParams.set('koki-recovery','1');await api.recover(courriel,u.href);}else await api.resendConfirmation(courriel,{retour:retour()});

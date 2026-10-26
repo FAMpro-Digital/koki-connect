@@ -156,10 +156,10 @@ async function espacePro(host,connected){
  // Un client déjà connecté doit aussi définir un mot de passe avant sa première fiche professionnelle.
  // Ce marqueur facilite le parcours ; il ne confère aucun rôle ni aucune autorisation.
  if(Pro.premiereCreationSansMotDePasse(t,api.user,fiches,chauffeurs)){
-  const f=form(host,'Définir mon mot de passe professionnel',[['password','Mot de passe (12 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
+  const f=form(host,'Définir mon mot de passe professionnel',[['password','Mot de passe (8 caractères minimum)','password'],['confirm','Confirmer le mot de passe','password']],async x=>{
    if(x.password.value!==x.confirm.value)throw Error('Les mots de passe ne correspondent pas.');
    try{await api.setProfessionalPassword(x.password.value);}finally{x.password.value='';x.confirm.value='';}await espacePro(host,true);
-  },status);f.inputs.password.minLength=12;f.inputs.confirm.minLength=12;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Enregistrer mon mot de passe';return;
+  },status);f.inputs.password.minLength=8;f.inputs.confirm.minLength=8;f.inputs.password.autocomplete=f.inputs.confirm.autocomplete='new-password';f.b.textContent='Enregistrer mon mot de passe';return;
  }
  const commerce=modules.commerce&&(fiches.length>0||t==='commercant'||t==='prestataire'),transport=modules.transport&&(chauffeurs.length>0||t==='chauffeur');
  if(commerce){const s=node('section');host.append(s);await proSpace(s,api,status,{upload,imageSelection,...parcoursPro('commerce')});}

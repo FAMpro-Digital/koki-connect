@@ -24,14 +24,17 @@ test('inscription réussie : e-mail nettoyé et lien de confirmation vers la pag
 test('professionnel : mot de passe minimum et marqueur de parcours sans rôle',async()=>{
  globalThis.location={origin:'https://koki-connect.vercel.app',pathname:'/'};
  const {createBusinessClient}=await charger();const d=db({error:null});const api=createBusinessClient(d,{enabled:true});
- await assert.rejects(api.signup('pro@exemple.sn','court',{professional:true}),/12 caractères/);assert.equal(d.appels.length,0);
+ await assert.rejects(api.signup('pro@exemple.sn','1234567',{professional:true}),/8 caractères/);assert.equal(d.appels.length,0);
+ await api.signup('pro@exemple.sn','Abcd1234',{professional:true});
+ assert.equal(d.appels[0].password,'Abcd1234');
  await api.signup('pro@exemple.sn','motdepasse-solide',{professional:true});
+ assert.equal(d.appels[1].password,'motdepasse-solide');
  assert.deepEqual(d.appels[0].options.data,{professional_password_set:true});
 });
 test('client devenant professionnel : mot de passe enregistré et identité actualisée',async()=>{
  const {createBusinessClient}=await charger();let user={id:'u',user_metadata:{}},saved;
  const api=createBusinessClient({auth:{getUser:async()=>({data:{user}}),updateUser:async x=>{saved=x;user={...user,user_metadata:x.data};return {error:null};}}},{enabled:true});
- await assert.rejects(api.setProfessionalPassword('court'),/12 caractères/);
- await api.setProfessionalPassword('motdepasse-solide');
- assert.equal(saved.password,'motdepasse-solide');assert.equal(api.user.user_metadata.professional_password_set,true);
+ await assert.rejects(api.setProfessionalPassword('court'),/8 caractères/);
+ await api.setProfessionalPassword('Abcd1234');
+ assert.equal(saved.password,'Abcd1234');assert.equal(api.user.user_metadata.professional_password_set,true);
 });
