@@ -32,6 +32,8 @@ function card(x,full=false){
 let detailGeneration=0;
 async function detail(x,focusComments=false){
  const generation=++detailGeneration,scroll=window.scrollY;
+ if(x.detail_required){try{x={...x,...await KokiPublicFeed.detail(x.id)};}catch{if(generation!==detailGeneration)return;const box=ouvrir(x.titre);box.append(n('p','Impossible de charger le texte complet. Vérifiez votre connexion.'),b('Réessayer',()=>detail(x,focusComments)),b('Retour à l’accueil',()=>fermerOpportunites()));return;}}
+ if(generation!==detailGeneration)return;
  await detailBase(x);
  if(generation!==detailGeneration||$('vue-portail').hidden||fiche(x))return;
  const box=$('portail-vue');
