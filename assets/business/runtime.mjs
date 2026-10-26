@@ -1,3 +1,4 @@
+import {privacyPanel} from './privacy.mjs';
 import {mountNotificationPrompt} from './notification-prompt.mjs';
 import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
@@ -186,7 +187,7 @@ async function espaceProfil(host){
  const tete=node('section');tete.className='pf-tete';entete(tete,null);
  const compte=node('section');compte.id='profil-compte';compte.className='business-panel profil-compte';const titre=node('h3','Se connecter');compte.append(titre);
  const pro=node('section');pro.id='profil-pro';pro.className='profil-pro';const fin=node('div');fin.className='pf-fin';
- const liens=raccourcis();host.append(tete,compte,liens,pro,fin);
+ const liens=raccourcis();host.append(tete,compte,liens,pro,fin);fin.before(privacyPanel());
  const service=modules.commerce?apiDe('commerce'):apiDe('transport');
  accountPanel(compte,service,async connected=>{titre.hidden=!!connected;compte.classList.toggle('pf-compte-connecte',!!connected);if(!connected)entete(tete,null);tete.hidden=false;liens.hidden=false;host.classList.remove('profil-boutique');try{await espacePro(pro,connected&&service.enabled);if(connected&&modules.commerce){const boutiques=await api.mine('boutiques');const marchand=boutiques.some(b=>b.statut!=='Archivé');tete.hidden=marchand;liens.hidden=marchand;host.classList.toggle('profil-boutique',marchand);}}catch(e){pro.append(node('p',lisible(e)));}},{intention:()=>{const t=Pro.lire(proStorage());return t?Pro.TYPES[t].label:null;},retour:()=>Pro.urlRetour(location.href,Pro.lire(proStorage())),erreurLien:prendreErreurLien(),
   connecte:(box,u,qui)=>entete(tete,u,qui),deconnexion:fin});
