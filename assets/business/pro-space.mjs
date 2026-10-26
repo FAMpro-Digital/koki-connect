@@ -38,7 +38,7 @@ function prixTexte(p){if(p.tarif==='devis')return 'Sur devis';return C.formaterP
 
 // Photos : celles déjà enregistrées (à conserver ou retirer) + nouvelles, compressées avant envoi, 5 au total.
 function photosField(host,{existing=[],api,upload,imageSelection,status}){
- const fs=node('fieldset',null,'pro-photos');fs.append(node('legend','Photos (facultatives, '+C.maxPhotos+' maximum)'),node('p','Les photos sont compressées sur votre téléphone avant l’envoi.','pro-hint'));
+ const fs=node('fieldset',null,'pro-photos');fs.append(node('legend','Logo et photos ('+C.maxPhotos+' maximum)'),node('p','Les photos sont compressées sur votre téléphone avant l’envoi.','pro-hint'));
  const kept=[];const grid=node('div',null,'pro-thumbs');fs.append(grid);
  for(const path of existing){const fig=node('figure',null,'pro-thumb'),img=node('img');img.alt='Photo enregistrée';img.loading='lazy';api.image(path).then(u=>{img.src=u;}).catch(()=>{img.alt='Photo indisponible';});const l=node('label'),c=node('input');c.type='checkbox';c.checked=true;l.append(c,' Conserver');fig.append(img,l);grid.append(fig);kept.push({path,keep:c});}
  const selections=[];const slots=node('div');fs.append(slots);
@@ -125,7 +125,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
 
  function fiche({edit,profil}){
   // Les valeurs en attente de validation sont reprises pour continuer la saisie.
- const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:{};const row=edit?state.profile:null;
+ const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,description:draft.description}:{};const row=edit?state.profile:null;
   const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
   const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
   let step=0;const total=5;let photos=null,where=null;
@@ -149,7 +149,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
     if(v.profile!=='Commerçant')fields.zone=input(panel,{label:'Zone d’intervention',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
     gps(panel,v.location,status).then(g=>{where=g;});}
    if(step===3){panel.append(node('h4','Horaires et présentation'));fields.hours=input(panel,{label:'Horaires d’ouverture',value:v.hours,hint:'Exemple : lundi–samedi 8 h–20 h.',attrs:{maxlength:'500'}});fields.description=input(panel,{label:'Présentation de votre activité',type:'textarea',value:v.description,attrs:{maxlength:'2000'}});}
-   if(step===4){panel.append(node('h4','Photos et envoi'));photos=photosField(panel,{existing:p.photos||[],api,upload,imageSelection,status});
+   if(step===4){panel.append(node('h4','Logo ou photo et envoi'));photos=photosField(panel,{existing:p.photos||[],api,upload,imageSelection,status});
     const recap=node('dl',null,'pro-recap');for(const [k,val] of [['Nom',v.name],['Activité',v.profile],['Catégorie',v.category],['Téléphone',C.afficherTelephone(v.phone)],['WhatsApp',C.afficherTelephone(v.sameWhatsapp?v.phone:v.whatsapp)],['Village ou quartier',v.village],['Horaires',v.hours||'—'],['Position GPS',v.location?'Renseignée':'Non renseignée']]){recap.append(node('dt',k),node('dd',val));}panel.append(recap);
     if(row?.statut==='Actif')panel.append(node('p','Si vous changez le nom, l’activité, un numéro ou les photos, ces changements seront vérifiés avant publication. En attendant, votre fiche reste visible avec les informations déjà validées.','pro-hint'));}
    const read=()=>{
@@ -163,7 +163,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    else{const send=button(row?'Enregistrer ma fiche':'Envoyer ma fiche pour validation');send.onclick=()=>guarded(send,async()=>{
      const values={name:v.name,profile:v.profile,category:v.category,phone:v.phone,whatsapp:v.sameWhatsapp?v.phone:v.whatsapp,village:v.village,photos:await photos.collect()};
      if(v.address)values.address=v.address;if(v.hours)values.hours=v.hours;if(v.description)values.description=v.description;if(v.zone&&v.profile!=='Commerçant')values.zone=v.zone;if(v.location)values.location=v.location;
-     const saved=await api.saveProfile(values,row);if(!row){brouillon?.effacer();fin();}
+     if(!row&&!values.photos.length)throw Error('Ajoutez un logo ou une photo de votre activité.');const saved=await api.saveProfile(values,row);if(!row){brouillon?.effacer();fin();}
      await done(saved.statut!=='Actif'?'Fiche envoyée : elle est en attente de validation par l’administration.':saved.payload?.modification?'Modifications envoyées pour validation. Votre fiche reste visible avec les informations déjà validées.':'Fiche enregistrée. Elle reste visible dans le catalogue.');
     });nav.append(send);}
    if(!edit&&brouillon){const save=button('Enregistrer le brouillon',()=>{try{read();}catch{}garder();status.textContent='Brouillon enregistré sur cet appareil : vous pourrez reprendre votre fiche plus tard depuis l’Espace professionnel.';},{kind:'secondary'});nav.append(save);}

@@ -38,3 +38,4 @@ test('client devenant professionnel : mot de passe enregistré et identité actu
  await api.setProfessionalPassword('Abcd1234');
  assert.equal(saved.password,'Abcd1234');assert.equal(api.user.user_metadata.professional_password_set,true);
 });
+test('fiche initiale : coordonnées conservées, aucun droit ni mot de passe dans les métadonnées',async()=>{const {createBusinessClient}=await charger();const d=db({error:null});const api=createBusinessClient(d,{enabled:true});await api.signup('pro@exemple.sn','Abcd1234',{professional:true,registration:{type:'Chauffeur',name:'TEST Chauffeur',phone:'771234567',category:'Taxi',address:'Koki centre',description:'Transport local',role:'superadmin',password:'NE_PAS_COPIER'}});const draft=d.appels[0].options.data.professional_registration;assert.equal(draft.phone,'+221771234567');assert.equal(draft.name,'TEST Chauffeur');assert.equal(draft.role,undefined);assert.equal(draft.password,undefined);});
