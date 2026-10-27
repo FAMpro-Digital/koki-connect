@@ -60,7 +60,8 @@
       "fix/retour-un-seul-appui": false,
       "fix/profil-appui-repete": false,
       "develop/logo-profil-pro": false,
-      "fix/profil-pro-en-haut": false
+      "fix/profil-pro-en-haut": false,
+      "fix/fermeture-pages": false
     }
   },
   "headers": [

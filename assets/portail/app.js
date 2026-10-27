@@ -31,13 +31,15 @@ function card(x,full=false){
 }
 let detailGeneration=0;
 async function detail(x,focusComments=false){
- const generation=++detailGeneration,scroll=window.scrollY;
+ const generation=++detailGeneration;
  if(x.detail_required){try{x={...x,...await KokiPublicFeed.detail(x.id)};}catch{if(generation!==detailGeneration)return;const box=ouvrir(x.titre);box.append(n('p','Impossible de charger le texte complet. Vérifiez votre connexion.'),b('Réessayer',()=>detail(x,focusComments)),b('Retour à l’accueil',()=>fermerOpportunites()));return;}}
  if(generation!==detailGeneration)return;
  await detailBase(x);
  if(generation!==detailGeneration||$('vue-portail').hidden||fiche(x))return;
  const box=$('portail-vue');
- const retour=()=>{fermerOpportunites();requestAnimationFrame(()=>window.scrollTo(0,scroll));};
+ // Ouverte depuis l'accueil : un seul pas en arrière, l'accueil reprend sa position. Ouverte depuis une liste : accueil, en haut
+ // (l'ancienne position de la liste n'a aucun sens sur l'accueil).
+ const retour=()=>{if(window.KokiNavigation?.profondeur?.()===1){window.KokiNavigation.retour();return;}fermerOpportunites();};
  const top=b('← Retour à l’accueil',retour);top.className='publication-retour';box.prepend(top);
  box.append(window.KokiSocial.actions(x,()=>section.scrollIntoView({block:'start',behavior:'smooth'})));
  const section=n('section');box.append(section);window.KokiSocial.comments(x,section);
