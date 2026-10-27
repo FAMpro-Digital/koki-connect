@@ -88,11 +88,13 @@ async function rechercher(q){clearTimeout(timer);timer=setTimeout(async()=>{awai
 // Profil : tout ce qui concerne le compte se trouve ici — connexion, inscription, mot de passe — et, pour les
 // professionnels, la fiche (boutique, services) ou l'inscription chauffeur. Les rubriques Commerce, Services et Transport
 // restent consacrées aux clients : catalogue, panier, demandes, réservations et leur suivi.
-async function profil(){const box=ouvrir('Profil utilisateur');const P=window.KokiPro;
+async function profil(){const box=ouvrir('Profil utilisateur');let P=window.KokiPro;
  const zone=n('div');zone.className='profil-espace';box.append(zone);
  const plus=n('div');plus.className='pf-plus';const pub=b('🔐 Espace administration',admin);pub.className='pf-lien';plus.append(pub);box.append(plus);
- if(!P){zone.append(n('p','Espace connecté momentanément indisponible. Rechargez la page.'));return;}
- await P.monter(zone);}
+ if(!P){zone.append(n('p','Chargement de votre espace…'));try{await import(new URL('assets/business/runtime.mjs',document.baseURI).href);P=window.KokiPro;}catch{}}
+ if(!zone.isConnected)return;
+ if(!P){zone.replaceChildren(n('p','Le chargement de votre espace a échoué. Vérifiez votre connexion puis réessayez.'),b('Recharger mon espace',()=>location.reload()));return;}
+ zone.replaceChildren();await P.monter(zone);}
 async function favoris(){await pret;const box=ouvrir('Favoris');const xs=visibles().filter(x=>fav.includes(x.id));xs.forEach(x=>box.append(card(x)));if(!xs.length)box.append(n('p','Aucun favori disponible. Ajoutez un contenu publié à vos favoris. Les favoris restent sur cet appareil.'));}
 function publier(){admin();}
 async function upload(file){if(!file)return null;const {processImage}=await import(new URL('assets/business/image-processing.mjs',document.baseURI).href);const {file:reduite}=await processImage(file);return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(Error('Image illisible'));r.readAsDataURL(reduite);});}
