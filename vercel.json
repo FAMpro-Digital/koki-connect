@@ -61,7 +61,8 @@
       "fix/profil-appui-repete": false,
       "develop/logo-profil-pro": false,
       "fix/profil-pro-en-haut": false,
-      "fix/fermeture-pages": false
+      "fix/fermeture-pages": false,
+      "perf/cache-delai-reseau": false
     }
   },
   "headers": [

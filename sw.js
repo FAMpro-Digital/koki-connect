@@ -44,18 +44,35 @@ async function garder(req,res){
   // Plus anciennes entrées retirées d'abord.
   for(const k of cles.slice(0,Math.max(0,cles.length-MAX_RUNTIME)))await runtime.delete(k);
 }
+// Réseau d'abord, mais sans attente infinie : sur une connexion faible (fréquent à Koki), si le serveur ne répond pas
+// en DELAI_RESEAU ms et qu'une copie existe, la copie s'affiche tout de suite ; la réponse du serveur, quand elle
+// arrive, met la copie à jour pour la prochaine ouverture. Hors ligne ou sans copie : comportement inchangé.
+const DELAI_RESEAU=3000;
+async function copie(req){
+  const hit=await caches.match(req,{ignoreSearch:req.mode==='navigate'});
+  if(hit)return hit;
+  if(req.mode==='navigate')return (await caches.match('index.html'))||(await caches.match('./'))||null;
+  return null;
+}
+async function repondre(e){
+  const req=e.request;
+  const reseau=fetch(req).then(res=>{
+    if(copiable(res)){const p=garder(req,res.clone()).catch(()=>{});try{e.waitUntil(p);}catch{}}
+    return res;
+  });
+  reseau.catch(()=>{});            // l'échec tardif d'une requête déjà remplacée par la copie ne doit rien casser
+  const patience=new Promise(r=>setTimeout(()=>copie(req).then(r,()=>r(null)),DELAI_RESEAU));
+  try{
+    const premier=await Promise.race([reseau,patience]);
+    return premier||await reseau;
+  }catch{
+    return (await copie(req))||Response.error();
+  }
+}
 self.addEventListener('fetch',e=>{
   const req=e.request,url=new URL(req.url);
   if(!gardable(req,url))return;
-  e.respondWith(fetch(req).then(res=>{
-    if(copiable(res)){const copy=res.clone();e.waitUntil(garder(req,copy).catch(()=>{}));}
-    return res;
-  }).catch(async()=>{
-    const hit=await caches.match(req,{ignoreSearch:req.mode==='navigate'});
-    if(hit)return hit;
-    if(req.mode==='navigate')return (await caches.match('index.html'))||(await caches.match('./'))||Response.error();
-    return Response.error();
-  }));
+  e.respondWith(repondre(e));
 });
 
 // Push volontaire : aucun contenu de commande sur l'écran verrouillé et aucune URL fournie par le message.
