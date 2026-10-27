@@ -10,7 +10,9 @@ import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE} from './client.mjs';
 // Message d'erreur affichable : jamais d'erreur technique brute (« TypeError: Failed to fetch »…).
 const lisible=e=>HORS_LIGNE.test(String(e?.message||e||''))||e?.name==='TypeError'?MESSAGE_HORS_LIGNE:(e?.message||'Une erreur est survenue. Réessayez.');
 import {node,field,action,form,accountPanel,history,professional,savedImage,retries} from './ui.mjs';
-import {proSpace,logoCompte} from './pro-space.mjs';
+import * as espaceCommerce from './pro-space.mjs';
+const {proSpace}=espaceCommerce;
+const logoCompte=(...args)=>espaceCommerce.logoCompte?.(...args)||null;
 import {catalogue as catalogueUI} from './catalogue.mjs';
 import * as Pro from './intention.mjs';
 let api,db,configuration,sdkLoading,modules={};
