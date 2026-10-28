@@ -63,3 +63,39 @@ test('hors ligne sans copie : l\'erreur est conservée ; copie altérée ou non 
   ctx.fetch = async () => ({ ok: false });
   await assert.rejects(ctx.KokiPublicFeed.charger());
 });
+
+test('les liens valides sont réutilisés puis renouvelés après expiration', async () => {
+  const { ctx, calls } = creer(false);
+  let now = 1000;
+  ctx.Date = { now: () => now };
+  await ctx.KokiPublicFeed.charger();
+  const count = () => calls.filter(c => c.url.includes('/object/sign/')).length;
+  const initial = count();
+  await ctx.KokiPublicFeed.charger();
+  assert.equal(count(), initial);
+  now += 111000;
+  await ctx.KokiPublicFeed.charger();
+  assert.ok(count() > initial);
+});
+
+test('actualisation : conserve le DOM si seuls les liens changent, affiche les modifications et retraits', async () => {
+  const { ctx } = creer(true);
+  let renders = 0;
+  ctx.document = { hidden: false };
+  ctx.$ = () => null;
+  ctx.fusion = () => {};
+  ctx.accueil = () => { renders++; };
+  ctx.contenusSource = [{ id: '1', titre: 'Initial', image: 'old' }];
+  let next = [{ id: '1', titre: 'Initial', image: 'new' }];
+  ctx.KokiPublicFeed.charger = async () => ({ contenus: next });
+  const source = fs.readFileSync('assets/portail/app.js', 'utf8');
+  vm.runInNewContext(source.slice(source.indexOf('let actualisation=false;'), source.indexOf('setInterval(actualiser')), ctx);
+  await ctx.actualiser();
+  assert.equal(renders, 0);
+  next = [{ id: '1', titre: 'Modifié', image: 'new' }];
+  await ctx.actualiser();
+  assert.equal(renders, 1);
+  next = [];
+  await ctx.actualiser();
+  assert.equal(renders, 2);
+});
