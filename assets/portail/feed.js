@@ -1,14 +1,23 @@
 (function(root){'use strict';
 let config;
+// Réutilisation en mémoire uniquement, sans prolonger les droits des liens signés.
+const imagesSignees=new Map();
+function memoriserImage(row){if(row.image)imagesSignees.set(row.image_path,{url:row.image,expire:Date.now()+110000});}
+function empreinte(contenus){return JSON.stringify(contenus.map(({image,...contenu})=>contenu));}
+
 async function request(url,options={}){const response=await fetch(url,{...options,cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Contenus momentanément indisponibles');return response.json();}
 // Supabase en ligne (https://<réf>.supabase.co) ; Supabase LOCAL accepté seulement si la page elle-même
 // est servie depuis cet ordinateur (127.0.0.1/localhost) ET si la configuration est marquée « local ».
 function cibleAutorisee(c){if(!c||typeof c.publishableKey!=='string'||!c.publishableKey.startsWith('sb_publishable_'))return false;if(/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(c.url))return c.local!==true;const h=root.location&&root.location.hostname;return c.local===true&&(h==='127.0.0.1'||h==='localhost')&&/^http:\/\/(127\.0\.0\.1|localhost):54321$/.test(c.url);}
 async function settings(){if(!config){const c=await request('assets/portail/backend.json');if(!cibleAutorisee(c))throw Error('Configuration publique invalide');config=c;}return config;}
 function imagePermise(value){try{const u=new URL(value);return config&&u.origin===config.url&&u.pathname.startsWith('/storage/v1/object/sign/koki-media/');}catch(_){return false;}}
-async function signerUne(c,headers,row){try{const signed=await request(c.url+'/storage/v1/object/sign/koki-media/'+row.image_path,{method:'POST',headers,body:JSON.stringify({expiresIn:120})});const url=c.url+'/storage/v1'+signed.signedURL;row.image=imagePermise(url)?url:null;}catch(_){row.image=null;}}
-async function signerImages(c,headers,queue){if(!queue.length)return;
-try{const lot=await request(c.url+'/storage/v1/object/sign/koki-media',{method:'POST',headers,body:JSON.stringify({expiresIn:120,paths:queue.map(x=>x.image_path)})});if(!Array.isArray(lot))throw Error('lot invalide');const parChemin=new Map(lot.map(x=>[x&&x.path,x]));let echec=[];for(const row of queue){const r=parChemin.get(row.image_path);const url=r&&!r.error&&typeof r.signedURL==='string'?c.url+'/storage/v1'+r.signedURL:null;if(url&&imagePermise(url))row.image=url;else echec.push(row);}for(const row of echec)row.image=null;return;}catch(_){}
+async function signerUne(c,headers,row){try{const signed=await request(c.url+'/storage/v1/object/sign/koki-media/'+row.image_path,{method:'POST',headers,body:JSON.stringify({expiresIn:120})});const url=c.url+'/storage/v1'+signed.signedURL;row.image=imagePermise(url)?url:null;memoriserImage(row);}catch(_){row.image=null;}}
+async function signerImages(c,headers,queue){
+const chemins=new Set(queue.map(x=>x.image_path));
+for(const [path,entry] of imagesSignees)if(!chemins.has(path)||entry.expire<=Date.now())imagesSignees.delete(path);
+queue=queue.filter(row=>{const entry=imagesSignees.get(row.image_path);if(!entry)return true;row.image=entry.url;return false;});
+if(!queue.length)return;
+try{const lot=await request(c.url+'/storage/v1/object/sign/koki-media',{method:'POST',headers,body:JSON.stringify({expiresIn:120,paths:queue.map(x=>x.image_path)})});if(!Array.isArray(lot))throw Error('lot invalide');const parChemin=new Map(lot.map(x=>[x&&x.path,x]));let echec=[];for(const row of queue){const r=parChemin.get(row.image_path);const url=r&&!r.error&&typeof r.signedURL==='string'?c.url+'/storage/v1'+r.signedURL:null;if(url&&imagePermise(url)){row.image=url;memoriserImage(row);}else echec.push(row);}for(const row of echec)row.image=null;return;}catch(_){}
 let i=0;await Promise.all(Array.from({length:Math.min(4,queue.length)},async()=>{while(i<queue.length)await signerUne(c,headers,queue[i++]);}));}
 async function chargerReseau(){const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const all=[];let offset=0;for(;;){const data=await request(c.url+'/rest/v1/rpc/koki_public_feed',{method:'POST',headers,body:JSON.stringify({p_offset:offset})});if(data.version!==1||!Array.isArray(data.contenus))throw Error('Flux public invalide');all.push(...data.contenus);if(!data.more)break;if(!data.contenus.length||offset>=100000)throw Error('Flux trop volumineux');offset+=data.contenus.length;}const rows=[...new Map(all.map(x=>[x?.id,x])).values()].filter(x=>x&&typeof x.id==='string'&&typeof x.titre==='string'&&typeof x.resume==='string'&&x.statut==='publié');
 // Les images ont une URL temporaire ; chaque actualisation renouvelle leur accès.
@@ -27,5 +36,5 @@ function fichierPermis(value){try{const u=new URL(value);return !!config&&u.orig
 async function signerFichier(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(String(path)))throw Error('Fichier non disponible');const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const signed=await request(c.url+'/storage/v1/object/sign/koki-livres/'+path,{method:'POST',headers,body:JSON.stringify({expiresIn:300})});const url=c.url+'/storage/v1'+signed.signedURL;if(!fichierPermis(url))throw Error('Lien de téléchargement refusé');return url;}
 async function renouvelerImage(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(String(path)))return null;const c=await settings(),row={image_path:path};await signerUne(c,{apikey:c.publishableKey,'Content-Type':'application/json'},row);return row.image;}
 async function detail(id){const c=await settings();const row=await request(c.url+'/rest/v1/rpc/koki_public_content',{method:'POST',headers:{apikey:c.publishableKey,'Content-Type':'application/json'},body:JSON.stringify({p_id:id})});if(!row||row.id!==id)throw Error('Publication indisponible');if(row.image_path)row.image=await renouvelerImage(row.image_path);return row;}
-root.KokiPublicFeed={detail,renouvelerImage,charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
+root.KokiPublicFeed={empreinte,detail,renouvelerImage,charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
 })(globalThis);
