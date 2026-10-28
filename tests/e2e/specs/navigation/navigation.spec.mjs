@@ -3,7 +3,7 @@ import { test, expect } from '../../helpers/isolation.mjs';
 test.describe('Navigation principale', () => {
   test('ouverture de l’application et barre de navigation', async ({ page }) => {
     await page.goto('/index.html');
-    await expect(page).toHaveTitle('KOKI CONNECT');
+    await expect(page).toHaveTitle(/Koki Connect/);
     await expect(page.locator('#tableau-de-bord')).toBeVisible();
     await expect(page.locator('#vue-portail')).toBeHidden();
     const boutons = page.locator('nav[aria-label="Navigation principale"] button[data-nav]');

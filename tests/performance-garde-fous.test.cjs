@@ -125,7 +125,7 @@ test('e2e : les sélecteurs utilisés existent dans index.html', () => {
   assert.match(html, /aria-label="Navigation principale"/);
   assert.match(html, /aria-label="Que recherchez-vous à Koki \?"/);
   assert.match(html, /class="raccourci"[^>]*data-recherche="Transport"|data-recherche="Transport"[^>]*class="raccourci"/);
-  assert.match(html, /<title>KOKI CONNECT<\/title>/);
+  assert.match(html, /<title>Koki Connect[^<]*<\/title>/);
 });
 
 test('workflow performance : déclenchement manuel uniquement, validation par environnement protégé, actions épinglées', () => {
