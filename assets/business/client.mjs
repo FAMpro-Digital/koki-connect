@@ -61,6 +61,13 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  return {subscribe(listener){listeners.add(listener);return ()=>listeners.delete(listener);},get enabled(){return enabled&&!!db;},get busy(){return busy;},get user(){return user;},get recovering(){return recovering;},identity,run,
  async recover(email,redirect){requireReady();const url=new URL(redirect);if(url.origin!==location.origin||!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))throw Error('Lien de récupération invalide.');const {error}=await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:url.href});if(error)throw Error('Envoi indisponible. Patientez avant de réessayer.');},
  async changePassword(password){requireReady();await identity();if(password.length<8)throw Error('Choisissez au moins 8 caractères.');const {error}=await db.auth.updateUser({password});if(error)throw Error('Modification refusée. Vérifiez votre session et la double authentification si elle est activée.');recovering=false;},
+ async signInGoogle({retour}={}){
+  requireReady();const to=lienRetour(retour);
+  if(!to)throw Error('Lien de retour invalide.');
+  const url=new URL(to);url.searchParams.delete('koki-recovery');url.searchParams.set('koki-google','1');
+  const {error}=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo:url.href,scopes:'openid email profile',queryParams:{prompt:'select_account'}}});
+  if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:'Connexion Google indisponible. Réessayez dans quelques instants.');
+ },
  async sendEmailLink(email,{retour}={}){
   requireReady();const address=String(email||'').trim(),to=lienRetour(retour);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))throw Error('Vérifiez votre adresse e-mail.');

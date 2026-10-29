@@ -46,7 +46,11 @@ export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=
   if(vue!=='connexion')action(box,'Retour à la connexion',()=>changer('connexion'),status);
   return;
  }
- box.append(node('p',choix?'Confirmez votre adresse e-mail pour accéder à votre fiche '+choix+'.':'Créez votre compte ou reconnectez-vous avec votre adresse e-mail, sans mot de passe.'));
+ box.append(node('p','Créez votre compte Koki Connect ou retrouvez-le avec votre compte Google, sans mot de passe ni lien de confirmation par e-mail.'));
+ const google=action(box,'Continuer avec Google',async()=>{await api.signInGoogle({retour:retour()});status.textContent='Redirection vers Google…';},status);
+ google.className='google-signin';
+ box.append(node('p','Google partage votre nom, votre adresse e-mail et votre photo de profil. Koki Connect n’accède pas à vos messages.'));
+ box.append(node('p','Vous pouvez aussi recevoir un lien de connexion par e-mail.'));
  const fields=form(box,'Continuer avec mon adresse e-mail',[['email','Adresse e-mail','email',courriel]],async x=>{
   courriel=x.email.value.trim();await api.sendEmailLink(courriel,{retour:retour()});
   status.textContent='Consultez votre boîte e-mail et vos spams. Cliquez sur le dernier lien reçu pour confirmer votre adresse et accéder à votre compte. Aucun mot de passe à saisir.';

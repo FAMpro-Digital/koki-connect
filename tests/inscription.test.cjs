@@ -76,3 +76,12 @@ test('professionnel : connexion par mot de passe et récupération',async()=>{
  assert.equal(api.appels[0][0],'login');
  await bouton(host,'Mot de passe oublié').onclick();await tick();const reset=formulaire(host,'oubli');champ(reset,'Adresse e-mail').value='pro@exemple.sn';await envoyer(reset);assert.equal(api.appels[1][0],'recover');
 });
+
+test('Google : bouton sans formulaire, erreur récupérable et session confirmée',async()=>{
+ const {api,host,status}=await monter();let calls=0;
+ api.signInGoogle=async()=>{calls++;throw Error('Connexion Google indisponible.');};
+ const button=bouton(host,'Continuer avec Google');assert.ok(button);
+ await button.onclick();assert.equal(calls,1);assert.equal(button.disabled,false);assert.match(status.textContent,/Google indisponible/);
+ api.signInGoogle=async options=>{assert.deepEqual(options,{retour:undefined});calls++;};
+ await button.onclick();assert.equal(calls,2);assert.match(status.textContent,/Redirection vers Google/);
+});
