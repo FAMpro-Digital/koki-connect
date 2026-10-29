@@ -188,7 +188,7 @@ function raccourcis(){
 }
 function entete(tete,u,qui){
  tete.replaceChildren();const a=nc('span',u?String(qui||'K').replace(/^\+?221\s?/,'').trim().charAt(0).toUpperCase()||'K':'👤','pf-avatar');
- const t=nc('div','','pf-tete-texte');t.append(node('strong',u?qui:'Bienvenue sur Koki Connect'),node('span',u?'Compte connecté sur cet appareil':'Connectez-vous avec le lien reçu par e-mail pour commander, réserver une course et suivre vos demandes. Les professionnels peuvent aussi utiliser leur mot de passe.'));
+ const t=nc('div','','pf-tete-texte');t.append(node('strong',u?(u.user_metadata?.full_name||u.user_metadata?.name||qui):'Bienvenue sur Koki Connect'),node('span',u?qui:'Connectez-vous avec Google ou le lien reçu par e-mail pour commander, réserver une course et suivre vos demandes. Les professionnels peuvent aussi utiliser leur mot de passe.'));
  tete.append(a,t);tete.classList.toggle('pf-tete-connecte',!!u);
 }
 async function espaceProfil(host){
@@ -212,12 +212,12 @@ window.KokiPro=Object.freeze({types:Pro.TYPES,choix:()=>Pro.lire(proStorage()),m
  async choisir(type){Pro.enregistrer(proStorage(),type);await ouvrirEspace(type);},
  oublier(){Pro.effacer(proStorage());}});
 (function retourDeLien(){
- const href=location.href,type=Pro.depuisURL(href),auth=Pro.retourAuth(href);
+ const href=location.href,type=Pro.depuisURL(href),auth=Pro.retourAuth(href),google=new URLSearchParams(location.search).get('koki-google')==='1';
  if(type)Pro.enregistrer(proStorage(),type);
- if(auth.erreur)erreurLien=Pro.messageLien(auth.erreur);
+ if(auth.erreur)erreurLien=google?'Connexion Google annulée ou refusée. Vous pouvez réessayer.':Pro.messageLien(auth.erreur);
  // Nettoyage de l'adresse : paramètre du parcours retiré ; fragment d'erreur retiré ; les jetons de session restent pour Supabase.
- try{if(type||auth.erreur){const u=new URL(href);u.searchParams.delete('koki-pro');if(auth.erreur)u.hash='';window.history.replaceState(window.history.state,'',u.pathname+u.search+u.hash);}}catch{}
- if(!type&&!auth.session&&!auth.erreur&&new URLSearchParams(location.search).get('koki-recovery')!=='1')return;
+ try{if(type||auth.erreur||google){const u=new URL(href);u.searchParams.delete('koki-google');u.searchParams.delete('koki-pro');if(auth.erreur)u.hash='';window.history.replaceState(window.history.state,'',u.pathname+u.search+u.hash);}}catch{}
+ if(!google&&!type&&!auth.session&&!auth.erreur&&new URLSearchParams(location.search).get('koki-recovery')!=='1')return;
  queueMicrotask(async()=>{
   const choix=Pro.lire(proStorage());
   try{await initialise();}catch{}
