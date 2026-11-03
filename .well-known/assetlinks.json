@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kokiconnect.app",
+      "sha256_cert_fingerprints":
+        ["6F:3A:D0:06:17:41:51:03:CB:25:C2:0B:7B:80:23:EE:4D:96:F0:E7:3E:50:F7:CB:B6:CF:04:5A:31:09:7A:05"]
+    }
+  }
+]
