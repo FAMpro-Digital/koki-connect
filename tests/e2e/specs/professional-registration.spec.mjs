@@ -26,7 +26,7 @@ for(const type of ['Commerçant','Prestataire de services','Chauffeur']){
   if(type==='Chauffeur')await host.getByLabel('Type de transport',{exact:true}).selectOption('Taxi');
   else{
    await host.getByLabel('Domaine d’activité',{exact:true}).fill('Couture');
-   await host.getByLabel('Village ou localité',{exact:true}).selectOption('Koki');
+   await host.getByLabel('Village ou localité',{exact:true}).selectOption('Coki');
   }
   await host.getByLabel('Adresse ou quartier',{exact:true}).fill('Koki centre');
   await host.getByLabel('Présentation de votre activité',{exact:true}).fill('Présentation de test');
@@ -45,6 +45,8 @@ for(const type of ['Commerçant','Prestataire de services','Chauffeur']){
   await expect(host.getByText(/Dossier renseigné/)).toBeVisible();
   const payload=await page.evaluate(()=>window.registrationCalls.at(-1));
   expect(payload.options.data.professional_registration).toMatchObject({type,name:'TEST Activité',phone:'+221771234567',address:'Koki centre',description:'Présentation de test'});
+  expect(payload.options.data.professional_registration.category).toBe(type==='Chauffeur'?'Taxi':'Couture');
+  if(type!=='Chauffeur')expect(payload.options.data.professional_registration.village).toBe('Coki');
   expect(payload.options.data.professional_registration.password).toBeUndefined();
   await page.reload();
   const restored=await page.evaluate(async payload=>{
