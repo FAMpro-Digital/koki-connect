@@ -81,3 +81,22 @@ test('les photos de publication et de produit restent entières',async({page})=>
  await expect(page.locator('#portail-actualites #test-photo-portrait')).toHaveCSS('aspect-ratio','auto');
  await expect(page.locator('#vue-commerce .cat-media img').last()).toHaveCSS('object-fit','contain');
 });
+
+test('aucun voile coloré au toucher ou au défilement des publications et de leurs photos',async({page})=>{
+ const card=page.locator('#portail-actualites article').first();
+ await expect(card).toBeVisible();
+ await card.evaluate(el=>{
+  const photo=document.createElement('button');photo.type='button';photo.className='publication-photo-link';photo.textContent='Photo de test';el.prepend(photo);
+ });
+ for(const target of [card,card.locator('p').first(),card.locator('.publication-title'),card.locator('.publication-photo-link')]){
+  await target.dispatchEvent('pointerdown',{button:0,pointerType:'touch',clientX:100,clientY:200});
+  await expect(page.locator('.koki-touche')).toHaveCount(0);
+  await target.dispatchEvent('pointercancel',{pointerType:'touch'});
+ }
+ await card.locator('.publication-title').dispatchEvent('keydown',{key:'Enter'});
+ await expect(page.locator('.koki-touche')).toHaveCount(0);
+ await card.getByText('Contenu fictif pour les tests automatiques.',{exact:true}).click();
+ await expect(page.locator('.publication-detail')).toBeVisible();
+ await page.locator('.publication-detail p').first().dispatchEvent('pointerdown',{button:0,pointerType:'touch',clientX:100,clientY:200});
+ await expect(page.locator('.koki-touche')).toHaveCount(0);
+});
