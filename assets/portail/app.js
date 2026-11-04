@@ -18,7 +18,12 @@ function date(v){return new Date(v).toLocaleString('fr-FR',{timeZone:'Africa/Dak
 function ouvrir(titre){document.querySelector('.search').hidden=true;document.querySelectorAll('body > .section').forEach(s=>s.hidden=s.id!=='vue-portail');$('portail-titre').textContent=titre;bandeau($('portail-bandeau'),PAGES_RUBRIQUES[titre]);$('portail-vue').replaceChildren();$('portail-titre').focus();window.scrollTo(0,0);return $('portail-vue');}
 function photo(x,parent){if(x.image&&(/^data:image\/(png|jpeg|webp);base64,/.test(x.image)||KokiPublicFeed.imagePermise(x.image))){const img=n('img');img.src=x.image;img.alt=x.titre;img.loading='lazy';if(x.image_path){img.dataset.imagePath=x.image_path;img.onerror=async()=>{img.onerror=null;try{const url=await KokiPublicFeed.renouvelerImage(x.image_path);if(url)img.src=url;}catch{}};}parent.append(img);}}
 function card(x,full=false){
- const e=n('article');e.className='portail-card'+(x.type==='Publicités'?' portail-ad':'')+(full?' publication-detail':'');
+ const e=n('article');
+ if(!full){e.addEventListener('click',ev=>{
+  if(ev.target.closest('button,a,input,textarea,select,label,[role="button"]')||window.getSelection()?.toString())return;
+  detail(x);
+ });}
+ e.className=(full?'':'publication-apercu ')+'portail-card'+(x.type==='Publicités'?' portail-ad':'')+(full?' publication-detail':'');
  if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');
  if(x.type==='Publicités')e.append(n('strong','Sponsorisé · '+(x.emplacement||'Carte sponsorisée')));
  const imageBox=n('div');photo(x,imageBox);if(imageBox.firstChild){const img=imageBox.firstChild;const link=b('',()=>full?window.KokiSocial.zoom(img):detail(x));link.className='publication-photo-link';link.setAttribute('aria-label',full?'Agrandir la photo de '+x.titre:'Lire '+x.titre);link.append(img);e.append(link);}

@@ -54,3 +54,30 @@ test('texte chargé à la demande et retour possible après échec',async({page}
  await expect(page.getByText('Impossible de charger le texte complet. Vérifiez votre connexion.')).toBeVisible();
  await page.getByRole('button',{name:'Retour à l’accueil',exact:true}).click();await expect(page.locator('#vue-portail')).toBeHidden();
 });
+
+test('le résumé ouvre toute l’information et Accueil ne crée pas de flash coloré',async({page})=>{
+ const card=page.locator('#portail-actualites article').first();
+ await page.evaluate(async()=>{
+  window.KokiPublicFeed.detail=async id=>({id,texte:'La suite complète de cette information.'});
+  window.KokiPublicFeed.charger=async()=>({version:1,contenus:[{id:'33333333-3333-4333-8333-333333333333',titre:'Information complète',resume:'Contenu fictif pour les tests automatiques.',statut:'publié',type:'Actualités',categorie:'Vie locale',publication:'2026-10-01T08:00:00Z',detail_required:true}]});
+  await window.KokiPortail.actualiser();
+ });
+ await card.getByText('Contenu fictif pour les tests automatiques.',{exact:true}).click();
+ await expect(page.locator('.publication-detail')).toBeVisible();
+ await expect(page.getByText('La suite complète de cette information.',{exact:true})).toBeVisible();
+ const accueil=page.getByRole('navigation',{name:'Navigation principale'}).getByRole('button',{name:/Accueil/});
+ await accueil.dispatchEvent('pointerdown',{button:0});
+ await expect(page.locator('.koki-touche')).toHaveCount(0);
+ await accueil.click();
+ await expect(page.locator('#vue-portail')).toBeHidden();
+});
+test('les photos de publication et de produit restent entières',async({page})=>{
+ await page.evaluate(()=>{
+  const image=document.createElement('img');image.id='test-photo-portrait';image.src='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><rect width="200" height="400" fill="red"/></svg>');
+  const carte=document.querySelector('#portail-actualites article');carte.prepend(image);
+  const produit=document.createElement('div');produit.className='cat-media';produit.append(image.cloneNode());document.querySelector('#vue-commerce').append(produit);
+ });
+ await expect(page.locator('#portail-actualites #test-photo-portrait')).toHaveCSS('object-fit','contain');
+ await expect(page.locator('#portail-actualites #test-photo-portrait')).toHaveCSS('aspect-ratio','auto');
+ await expect(page.locator('#vue-commerce .cat-media img').last()).toHaveCSS('object-fit','contain');
+});

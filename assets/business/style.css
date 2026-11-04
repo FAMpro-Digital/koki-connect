@@ -98,7 +98,7 @@
 #vue-commerce .business-panel .cat-card-open{display:flex;flex-direction:column;align-items:stretch;flex:1;text-align:left;padding:0;margin:0;background:transparent;color:inherit;border:0;border-radius:0;min-height:0;font:inherit}
 #vue-commerce .cat-card[data-kind=services] .cat-card-open,#vue-commerce .cat-card[data-kind=professionnels] .cat-card-open{flex-direction:row;align-items:center;gap:12px;padding:14px 14px 0}
 #vue-commerce .cat-media{position:relative;display:block}
-#vue-commerce .cat-media img,#vue-commerce .cat-media .cat-tile{display:flex;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef0f2}
+#vue-commerce .cat-media img,#vue-commerce .cat-media .cat-tile{display:flex;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;background:#eef0f2}
 #vue-commerce .cat-card[data-kind=services] .cat-media,#vue-commerce .cat-card[data-kind=professionnels] .cat-media{flex:0 0 56px;width:56px}
 #vue-commerce .cat-card[data-kind=services] .cat-media .cat-tile,#vue-commerce .cat-card[data-kind=services] .cat-media img,#vue-commerce .cat-card[data-kind=professionnels] .cat-media .cat-tile,#vue-commerce .cat-card[data-kind=professionnels] .cat-media img{aspect-ratio:1;border-radius:14px}
 #vue-commerce .cat-card[data-kind=services] .cat-tile svg,#vue-commerce .cat-card[data-kind=professionnels] .cat-tile svg{width:26px;height:26px}
@@ -156,7 +156,7 @@
 #vue-commerce .cat-gallery{position:relative}
 #vue-commerce .cat-rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #vue-commerce .cat-rail figure{flex:0 0 100%;margin:0;scroll-snap-align:start}
-#vue-commerce .cat-gallery img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#eef0f2;border-radius:16px}
+#vue-commerce .cat-gallery img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;background:#eef0f2;border-radius:16px}
 #vue-commerce .cat-gallery-count{position:absolute;right:10px;bottom:10px;margin:0;background:rgba(0,0,0,.6);color:#fff;border-radius:12px;padding:2px 10px;font-size:.85rem}
 #vue-commerce .cat-infos{display:grid;grid-template-columns:minmax(0,38%) 1fr;gap:6px 12px;margin:0}#vue-commerce .cat-infos dt{font-weight:600;color:var(--cat-doux)}#vue-commerce .cat-infos dd{margin:0}
 #vue-commerce .cat-description{white-space:pre-line}
