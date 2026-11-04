@@ -21,8 +21,9 @@
   function sombre(rgb) { return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) < 150; }
 
   function onde(el, x, y) {
-    // La navigation change de page : aucun calque coloré ne doit rester par-dessus.
-    if (el.closest('nav[aria-label="Navigation principale"]')) return null;
+    // Les publications se lisent et se font défiler : aucun voile sur leur texte ou leurs photos.
+    // Même règle pour la navigation, qui change de page immédiatement.
+    if (el.closest('nav[aria-label="Navigation principale"], .portail-card')) return null;
     var r = el.getBoundingClientRect();
     if (r.width < 8 || r.height < 8 || r.bottom < 0 || r.top > innerHeight) return null;
     var st = getComputedStyle(el);
