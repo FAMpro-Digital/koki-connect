@@ -12,3 +12,29 @@ for(const statut of ['Actif','En attente'])test('gestion immédiate de la boutiq
  await host.getByRole('button',{name:/Ajouter et gérer mes produits/}).click();await expect(host.getByRole('button',{name:'Ajouter un produit',exact:true})).toBeEnabled();await expect(host.getByRole('button',{name:'Modifier le prix ou le stock'})).toBeEnabled();
  page.once('dialog',d=>d.accept());await host.getByRole('button',{name:'Retirer le produit'}).click();await expect.poll(()=>page.evaluate(()=>window.removed)).toBe('x');
 });
+
+test('les modifications de boutique restent visibles dans le compte professionnel après enregistrement',async({page})=>{
+ await page.goto('/index.html');
+ await page.evaluate(async()=>{
+  const {proSpace}=await import('/assets/business/pro-space.mjs');const {imageSelection}=await import('/assets/business/ui.mjs');
+  document.body.replaceChildren();const host=document.createElement('section');host.id='profil-pro';document.body.append(host);
+  const data={professionnels:[{id:'p',statut:'Actif',payload:{nom:'Ancien nom professionnel',type:'Commerçant',village:'Keur Ngoura'}}],boutiques:[{id:'b',revision:1,statut:'Actif',parent_id:'p',payload:{nom:'Ma boutique',village:'Coki',description:'Ancienne description',photos:['photo-test']}}],produits:[],services:[]};
+  const api={mine:async k=>structuredClone(data[k]),localites:async()=>['Coki'],image:async()=>'/favicon.ico',user:{},pending:()=>[],saveShop:async(values,row)=>{
+   const saved={...row,revision:row.revision+1,payload:{...row.payload,nom:values.name,village:values.village,description:values.description,photos:values.photos}};data.boutiques=[saved];return structuredClone(saved);
+  }};
+  await proSpace(host,api,document.createElement('p'),{imageSelection,upload:async()=>''});
+ });
+ const host=page.locator('#profil-pro');
+ await host.getByRole('button',{name:'Modifier la boutique',exact:true}).click();
+ await host.getByLabel('Nom de la boutique',{exact:true}).fill('Boutique mise à jour');
+ await host.getByLabel('Village ou quartier',{exact:true}).fill('Diourbel');
+ await host.getByLabel('Description (facultatif)',{exact:true}).fill('Nouvelle description enregistrée');
+ await host.getByRole('button',{name:'Enregistrer la boutique',exact:true}).click();
+ await expect(host.getByRole('heading',{name:'Boutique mise à jour',exact:true})).toBeVisible();
+ await expect(host.getByText('Localité : Diourbel',{exact:true})).toBeVisible();
+ await expect(host.getByText('Nouvelle description enregistrée',{exact:true})).toBeVisible();
+ await expect(host.getByRole('img',{name:'Photo de Boutique mise à jour',exact:true})).toBeVisible();
+ await expect(host.getByRole('status')).toContainText('sans nouvelle validation');
+ await host.getByRole('button',{name:'Modifier la boutique',exact:true}).click();
+ await expect(host.getByLabel('Village ou quartier',{exact:true})).toHaveValue('Diourbel');
+});

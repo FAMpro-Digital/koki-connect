@@ -107,7 +107,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const p=state.profile.payload,bloc=node('div',null,'pro-identite'),av=node('span',null,'pro-logo');av.setAttribute('aria-hidden','true');av.textContent=String(p.nom||'K').trim().charAt(0).toUpperCase()||'K';
   const chemin=logoCompte(state.profile,state.boutiques);
   if(chemin){const img=node('img');img.alt='Logo de '+p.nom;img.loading='lazy';api.image(chemin).then(u=>{img.src=u;img.onload=()=>{av.replaceChildren(img);av.removeAttribute('aria-hidden');};}).catch(()=>{});}
-  const t=node('div');t.append(node('strong',p.nom),node('span',[p.type,p.village].filter(Boolean).join(' · '),'pro-hint'));bloc.append(av,t);return bloc;
+  const t=node('div');t.append(node('small','Compte professionnel'),node('strong',p.nom),node('span',[p.type,p.village].filter(Boolean).join(' · '),'pro-hint'));bloc.append(av,t);return bloc;
  }
  function accueil(){
   host.replaceChildren();const head=node('div',null,'pro-head');head.append(node('h3',state.boutiques.some(b=>b.statut!=='Archivé')?'Ma boutique':'Espace professionnel','pro-title'));host.append(head,local);
@@ -125,7 +125,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const p=state.profile,card=node('article',null,'pro-card');
   const title=node('div',null,'pro-card-head');title.append(node('h4',p.payload.nom),badge('professionnels',p.statut,p));card.append(title,node('p',p.payload.type+(p.payload.village?' · '+p.payload.village:'')),explanation('professionnels',p));
   if(!['Suspendu','Archivé'].includes(p.statut))card.append(button('Modifier ma fiche',()=>go('fiche',{edit:true}),{kind:'secondary'}));
-  if(!state.boutiques.some(b=>b.statut!=='Archivé'))body.append(card);else{const infos=node('details');infos.append(node('summary','Informations professionnelles'),card);body.append(infos);for(const boutique of state.boutiques.filter(b=>b.statut!=='Archivé'))body.append(listCard('boutiques',boutique,{details:[boutique.payload.adresse],actions:[]}));}
+  if(!state.boutiques.some(b=>b.statut!=='Archivé'))body.append(card);else{const infos=node('details');infos.append(node('summary','Informations professionnelles'),card);body.append(infos);for(const boutique of state.boutiques.filter(b=>b.statut!=='Archivé'))body.append(shopCard(boutique));}
   const actif=p.statut==='Actif',envoyee=['En attente','À valider','Actif'].includes(p.statut),menu=node('div',null,'pro-menu');
   const entry=(label,count,view,enabled,reason)=>{const b=button(label+' ('+count+')',()=>go(view),{kind:'tile'});if(!enabled){b.disabled=true;b.title=reason;}menu.append(b);};
   const wait='Disponible après la validation de votre fiche.';
@@ -204,11 +204,23 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   wrap.append(l,sel);return wrap;
  }
 
+ function shopCard(row,archivable=false){
+  const p=row.payload,actions=[];
+  if(row.statut!=='Fermé')actions.push(button('Modifier la boutique',()=>go('boutique',{id:row.id}),{kind:'secondary'}));
+  if(archivable)actions.push(archiveButton('boutiques',row,'Ses produits ne seront plus visibles.'));
+  const card=listCard('boutiques',row,{details:[p.village&&'Localité : '+p.village,p.categorie,p.adresse,p.description,p.horaires&&'Horaires : '+p.horaires],actions});
+  const paths=p.photos||(p.image_path?[p.image_path]:[]);
+  if(paths.length){const gallery=node('div',null,'pro-shop-photos');
+   for(const path of paths){const img=node('img');img.alt='Photo de '+p.nom;img.loading='lazy';gallery.append(img);api.image(path).then(url=>{img.src=url;}).catch(()=>{img.alt='Photo indisponible';});}
+   card.querySelector('.pro-card-head').after(gallery);
+  }
+  return card;
+ }
  function boutiques(){
   const body=frame('Mes boutiques');const rows=state.boutiques.filter(b=>b.statut!=='Archivé');
   body.append(node('p','Chaque nouvelle boutique est vérifiée par l’administration avant d’apparaître dans le catalogue.','pro-hint'),button('Ajouter une boutique',()=>go('boutique')));
   if(!rows.length)body.append(node('p','Aucune boutique pour le moment.'));
-  for(const b of rows)body.append(listCard('boutiques',b,{details:[[b.payload.categorie,b.payload.village].filter(Boolean).join(' · '),b.payload.adresse,b.payload.horaires&&'Horaires : '+b.payload.horaires],actions:[...(['Fermé'].includes(b.statut)?[]:[button('Modifier',()=>go('boutique',{id:b.id}),{kind:'secondary'})]),archiveButton('boutiques',b,'Ses produits ne seront plus visibles.')]}));
+  for(const b of rows)body.append(shopCard(b,true));
   archived(body,state.boutiques);
  }
  function archived(body,rows){const old=rows.filter(r=>r.statut==='Archivé');if(!old.length)return;const d=node('details',null,'pro-archives');d.append(node('summary','Éléments archivés ('+old.length+')'));
@@ -218,7 +230,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
 
  function boutiqueForm({id}){
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
-  const body=frame(row?'Modifier la boutique':'Nouvelle boutique');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
+  const body=frame(row?'Modifier la boutique':'Nouvelle boutique');if(row?.statut==='Actif')body.append(node('p','Les changements de cette boutique sont appliqués directement après enregistrement. Ils ne créent pas de demande dans les validations.','pro-hint'));const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   const name=input(f,{label:'Nom de la boutique',value:p.nom||pro.nom||'',required:true,attrs:{maxlength:'180'}});
   const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',list:state.localites,hint:'Choisissez une suggestion ou saisissez votre propre localité.',attrs:{maxlength:'180'}});
   if(!row)f.append(node('p','Nom et village suffisent : vous pourrez ajouter le reste plus tard.','pro-hint'));
@@ -235,7 +247,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    if(category.value.trim())values.category=category.value.trim();if(address.value.trim())values.address=address.value.trim();if(hours.value.trim())values.hours=hours.value.trim();if(description.value.trim())values.description=description.value.trim();
    if(whatsapp.value.trim()){const w=C.normaliserTelephone(whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');values.whatsapp=w;}
    if(where?.value)values.location=where.value;
-   const saved=await api.saveShop(values,row);await done(saved.statut==='Actif'?'Boutique enregistrée.':'Boutique envoyée : en attente de validation par l’administration.');
+   const saved=await api.saveShop(values,row);await done(saved.statut==='Actif'?'Boutique enregistrée. Les changements sont appliqués directement, sans nouvelle validation.':'Boutique envoyée : en attente de validation par l’administration.');
   });
  }
 
