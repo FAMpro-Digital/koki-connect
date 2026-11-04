@@ -24,7 +24,7 @@ const champ=(f,label)=>[...f.descendants()].find(e=>e.attributes['aria-label']==
 const envoyer=async f=>{await f.onsubmit({preventDefault(){}});await tick();};
 function fauxApi(){const appels=[];return {appels,enabled:true,pending:()=>[],subscribe:()=>()=>{},
  identity:async()=>{throw Error('Connectez-vous');},login:async(e,p)=>{appels.push(['login',e,p]);throw Error('Connexion refusée. Vérifiez vos identifiants.');},
- sendEmailLink:async(e,o)=>{appels.push(['email',e,o]);},signup:async(e,p)=>{appels.push(['signup',e,p]);},recover:async(e,u)=>{appels.push(['recover',e,u]);},sendCode:async()=>'+221770000000'};}
+ sendEmailLink:async(e,o)=>{appels.push(['email',e,o]);},signup:async(e,p,o)=>{appels.push(['signup',e,p,o]);},recover:async(e,u)=>{appels.push(['recover',e,u]);},sendCode:async()=>'+221770000000'};}
 async function monter(){const api=fauxApi();const {host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');const status=accountPanel(host,api,async()=>{});await tick();return {api,host,status};}
 
 
@@ -58,7 +58,7 @@ test('lien expiré, destination conservée et session confirmée',async()=>{
  await bouton(host,'Déconnexion de cet appareil').onclick();await tick();assert.ok(formulaire(host,'connexion'));assert.deepEqual(connected,[true,false]);
 });
 
-for(const type of ['Commerçant','Prestataire','Chauffeur'])test(type+' : inscription avec mot de passe obligatoire',async()=>{
+for(const type of ['Commerçant','Prestataire de services','Chauffeur'])test(type+' : inscription avec mot de passe obligatoire',async()=>{
  const api=fauxApi(),{host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');
  accountPanel(host,api,async()=>{},{intention:()=>type,retour:()=>location.href,prepareRegistrationPhoto:async()=> '11111111-1111-4111-8111-111111111111'});await tick();
  assert.ok(formulaire(host,'connexion-pro'));assert.equal(bouton(host,'Recevoir mon lien de connexion'),undefined);
@@ -67,8 +67,15 @@ for(const type of ['Commerçant','Prestataire','Chauffeur'])test(type+' : inscri
  await envoyer(f);assert.equal(api.appels.length,0);
  champ(f,'Mot de passe (8 caractères minimum)').value='Mot-de-passe-solide';champ(f,'Confirmer le mot de passe').value='autre-mot-de-passe';
  await envoyer(f);assert.equal(api.appels.length,0);
- champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';assert.equal(f.elements?.name,undefined);await envoyer(f);
- assert.deepEqual(api.appels,[['signup','pro@exemple.sn','Mot-de-passe-solide']]);assert.ok(formulaire(host,'connexion-pro'));
+ champ(f,'Confirmer le mot de passe').value='Mot-de-passe-solide';await envoyer(f);assert.equal(api.appels.length,0);
+ champ(f,type==='Chauffeur'?'Nom du chauffeur':'Nom de la boutique ou du prestataire').value='TEST Activité';
+ champ(f,'Numéro de téléphone').value='771234567';champ(f,type==='Chauffeur'?'Type de transport':'Domaine d’activité').value=type==='Chauffeur'?'Taxi':'Couture';
+ champ(f,'Adresse ou quartier').value='Koki centre';champ(f,'Présentation de votre activité').value='Présentation de test';
+ if(type!=='Chauffeur')champ(f,'Village ou localité').value='Koki';await envoyer(f);
+ assert.equal(api.appels.length,1);const [method,email,password,options]=api.appels[0];
+ assert.deepEqual([method,email,password],['signup','pro@exemple.sn','Mot-de-passe-solide']);
+ assert.equal(options.registration.name,'TEST Activité');assert.equal(options.registration.phone,'+221771234567');assert.equal(options.registration.type,type);
+ assert.equal(options.registration.photo_id,'11111111-1111-4111-8111-111111111111');assert.ok(formulaire(host,'connexion-pro'));
 });
 test('professionnel : connexion par mot de passe et récupération',async()=>{
  const api=fauxApi(),{host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');accountPanel(host,api,async()=>{},{intention:()=> 'Chauffeur'});await tick();

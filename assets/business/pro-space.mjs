@@ -143,7 +143,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
  function fiche({edit,profil}){
   // Un seul écran : quatre informations obligatoires, le reste est facultatif et repliable.
   // Les valeurs en attente de validation sont reprises pour continuer la saisie.
- const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,village:draft.village,description:draft.description}:{};const row=edit?state.profile:null;
+ const draft=api.user?.user_metadata?.professional_registration;const p=edit&&state.profile?{...state.profile.payload,...(state.profile.payload.modification||{})}:draft?{type:draft.type,nom:draft.name,telephone:draft.phone,categorie:draft.category,adresse:draft.address,village:draft.village,description:draft.description}:{};const row=edit?state.profile:null;
   const accountPhone=api.user?.phone?'+'+String(api.user.phone).replace(/^\+/,''):'';
   const v={name:p.nom||'',profile:p.type||'Commerçant',category:p.categorie||'',phone:p.telephone||accountPhone,whatsapp:p.whatsapp||'',sameWhatsapp:!p.whatsapp||p.whatsapp===p.telephone,village:p.village||'',address:p.adresse||'',zone:p.zone||'',hours:p.horaires||'',description:p.description||'',location:p.localisation||null};
   // Brouillon (nouvelle fiche seulement) : reprise des valeurs ; le profil choisi avant l'inscription est proposé.
