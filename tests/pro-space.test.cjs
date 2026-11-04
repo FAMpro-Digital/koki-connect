@@ -9,12 +9,12 @@ async function client(options){const {createBusinessClient}=await import('../ass
 
 test('espace professionnel : commandes sécurisées, identifiants fournis par l’état, jamais saisis',async()=>{
  const {api,calls}=await client();
- await api.saveProfile({name:'TEST',profile:'Commerçant',category:'Alimentation',phone:'+221771234567',village:'Coki',photos:[]});
- assert.deepEqual(calls.at(-1),{command:'save_profile',input:{name:'TEST',profile:'Commerçant',category:'Alimentation',phone:'+221771234567',village:'Coki',photos:[],request_id:'TEST-request'}});
+ await api.saveProfile({name:'TEST',profile:'Commerçant',category:'Alimentation',phone:'+221771234567',village:'Louga — quartier Santhiaba',photos:[]});
+ assert.deepEqual(calls.at(-1),{command:'save_profile',input:{name:'TEST',profile:'Commerçant',category:'Alimentation',phone:'+221771234567',village:'Louga — quartier Santhiaba',photos:[],request_id:'TEST-request'}});
  const row={id:'TEST-row',revision:3,parent_id:'TEST-parent',payload:{}};
  await api.saveProduct({name:'Riz',price:500,stock:2,parent_id:'IGNORÉ'},row);
  assert.equal(calls.at(-1).input.parent_id,'TEST-parent','un produit existant reste dans sa boutique');assert.equal(calls.at(-1).input.revision,3);
- await api.saveShop({name:'Boutique',village:'Coki'});assert.equal(calls.at(-1).input.parent_id,undefined,'la boutique est rattachée par le serveur au compte');
+ await api.saveShop({name:'Boutique',village:'Louga — quartier Santhiaba'});assert.equal(calls.at(-1).input.parent_id,undefined,'la boutique est rattachée par le serveur au compte');
  await api.setAvailability(row,'Épuisé');assert.deepEqual(calls.at(-1).input,{id:'TEST-row',revision:3,status:'Épuisé',request_id:'TEST-request'});
  await api.archive(row);assert.equal(calls.at(-1).command,'archive');
  assert.deepEqual(await api.localites(),['Coki','Ouarak']);assert.equal(calls.at(-1).input.request_id,undefined,'lecture sans clé de requête');
