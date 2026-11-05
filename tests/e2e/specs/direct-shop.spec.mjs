@@ -61,10 +61,10 @@ test('partage de la boutique active et copie du lien avec repli manuel',async({p
 
 test('boutique et produits en images sans deuxième bouton de création',async({page})=>{
  await page.goto('/index.html');await page.evaluate(async()=>{
-  const {proSpace}=await import('/assets/business/pro-space.mjs');
+  const {proSpace}=await import('/assets/business/pro-space.mjs');const {imageSelection}=await import('/assets/business/ui.mjs');
   const host=document.createElement('section');host.id='visual-pro';document.body.append(host);
   const data={professionnels:[{id:'p',statut:'Actif',payload:{nom:'Pro',type:'Commerçant'}}],boutiques:[{id:'b',parent_id:'p',statut:'Actif',payload:{nom:'Boutique test',photos:['shop-photo']}}],produits:[{id:'x',parent_id:'b',statut:'Disponible',payload:{nom:'Assiette',prix:1500,stock:8,photos:['product-photo']}},{id:'other',parent_id:'elsewhere',statut:'Disponible',payload:{nom:'Autre boutique',prix:1,stock:1}}],services:[]};
-  await proSpace(host,{mine:async k=>data[k],localites:async()=>[],image:async()=>'/favicon.ico',user:{},pending:()=>[]},document.createElement('p'),{});
+  await proSpace(host,{mine:async k=>data[k],localites:async()=>[],image:async()=>'/favicon.ico',user:{},pending:()=>[]},document.createElement('p'),{imageSelection,upload:async()=>''});
  });
  const host=page.locator('#visual-pro');
  await expect(host.getByRole('img',{name:'Photo de Boutique test',exact:true})).toBeVisible();
