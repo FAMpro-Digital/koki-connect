@@ -38,3 +38,23 @@ test('les modifications de boutique restent visibles dans le compte professionne
  await host.getByRole('button',{name:'Modifier la boutique',exact:true}).click();
  await expect(host.getByLabel('Village ou quartier',{exact:true})).toHaveValue('Diourbel');
 });
+
+test('partage de la boutique active et copie du lien avec repli manuel',async({page})=>{
+ await page.goto('/index.html');
+ await page.evaluate(async()=>{
+  const {proSpace}=await import('/assets/business/pro-space.mjs');
+  document.body.replaceChildren();const host=document.createElement('section');host.id='profil-pro';document.body.append(host);
+  const data={professionnels:[{id:'p',statut:'Actif',payload:{nom:'Pro',type:'Commerçant'}}],boutiques:[{id:'eb88d23c-270d-495b-ac11-ff29a232133a',parent_id:'p',statut:'Actif',payload:{nom:'Boutique test'}}],produits:[],services:[]};
+  Object.defineProperty(navigator,'share',{configurable:true,value:async x=>{window.shared=x;}});
+  Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async x=>{window.copied=x;}}});
+  await proSpace(host,{mine:async k=>data[k],localites:async()=>[],user:{},pending:()=>[]},document.createElement('p'),{});
+ });
+ const host=page.locator('#profil-pro'),url='https://www.kokiconnect.com/?fiche=eb88d23c-270d-495b-ac11-ff29a232133a';
+ await host.getByRole('button',{name:'Partager ma boutique',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>window.shared?.url)).toBe(url);
+ await host.getByRole('button',{name:'Copier le lien',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>window.copied)).toBe(url);
+ await page.evaluate(()=>{navigator.clipboard.writeText=async()=>{throw Error('denied');};});
+ await host.getByRole('button',{name:'Copier le lien',exact:true}).click();
+ await expect(host.getByLabel('Lien public de la boutique (facultatif)',{exact:true})).toHaveValue(url);
+});

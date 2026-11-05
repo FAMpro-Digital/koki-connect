@@ -4,7 +4,7 @@ import {registrationPhoto,clearRegistrationPhoto} from './registration-photo.mjs
 // Toutes les règles sont vérifiées par le serveur (koki_business) ; cette interface ne demande
 // jamais d'identifiant technique : ils viennent de l'état chargé depuis le compte connecté.
 import './commerce-contract.js';
-import {niveauStock,produitsStockBas,SEUIL_STOCK_BAS} from './catalogue-extras.mjs';
+import {niveauStock,produitsStockBas,SEUIL_STOCK_BAS,lienFiche} from './catalogue-extras.mjs';
 const C=globalThis.KokiCommerceContract;
 const node=(tag,text,className)=>{const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(className)e.className=className;return e;};
 let uid=0;const nextId=prefix=>'pro-'+prefix+'-'+(++uid);
@@ -204,8 +204,21 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   wrap.append(l,sel);return wrap;
  }
 
+ function shopSharing(row){
+  if(row.statut!=='Actif'||row.payload.moderation_lock||state.profile?.statut!=='Actif'||state.profile?.payload?.moderation_lock)return [];
+  const url=lienFiche(row.id,'https://www.kokiconnect.com/');
+  const wrap=node('div',null,'pro-field');
+  const showLink=()=>{wrap.replaceChildren();const field=input(wrap,{label:'Lien public de la boutique',value:url,attrs:{readonly:'readonly'}});field.focus();field.select();local.textContent='Sélectionnez et copiez le lien ci-dessous.';};
+  const share=button('Partager ma boutique',async()=>{
+   const text='Découvrez « '+row.payload.nom+' » sur KOKI CONNECT.';
+   if(navigator.share){try{await navigator.share({title:row.payload.nom,text,url});return;}catch(e){if(e?.name==='AbortError')return;}}
+   showLink();
+  },{kind:'secondary'});
+  const copy=button('Copier le lien',async()=>{try{await navigator.clipboard.writeText(url);local.textContent='Lien de la boutique copié. Vous pouvez l’envoyer à vos clients.';}catch{showLink();}},{kind:'secondary'});
+  return [share,copy,wrap];
+ }
  function shopCard(row,archivable=false){
-  const p=row.payload,actions=[];
+  const p=row.payload,actions=shopSharing(row);
   if(row.statut!=='Fermé')actions.push(button('Modifier la boutique',()=>go('boutique',{id:row.id}),{kind:'secondary'}));
   if(archivable)actions.push(archiveButton('boutiques',row,'Ses produits ne seront plus visibles.'));
   const card=listCard('boutiques',row,{details:[p.village&&'Localité : '+p.village,p.categorie,p.adresse,p.description,p.horaires&&'Horaires : '+p.horaires],actions});
