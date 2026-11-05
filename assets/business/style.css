@@ -223,3 +223,4 @@
 #vue-commerce .business-panel .pro-logo img,#profil-pro .pro-logo img{width:100%;height:100%;object-fit:cover;display:block}
 
 .pro-shop-photos{display:flex;gap:8px;overflow-x:auto;margin:12px 0}.pro-shop-photos img{width:7.5rem;height:7.5rem;flex:none;object-fit:contain;border-radius:12px;background:#f5f7f6}
+.pro-shop-products{margin-top:16px;border-top:1px solid #d8dce1;padding-top:12px}.pro-shop-products h5{font-size:1rem;margin:0 0 12px}.pro-shop-products .pro-card{background:#fff}

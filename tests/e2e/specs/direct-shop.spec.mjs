@@ -58,3 +58,21 @@ test('partage de la boutique active et copie du lien avec repli manuel',async({p
  await host.getByRole('button',{name:'Copier le lien',exact:true}).click();
  await expect(host.getByLabel('Lien public de la boutique (facultatif)',{exact:true})).toHaveValue(url);
 });
+
+test('boutique et produits en images sans deuxième bouton de création',async({page})=>{
+ await page.goto('/index.html');await page.evaluate(async()=>{
+  const {proSpace}=await import('/assets/business/pro-space.mjs');
+  const host=document.createElement('section');host.id='visual-pro';document.body.append(host);
+  const data={professionnels:[{id:'p',statut:'Actif',payload:{nom:'Pro',type:'Commerçant'}}],boutiques:[{id:'b',parent_id:'p',statut:'Actif',payload:{nom:'Boutique test',photos:['shop-photo']}}],produits:[{id:'x',parent_id:'b',statut:'Disponible',payload:{nom:'Assiette',prix:1500,stock:8,photos:['product-photo']}},{id:'other',parent_id:'elsewhere',statut:'Disponible',payload:{nom:'Autre boutique',prix:1,stock:1}}],services:[]};
+  await proSpace(host,{mine:async k=>data[k],localites:async()=>[],image:async()=>'/favicon.ico',user:{},pending:()=>[]},document.createElement('p'),{});
+ });
+ const host=page.locator('#visual-pro');
+ await expect(host.getByRole('img',{name:'Photo de Boutique test',exact:true})).toBeVisible();
+ await expect(host.getByRole('img',{name:'Photo de Assiette',exact:true})).toBeVisible();
+ await expect(host.getByRole('heading',{name:'Autre boutique',exact:true})).toHaveCount(0);
+ await host.getByRole('button',{name:'Mes boutiques (1)',exact:true}).click();
+ await expect(host.getByRole('button',{name:'Ajouter une boutique',exact:true})).toHaveCount(0);
+ await expect(host.getByRole('img',{name:'Photo de Assiette',exact:true})).toBeVisible();
+ await host.getByRole('button',{name:'Modifier le produit',exact:true}).click();
+ await expect(host.getByLabel('Nom du produit',{exact:true})).toHaveValue('Assiette');
+});

@@ -217,21 +217,30 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const copy=button('Copier le lien',async()=>{try{await navigator.clipboard.writeText(url);local.textContent='Lien de la boutique copié. Vous pouvez l’envoyer à vos clients.';}catch{showLink();}},{kind:'secondary'});
   return [share,copy,wrap];
  }
+ function addPhotos(card,row){
+  const p=row.payload,paths=p.photos?.length?p.photos:(p.image_path?[p.image_path]:[]);
+  const gallery=node('div',null,'pro-shop-photos');
+  if(!paths.length)gallery.append(node('p','Aucune photo ajoutée.','pro-hint'));
+  for(const path of paths){const img=node('img');img.alt='Photo de '+p.nom;img.loading='lazy';gallery.append(img);api.image(path).then(url=>{img.src=url;}).catch(()=>{img.alt='Photo indisponible';});}
+  card.querySelector('.pro-card-head').after(gallery);
+ }
  function shopCard(row,archivable=false){
   const p=row.payload,actions=shopSharing(row);
   if(row.statut!=='Fermé')actions.push(button('Modifier la boutique',()=>go('boutique',{id:row.id}),{kind:'secondary'}));
   if(archivable)actions.push(archiveButton('boutiques',row,'Ses produits ne seront plus visibles.'));
   const card=listCard('boutiques',row,{details:[p.village&&'Localité : '+p.village,p.categorie,p.adresse,p.description,p.horaires&&'Horaires : '+p.horaires],actions});
-  const paths=p.photos||(p.image_path?[p.image_path]:[]);
-  if(paths.length){const gallery=node('div',null,'pro-shop-photos');
-   for(const path of paths){const img=node('img');img.alt='Photo de '+p.nom;img.loading='lazy';gallery.append(img);api.image(path).then(url=>{img.src=url;}).catch(()=>{img.alt='Photo indisponible';});}
-   card.querySelector('.pro-card-head').after(gallery);
-  }
+  addPhotos(card,row);
+  const products=state.produits.filter(x=>x.parent_id===row.id&&x.statut!=='Archivé');
+  const section=node('section',null,'pro-shop-products');section.append(node('h5','Produits de la boutique ('+products.length+')'));
+  if(!products.length)section.append(node('p','Aucun produit pour le moment.','pro-hint'));
+  for(const product of products){const item=listCard('produits',product,{details:[C.formaterPrix(product.payload.prix),'Stock : '+product.payload.stock],actions:[button('Modifier le produit',()=>go('produit',{id:product.id}),{kind:'secondary'})]});addPhotos(item,product);section.append(item);}
+  if(activeShops().some(b=>b.id===row.id))section.append(button('Ajouter un produit',()=>go('produit',{shopId:row.id}),{kind:'secondary'}));
+  card.append(section);
   return card;
  }
  function boutiques(){
   const body=frame('Mes boutiques');const rows=state.boutiques.filter(b=>b.statut!=='Archivé');
-  body.append(node('p','Chaque nouvelle boutique est vérifiée par l’administration avant d’apparaître dans le catalogue.','pro-hint'),button('Ajouter une boutique',()=>go('boutique')));
+  if(!rows.length)body.append(button('Ajouter une boutique',()=>go('boutique')));
   if(!rows.length)body.append(node('p','Aucune boutique pour le moment.'));
   for(const b of rows)body.append(shopCard(b,true));
   archived(body,state.boutiques);
@@ -242,6 +251,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   body.append(d);}
 
  function boutiqueForm({id}){
+  if(!id&&state.boutiques.some(b=>b.statut!=='Archivé')){boutiques();return;}
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
   const body=frame(row?'Modifier la boutique':'Nouvelle boutique');if(row?.statut==='Actif')body.append(node('p','Les changements de cette boutique sont appliqués directement après enregistrement. Ils ne créent pas de demande dans les validations.','pro-hint'));const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   const name=input(f,{label:'Nom de la boutique',value:p.nom||pro.nom||'',required:true,attrs:{maxlength:'180'}});
@@ -273,7 +283,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   for(const x of rows){const shop=state.boutiques.find(b=>b.id===x.parent_id);
    const price=node('p',null,'pro-price');price.append(node('strong',C.formaterPrix(x.payload.prix)));if(x.payload.ancien_prix){const s=node('s',C.formaterPrix(x.payload.ancien_prix));s.setAttribute('aria-label','Ancien prix '+C.formaterPrix(x.payload.ancien_prix));price.append(' ',s);}
    const card=listCard('produits',x,{details:[shops.length>1||shop?.statut!=='Actif'?'Boutique : '+(shop?.payload.nom||'—')+(shop&&shop.statut!=='Actif'?' ('+shop.statut+')':''):null,'Stock : '+x.payload.stock],actions:[button('Modifier le prix ou le stock',()=>go('produit',{id:x.id}),{kind:'secondary'}),archiveButton('produits',x,'Il disparaîtra du catalogue.')]});
-   card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);
+   addPhotos(card,x);card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);
    const rapide=stockRapide(x);if(rapide)card.querySelector('.pro-actions').before(rapide);body.append(card);}
   archived(body,state.produits);
  }
@@ -310,12 +320,12 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   }
   zone.append(node('p','Chiffres indicatifs : depuis la mise à jour de sécurité, chaque action est comptée au plus une fois par compte, fiche et jour. Les visites sans connexion ne sont plus comptées. Ces clics ne représentent pas des commandes payées ; les anciennes données peuvent contenir des doublons.','pro-hint'));
  }
- function produitForm({id}){
+ function produitForm({id,shopId}){
   const row=state.produits.find(x=>x.id===id)||null,p=row?.payload||{};const shops=activeShops();
   const body=frame(row?'Modifier le produit':'Nouveau produit');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   let shop=null;
   if(row)f.append(node('p','Boutique : '+(state.boutiques.find(b=>b.id===row.parent_id)?.payload.nom||'—'),'pro-hint'));
-  else if(shops.length>1)shop=input(f,{label:'Boutique',required:true,options:shops.map(b=>({value:b.id,label:b.payload.nom}))});
+  else if(shops.length>1)shop=input(f,{label:'Boutique',required:true,value:shopId||shops[0].id,options:shops.map(b=>({value:b.id,label:b.payload.nom}))});
   else f.append(node('p','Boutique : '+shops[0]?.payload.nom,'pro-hint'));
   const name=input(f,{label:'Nom du produit',value:p.nom||'',required:true,attrs:{maxlength:'180'}});
   const category=input(f,{label:'Catégorie',value:p.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
