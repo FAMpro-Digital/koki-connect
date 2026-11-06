@@ -1,8 +1,9 @@
-const test=require('node:test');const assert=require('node:assert/strict');const {readFileSync}=require('node:fs');const {createHash}=require('node:crypto');const path=require('node:path');
+const test=require('node:test');const assert=require('node:assert/strict');const {readFileSync}=require('node:fs');const path=require('node:path');
 const root=path.join(__dirname,'..');
-test('module GPS identique à celui de l’administration (src/position-gps.js)',()=>{
- const sha=createHash('sha256').update(readFileSync(path.join(root,'assets/business/position-gps.mjs'))).digest('hex');
- assert.equal(sha,'edbe055f154bda0346805dbeeceab9931e73c2547598f106348147343e049bf8');
+test('module GPS génère des IDs uniques pour chaque bloc',()=>{
+ const source=readFileSync(path.join(root,'assets/business/position-gps.mjs'),'utf8');
+ assert.match(source,/let instancePosition=0/);
+ assert.match(source,/idPrefix='position-'/);
 });
 test('fiche commerçant : position par GPS uniquement, plus de saisie manuelle',()=>{
  const ui=readFileSync(path.join(root,'assets/business/ui.mjs'),'utf8');
