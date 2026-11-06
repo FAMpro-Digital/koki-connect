@@ -43,7 +43,7 @@ export function lienCarte(latitude,longitude){
 
 // Bloc « Position GPS » d'un formulaire. map.latitude / map.longitude reçoivent des champs
 // numériques cachés : le code d'enregistrement existant les lit sans changement (vide → null).
-export function positionField(form,map,valeurs={},{geo,onError}={}
+export function positionField(form,map,valeurs={},{geo,onError}={}){
  const idPrefix='position-'+(++instancePosition)+'-';
  const el=(t,txt)=>{const e=document.createElement(t);if(txt!==undefined)e.textContent=txt;return e;};
  const bloc=el('div');bloc.className='wide position-gps';
