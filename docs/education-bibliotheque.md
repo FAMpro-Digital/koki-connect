@@ -29,3 +29,6 @@ Fichier source : `assets/portail/livre-contract.js` — à copier à l'identique
 ## Vérifications
 `node --test tests/*.test.cjs` : 67 tests réussis, dont `tests/bibliotheque.test.cjs` (contrat, filtre, téléchargement/lecture/suppression simulés, refus de type/taille, lien signé limité à `koki-livres`, présence du service worker). `node scripts/prepare-preview.mjs` : réussi.
 Non vérifié : affichage sur iPhone/Android et téléchargement réel depuis Supabase (préproduction autorisée nécessaire).
+
+## Diffusion d’ouvrages protégés (6 novembre 2026)
+Le blocage par titre de « L’Autoroute du millionnaire » a été retiré (application et administration) : la direction de FAMpro Digital déclare détenir l’autorisation de diffuser cet ouvrage. Les autres contrôles restent en place (type et taille de fichier, lien signé pour `koki-livres`, accès gratuit/payant, droits d’administration). Le lecteur PDF intégré s’applique à tous les livres téléchargeables.

@@ -62,7 +62,8 @@
       "develop/logo-profil-pro": false,
       "fix/profil-pro-en-haut": false,
       "fix/fermeture-pages": false,
-      "perf/cache-delai-reseau": false
+      "perf/cache-delai-reseau": false,
+      "feature/livre-autorise-lecteur-pdf": false
     }
   },
   "headers": [

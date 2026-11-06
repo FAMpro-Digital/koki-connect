@@ -15,7 +15,7 @@ test('Contrat livre : gratuit, payant et refus',()=>{
   assert.equal(L.decode(row(JSON.stringify({schema:L.marker,version:1,...base,acces:'Payant',prix:1500}))),null);
   assert.equal(L.decode({...row(L.encode(base)),categorie:'Sport'}),null);
   assert.equal(L.decode(row('{"schema":"koki.education.school","version":1}')),null);
-  assert.equal(L.decode({...row(L.encode(base)),titre:'L’Autoroute du millionnaire'}),null,'un ouvrage protégé sans autorisation ne doit pas être diffusé');
+  assert.ok(L.decode({...row(L.encode(base)),titre:'L’Autoroute du millionnaire'}),'ouvrage diffusé avec l’autorisation déclarée par la direction (6 nov. 2026)');
   assert.equal(L.prix(12500),'12 500 FCFA');
 });
 
