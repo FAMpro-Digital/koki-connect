@@ -206,13 +206,47 @@
     etat[type]=lieu?{nom:lieu.nom,latitude:lieu.latitude,longitude:lieu.longitude}:null;
     etat.choisi=null; message(''); actualiser();
   }
+  function obtenirPositionSecurisee(options = {}) {
+    return new Promise((resolve, reject) => {
+      if (!globalThis.isSecureContext) {
+        reject(new Error('La localisation exige une connexion sécurisée (https).'));
+        return;
+      }
+      if (!navigator.geolocation?.getCurrentPosition) {
+        reject(new Error('Ce navigateur ne permet pas la localisation GPS.'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(position => {
+        const { latitude, longitude, accuracy } = position.coords || {};
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+            latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+          reject(new Error('Position GPS invalide. Choisissez votre départ sur la carte.'));
+          return;
+        }
+        resolve({
+          coords: {
+            latitude: Math.round(latitude * 1e6) / 1e6,
+            longitude: Math.round(longitude * 1e6) / 1e6,
+            accuracy: Number.isFinite(accuracy) ? Math.round(accuracy) : null
+          }
+        });
+      }, error => {
+        const messages = {
+          1: 'Localisation refusée. Autorisez la position pour ce site puis réessayez.',
+          2: 'Position introuvable. Activez la localisation du téléphone puis réessayez.',
+          3: 'Le GPS met trop de temps à répondre. Placez-vous à l’extérieur et réessayez.'
+        };
+        reject(new Error(messages[error?.code] || 'Localisation impossible sur cet appareil.'));
+      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0, ...options });
+    });
+  }
   async function utiliserPosition(automatique = false) {
     if (courseActive() || positionEnCours) return;
     positionEnCours = true;
     const departInitial = etat.depart;
     const bouton=$('position');bouton.disabled=true;message('Votre position sert à définir le départ et trouver un chauffeur proche. Autorisez la localisation sur votre appareil…');
     try {
-      const position=await obtenirPositionActuelle({enableHighAccuracy:true,maximumAge:30000});
+      const position=await obtenirPositionSecurisee();
       if (courseActive() || etat.depart !== departInitial || (automatique && (etat.demo || document.getElementById('vue-transport').hidden))) return;
       if (!core.pointValide(position.coords)) throw Error('Position GPS invalide. Choisissez votre départ sur la carte.');
       etat.depart={nom:'Ma position actuelle',latitude:position.coords.latitude,longitude:position.coords.longitude};
