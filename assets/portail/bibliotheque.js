@@ -5,13 +5,12 @@
 const L=KokiLivreContract,H=KokiLivresHorsLigne,C=KokiPortailCore,$=id=>document.getElementById(id);
 const TITRE='📚 Bibliothèque',TITRE_MES='📥 Mes livres';
 let generation=0,filtre={acces:'Tous',categorie:'Toutes',q:''},urlLecture=null,enCours=new Map();
+const LECTURE='koki-lecture-v1';
 function n(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
 function b(text,fn,cls){const e=n('button',text,cls);e.type='button';e.onclick=fn;return e;}
 function ouvrir(t){return KokiPortail.ouvrir(t);}
 function actif(t){return $('portail-titre').textContent===t;}
 function livres(feed){return feed.contenus.map(row=>({row,livre:L.decode(row)})).filter(x=>x.livre&&!x.livre.archive&&C.visible(x.row));}
-function photo(row,parent){if(row.image&&KokiPublicFeed.imagePermise(row.image)){const img=n('img');img.src=row.image;img.alt='';img.loading='lazy';parent.append(img);}}
-function badge(livre){return livre.acces==='Gratuit'?n('span','Gratuit','biblio-badge biblio-gratuit'):n('span',L.prix(livre.prix),'biblio-badge biblio-payant');}
 function whatsapp(livre,row){const d=String(livre.whatsapp||'').replace(/[^0-9]/g,'');if(d.length<9)return null;const num=d.length===9?'221'+d:d;const a=n('a','Commander sur WhatsApp','portail-more biblio-action');a.href='https://wa.me/'+num+'?text='+encodeURIComponent('Bonjour, je souhaite '+(livre.acces==='Payant'?'acheter':'obtenir')+' le livre « '+row.titre+' »'+(livre.acces==='Payant'?' ('+L.prix(livre.prix)+')':'')+', vu sur Koki Connect.');a.target='_blank';a.rel='noopener';return a;}
 
 // Couverture : photo publiée, sinon couverture dessinée aux couleurs Koki Connect (vert foncé, vert, orange).
@@ -78,8 +77,8 @@ function detail(row){
   if(L.telechargeable(livre)){
    if(H.present(row.id)){zone.append(n('p','✓ Téléchargé · disponible sans internet','biblio-ok'),b('Lire hors ligne',()=>lire(row.id,zone)),b('Supprimer du téléphone',async()=>{if(!confirm('Supprimer « '+row.titre+' » de ce téléphone ?'))return;await H.supprimer(row.id);actions();}));return;}
    const job=enCours.get(row.id);if(job){progression(job);return;}
-   zone.append(b('Télécharger'+(livre.taille_mo?' · '+livre.taille_mo+' Mo':''),demarrer,'biblio-principal'),b('Lire en ligne',async e=>{const btn=e.currentTarget;btn.disabled=true;try{const lien=n('a','Ouvrir le livre en ligne','portail-more biblio-action');lien.href=await KokiPublicFeed.signerFichier(livre.fichier);lien.target='_blank';lien.rel='noopener';btn.replaceWith(lien);}catch(err){btn.disabled=false;alert(err.message||'Lien indisponible.');}}),n('p','Une fois téléchargé, le livre reste lisible sans internet.','portail-meta'));
-   if(!H.disponible())zone.append(n('p','Ce navigateur ne permet pas le téléchargement hors ligne ; utilisez « Lire en ligne ».','portail-note'));
+   zone.append(b('Télécharger'+(livre.taille_mo?' · '+livre.taille_mo+' Mo':''),demarrer,'biblio-principal'),b('Lire dans l’application',async e=>{const btn=e.currentTarget;btn.disabled=true;try{const lien=await KokiPublicFeed.signerFichier(livre.fichier);lireLien(lien,zone,row.id);}catch(err){alert(err.message||'Lien indisponible.');}finally{btn.disabled=false;}}),n('p','La lecture reste dans Koki Connect ; téléchargez le livre pour le retrouver hors connexion.','portail-meta'));
+   if(!H.disponible())zone.append(n('p','Ce navigateur ne permet pas le téléchargement hors ligne ; la lecture intégrée reste disponible.','portail-note'));
   }else if(livre.acces==='Payant'){
    zone.append(n('p','Prix : '+L.prix(livre.prix),'biblio-prix'));const w=whatsapp(livre,row);if(w)zone.append(w);
    zone.append(n('p','Le paiement en ligne (Wave, Orange Money) et le téléchargement des livres payants arrivent dans une prochaine étape. En attendant, commandez directement auprès du fournisseur.','portail-note'));
@@ -102,14 +101,30 @@ async function lire(id,zone){
  let f;try{f=await H.ouvrir(id);}catch(_){f=null;}
  if(!f){alert('Ce livre n’est plus sur le téléphone. Téléchargez-le à nouveau.');return;}
  if(urlLecture)URL.revokeObjectURL(urlLecture);urlLecture=URL.createObjectURL(f.blob);
- const panneau=n('div',undefined,'portail-panel biblio-lecteur');
+ const panneau=n('section',undefined,'portail-panel biblio-lecteur');
+ panneau.setAttribute('aria-label','Lecteur PDF intégré');
  if(f.type.startsWith('audio/')){const au=n('audio');au.controls=true;au.src=urlLecture;au.style.width='100%';panneau.append(au);}
- const ouvrirLien=n('a','Ouvrir le livre','portail-more biblio-action');ouvrirLien.href=urlLecture;ouvrirLien.target='_blank';ouvrirLien.rel='noopener';
  const meta=H.liste().find(x=>x.id===id),ext={'application/pdf':'.pdf','application/epub+zip':'.epub','audio/mpeg':'.mp3','audio/mp4':'.m4a','audio/x-m4a':'.m4a'}[f.type]||'';
  const garder=n('a','Enregistrer dans Fichiers','portail-more biblio-action');garder.href=urlLecture;garder.download=((meta&&meta.titre)||'livre').replace(/[\\/:*?"<>|]/g,'-')+ext;
- if(!f.type.startsWith('audio/'))panneau.append(ouvrirLien);panneau.append(garder);
+ if(f.type==='application/pdf'){
+  const key=LECTURE+':'+id,etat=JSON.parse(localStorage.getItem(key)||'{}');
+  const barre=n('div',undefined,'biblio-lecteur-barre');
+  const recherche=n('input');recherche.type='search';recherche.placeholder='Rechercher dans le PDF';recherche.setAttribute('aria-label','Rechercher dans le PDF');
+  const zoom=n('input');zoom.type='range';zoom.min='80';zoom.max='180';zoom.value=String(etat.zoom||100);zoom.setAttribute('aria-label','Zoom');
+  const zoomLabel=n('span',zoom.value+' %','biblio-zoom-label');
+  const favori=b(etat.marque?'★ Marqué':'☆ Marquer',()=>{etat.marque=!etat.marque;localStorage.setItem(key,JSON.stringify(etat));favori.textContent=etat.marque?'★ Marqué':'☆ Marquer';},'biblio-secondaire');
+  const plein=b('Plein écran',()=>panneau.requestFullscreen?.(),'biblio-secondaire');
+  barre.append(recherche,zoom,zoomLabel,favori,plein);panneau.append(barre);
+  const frame=n('iframe');frame.className='biblio-pdf-frame';frame.title='Lecture du PDF';frame.src=urlLecture+(etat.page?'#page='+encodeURIComponent(etat.page):'');
+  frame.onload=()=>{try{frame.contentWindow?.find(etat.recherche||'')}catch(_){}};
+  recherche.value=etat.recherche||'';recherche.oninput=()=>{etat.recherche=recherche.value;localStorage.setItem(key,JSON.stringify(etat));try{frame.contentWindow?.find(recherche.value)}catch(_) {}};
+  zoom.oninput=()=>{zoomLabel.textContent=zoom.value+' %';etat.zoom=Number(zoom.value);localStorage.setItem(key,JSON.stringify(etat));frame.style.transform='scale('+Number(zoom.value)/100+')';frame.style.transformOrigin='top left';frame.style.width=(10000/Number(zoom.value))+'%';};
+  zoom.oninput();panneau.append(frame,n('p','La position, le zoom et le marque-page sont conservés sur cet appareil. Utilisez la barre de recherche du lecteur PDF pour parcourir le texte.','portail-meta'));
+ }else if(!f.type.startsWith('audio/')){const frame=n('iframe');frame.className='biblio-pdf-frame';frame.title='Lecture du livre';frame.src=urlLecture;panneau.append(frame);}
+ panneau.append(garder);
  zone.querySelectorAll('.biblio-lecteur').forEach(e=>e.remove());zone.append(panneau);
 }
+function lireLien(src,zone,id){const panneau=n('section',undefined,'portail-panel biblio-lecteur');panneau.setAttribute('aria-label','Lecteur PDF intégré');const barre=n('div',undefined,'biblio-lecteur-barre');const q=n('input');q.type='search';q.placeholder='Rechercher dans le PDF';q.setAttribute('aria-label','Rechercher dans le PDF');const plein=b('Plein écran',()=>panneau.requestFullscreen?.(),'biblio-secondaire');barre.append(q,plein);const frame=n('iframe');frame.className='biblio-pdf-frame';frame.title='Lecture du PDF';frame.src=src;frame.onload=()=>{q.oninput=()=>{try{frame.contentWindow?.find(q.value)}catch(_){}}};panneau.append(barre,frame);zone.querySelectorAll('.biblio-lecteur').forEach(e=>e.remove());zone.append(panneau);}
 
 async function mesLivres(){
  ++generation;const box=ouvrir(TITRE_MES),xs=H.liste(),{octets}=await H.espace();if(!actif(TITRE_MES))return;

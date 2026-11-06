@@ -8,6 +8,7 @@
 .biblio-ligne{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}.biblio-badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}.biblio-gratuit{background:#1f7a4d;color:#fff}.biblio-payant{background:#f7d9a0;color:#6b3f00}.biblio-hors-ligne{color:#1f7a4d;font-size:13px;font-weight:700}
 .biblio-infos{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:12px 0}.biblio-infos dt{color:#526455}.biblio-infos dd{margin:0;font-weight:700}
 .biblio-zone{display:grid;gap:10px;margin-top:12px}.biblio-zone progress{width:100%;height:12px}.biblio-principal{background:#087a3d!important;color:#fff!important;border-color:#087a3d!important;font-weight:700}.biblio-ok{color:#1f7a4d;font-weight:700}.biblio-prix{font-size:20px;font-weight:700}.biblio-action{text-align:center}.biblio-lecteur{display:grid;gap:10px}
+.biblio-lecteur-barre{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.biblio-lecteur-barre input[type=search]{flex:1;min-width:180px}.biblio-lecteur-barre input[type=range]{width:110px}.biblio-pdf-frame{width:100%;height:min(72vh,900px);border:1px solid #cfe0d5;border-radius:12px;background:#f4f7f5}.biblio-lecteur:fullscreen{background:#fff;padding:16px;overflow:auto}
 
 /* Rubrique Santé — mise en page adaptative (grilles auto-ajustées, aucune largeur fixe) */
 .sante-page{display:flex;flex-direction:column;gap:20px;color:#14171a}

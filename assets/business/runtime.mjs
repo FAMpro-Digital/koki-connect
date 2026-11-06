@@ -3,13 +3,13 @@ import {mountNotificationPrompt} from './notification-prompt.mjs';
 import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
 import {isProcessedImage} from './image-processing.mjs';
-import {createCartStore,createStatusObserver,searchCatalogue,catalogueCategories,searchDrivers} from './business-state.js';
+import {createCartStore,createStatusObserver} from './business-state.js';
 import {indexCatalogue} from './catalogue-state.mjs';
 import {imageSelection} from './ui.mjs';
 import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE} from './client.mjs';
 // Message d'erreur affichable : jamais d'erreur technique brute (« TypeError: Failed to fetch »…).
 const lisible=e=>HORS_LIGNE.test(String(e?.message||e||''))||e?.name==='TypeError'?MESSAGE_HORS_LIGNE:(e?.message||'Une erreur est survenue. Réessayez.');
-import {node,field,action,form,accountPanel,history,professional,savedImage,retries} from './ui.mjs';
+import {node,action,form,accountPanel,history,professional,retries} from './ui.mjs';
 import * as espaceCommerce from './pro-space.mjs';
 const {proSpace}=espaceCommerce;
 const logoCompte=(...args)=>espaceCommerce.logoCompte?.(...args)||null;

@@ -4,7 +4,7 @@ import {registrationPhoto,clearRegistrationPhoto} from './registration-photo.mjs
 // Toutes les règles sont vérifiées par le serveur (koki_business) ; cette interface ne demande
 // jamais d'identifiant technique : ils viennent de l'état chargé depuis le compte connecté.
 import './commerce-contract.js';
-import {niveauStock,produitsStockBas,SEUIL_STOCK_BAS,lienFiche} from './catalogue-extras.mjs';
+import {niveauStock,produitsStockBas,lienFiche} from './catalogue-extras.mjs';
 const C=globalThis.KokiCommerceContract;
 const node=(tag,text,className)=>{const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(className)e.className=className;return e;};
 let uid=0;const nextId=prefix=>'pro-'+prefix+'-'+(++uid);
