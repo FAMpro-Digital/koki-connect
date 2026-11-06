@@ -15,6 +15,7 @@ test('Contrat livre : gratuit, payant et refus',()=>{
   assert.equal(L.decode(row(JSON.stringify({schema:L.marker,version:1,...base,acces:'Payant',prix:1500}))),null);
   assert.equal(L.decode({...row(L.encode(base)),categorie:'Sport'}),null);
   assert.equal(L.decode(row('{"schema":"koki.education.school","version":1}')),null);
+  assert.equal(L.decode({...row(L.encode(base)),titre:'L’Autoroute du millionnaire'}),null,'un ouvrage protégé sans autorisation ne doit pas être diffusé');
   assert.equal(L.prix(12500),'12 500 FCFA');
 });
 
@@ -66,4 +67,12 @@ test('Application : Bibliothèque reliée, service worker publié',()=>{
   assert.ok(fs.readFileSync('scripts/prepare-preview.mjs','utf8').includes("'sw.js'"));
   const sw=fs.readFileSync('sw.js','utf8');assert.ok(!sw.includes('supabase.co'));assert.ok(sw.includes('url.origin!==self.location.origin'));
   for(const f of ['assets/portail/bibliotheque.js','assets/portail/app.js','sw.js'])new vm.Script(fs.readFileSync(f,'utf8'));
+});
+
+test('Lecteur intégré : pas de sortie vers un nouvel onglet',()=>{
+  const bib=fs.readFileSync('assets/portail/bibliotheque.js','utf8');
+  assert.match(bib,/Lecteur PDF intégré/);
+  assert.match(bib,/biblio-pdf-frame/);
+  assert.match(bib,/localStorage/);
+  assert.doesNotMatch(bib,/Ouvrir le livre en ligne/);
 });

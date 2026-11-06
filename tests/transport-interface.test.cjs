@@ -1,5 +1,5 @@
 // Transport : feuille de réservation (carte, « Où allez-vous ? », véhicules avec prix, Commander) branchée sur le serveur existant.
-const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
+const test=require('node:test');const assert=require('node:assert/strict');
 test('interface Transport : carte, trajet, quatre véhicules avec prix, bouton Commander',()=>{
  const html=require('./_aide.cjs').accueil(),v=html.slice(html.indexOf('<section id="vue-transport"'),html.indexOf('<section id="vue-carte"'));
  assert.match(v,/<h2 id="titre-transport" tabindex="-1">Où allez-vous \?<\/h2>/);

@@ -21,7 +21,7 @@ try{const lot=await request(c.url+'/storage/v1/object/sign/koki-media',{method:'
 let i=0;await Promise.all(Array.from({length:Math.min(4,queue.length)},async()=>{while(i<queue.length)await signerUne(c,headers,queue[i++]);}));}
 async function chargerReseau(){const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const all=[];let offset=0;for(;;){const data=await request(c.url+'/rest/v1/rpc/koki_public_feed',{method:'POST',headers,body:JSON.stringify({p_offset:offset})});if(data.version!==1||!Array.isArray(data.contenus))throw Error('Flux public invalide');all.push(...data.contenus);if(!data.more)break;if(!data.contenus.length||offset>=100000)throw Error('Flux trop volumineux');offset+=data.contenus.length;}const rows=[...new Map(all.map(x=>[x?.id,x])).values()].filter(x=>x&&typeof x.id==='string'&&typeof x.titre==='string'&&typeof x.resume==='string'&&x.statut==='publié');
 // Les images ont une URL temporaire ; chaque actualisation renouvelle leur accès.
-const queue=rows.filter(x=>x.image_path&&/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(x.image_path));let i=0;
+const queue=rows.filter(x=>x.image_path&&/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(x.image_path));
 // Signature par lot : une seule requête pour toutes les images ; repli image par image si le lot échoue.
 await signerImages(c,headers,queue);return {version:1,contenus:rows};}
 // Dernier flux public réussi, gardé sur l'appareil : affiché si le réseau ou le serveur est indisponible.
