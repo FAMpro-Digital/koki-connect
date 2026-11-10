@@ -6,6 +6,7 @@
 const ACTIONS={
   clic:{
     "afficherMenu()":function(el,event){afficherMenu()},
+    "KokiPortail.parametres()":function(){KokiPortail.parametres()},
     "KokiPortail.profil()":function(el,event){KokiPortail.profil()},
     "afficherNotifications()":function(el,event){afficherNotifications()},
     "chargerMeteo()":function(el,event){chargerMeteo()},
