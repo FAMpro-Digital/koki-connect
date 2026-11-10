@@ -39,7 +39,7 @@ const serveur = http.createServer(async (req, res) => {
     if (!complet.startsWith(RACINE.endsWith(sep) ? RACINE : RACINE + sep)) { res.writeHead(403).end(); return; }
     const relatif = complet.slice(RACINE.length);
     // Même périmètre que la publication (scripts/prepare-preview.mjs) : rien d'autre n'est servi.
-    if (!/^(index\.html|assets\/|favicon\.ico$|manifest\.webmanifest$|sw\.js$)/.test(relatif.split(sep).join('/'))) { res.writeHead(404).end(); return; }
+    if (!/^((?:index|conditions|confidentialite|suppression-compte|tests-application)\.html$|assets\/|favicon\.ico$|manifest\.webmanifest$|sw\.js$)/.test(relatif.split(sep).join('/'))) { res.writeHead(404).end(); return; }
     const info = await stat(complet);
     if (!info.isFile()) { res.writeHead(404).end(); return; }
     res.writeHead(200, { ...entetes, 'Content-Type': TYPES[extname(complet)] || 'application/octet-stream' });
