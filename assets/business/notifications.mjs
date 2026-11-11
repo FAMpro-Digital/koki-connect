@@ -51,6 +51,10 @@ export async function renderNotifications(host,db,{vapidPublicKey='',smsEnabled=
    if(!await enablePush(db,vapidPublicKey)){status.textContent='Autorisation refusée. Vous pouvez la modifier dans les réglages du téléphone.';return;}status.textContent='Notifications activées sur cet appareil.';
   }),button('Désactiver sur cet appareil',async()=>{await disablePush(db);status.textContent='Notifications désactivées sur cet appareil.';}));
  }
+ // Notifications de publications adaptées aux lectures : explication claire et refus possible (le refus efface les données du serveur).
+ if(window.KokiInterets){const l=element('label','Adapter les notifications à mes lectures '),c=element('input');c.type='checkbox';c.checked=window.KokiInterets.partage();l.append(c);
+  c.onchange=()=>{window.KokiInterets.regler(c.checked);status.textContent=c.checked?'Notifications adaptées à vos lectures.':'Vos centres d’intérêt sont effacés du serveur. Vous recevrez seulement les publications « À la une ».';};
+  settings.append(l,element('small','Koki Connect enregistre sur votre compte les rubriques et catégories que vous consultez le plus, uniquement pour vous prévenir des publications qui vous intéressent. Décochez pour effacer ces données du serveur.'));}
  if(smsEnabled){
   const {data:p}=await db.from('koki_notification_preferences').select('sms').eq('user_id',user.id).maybeSingle();
   if(disposed)return;

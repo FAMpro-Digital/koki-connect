@@ -252,4 +252,7 @@ window.KokiSocialAPI=async args=>{
  return data;
 };
 
+// Centres d'intérêt de lecture → compte de l'utilisateur, uniquement pour cibler les notifications de publications.
+// Jamais pour un visiteur ni un compte anonyme ; actif=false efface les données du serveur.
+window.KokiInteretsSync=async(interets,actif=true)=>{await initialise();if(!db)return false;const {data}=await db.auth.getSession();const u=data?.session?.user;if(!u||u.is_anonymous)return false;const {error}=await db.rpc('koki_interests_sync',{p_types:actif?interets?.types||{}:{},p_categories:actif?interets?.categories||{}:{},p_actif:actif});if(error)throw Error('Synchronisation indisponible');return true;};
 window.KokiSocialSummary=async ids=>{await initialise();if(!db)return [];const {data,error}=await db.rpc('koki_social_summaries',{p_ids:ids});if(error)throw Error('Compteurs indisponibles');return data;};

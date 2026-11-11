@@ -46,3 +46,10 @@ test('page : module chargé avant le flux, accueil classé, intérêt noté à l
  assert.ok(app.includes("if(['Actualités','Annonces','Opportunités'].includes(type))xs=classement(xs);"));
  assert.ok(app.includes('KokiClassement?.noter(x,localStorage)'));assert.ok(app.includes('aLireAussi(x,box)'));
 });
+test('notifications ciblées : envoi au compte connecté seulement, refus possible, politique mise à jour',()=>{
+ const app=fs.readFileSync('assets/portail/app.js','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8'),nt=fs.readFileSync('assets/business/notifications.mjs','utf8');
+ assert.ok(rt.includes("if(!u||u.is_anonymous)return false;"));assert.ok(rt.includes("db.rpc('koki_interests_sync'"));
+ assert.ok(app.includes("localStorage.getItem(CLE_PARTAGE)!=='non'"));assert.ok(app.includes('6*3600e3'));
+ assert.ok(nt.includes('Adapter les notifications à mes lectures'));assert.ok(nt.includes('effacer ces données du serveur'));
+ assert.ok(fs.readFileSync('confidentialite.html','utf8').includes('Centres d’intérêt et notifications'));
+});
