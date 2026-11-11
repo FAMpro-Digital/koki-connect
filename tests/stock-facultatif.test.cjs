@@ -20,3 +20,13 @@ test('formulaire produit : stock non obligatoire et non envoyé quand il est vid
  assert.ok(!s.includes("value:p.stock??1,required:true"));
  assert.ok(s.includes('Facultatif. Laissez vide si vous ne comptez pas le stock.'));
 });
+test('produit : le prix est facultatif, mais reste contrôlé quand il est saisi',()=>{
+ assert.deepEqual(C.verifierOffre('produits',{nom:'Riz'}),[]);
+ assert.deepEqual(C.verifierOffre('produits',{nom:'Riz',prix:null}),[]);
+ assert.equal(C.verifierOffre('produits',{nom:'Riz',prix:-5}).length,1);
+ assert.equal(C.verifierOffre('produits',{nom:'Riz',ancien_prix:900}).length,1);
+ const s=fs.readFileSync('assets/business/pro-space.mjs','utf8');
+ assert.ok(s.includes("if(num(price)!==null)values.price=num(price);"));
+ assert.ok(s.includes('Laissez vide pour afficher « Prix sur demande ».'));
+ assert.ok(fs.readFileSync('assets/business/catalogue.mjs','utf8').includes("C.formaterPrix(x.prix)||'Prix sur demande'"));
+});
