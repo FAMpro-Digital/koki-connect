@@ -57,8 +57,22 @@ export function filtrer(idx,{kind='produits',query='',categorie='',village='',di
  else if(tri==='prix-desc')res.sort((a,b)=>(Number.isInteger(b.prix)?b.prix:-1)-(Number.isInteger(a.prix)?a.prix:-1)||a.ordre-b.ordre);
  else if(tri==='nom')res.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
  else if(tri==='proche'&&position){const d=x=>distanceKm(position,positionDe(x,idx));const val=x=>{const v=d(x);return v===null?Infinity:v;};res.sort((a,b)=>val(a)-val(b)||a.ordre-b.ordre);}
- else res.sort((a,b)=>a.ordre-b.ordre);
+ else{
+  // Ordre recommandé (par défaut) : disponible et boutique ouverte d'abord, puis horaires inconnus, puis fermé, puis épuisé ;
+  // à rang égal, le plus proche si la position est connue, sinon le plus récent.
+  const rang=x=>{if(!disponible(x))return 3;const o=etatOuverture(x,idx,maintenant);return o===true?0:o===false?2:1;};
+  const d=x=>{if(!position)return 0;const v=distanceKm(position,positionDe(x,idx));return v===null?Infinity:v;};
+  const cle=new Map(res.map(x=>[x,[rang(x),d(x)]]));
+  res.sort((a,b)=>cle.get(a)[0]-cle.get(b)[0]||(cle.get(a)[1]===cle.get(b)[1]?0:cle.get(a)[1]-cle.get(b)[1])||a.ordre-b.ordre);
+ }
  return res;
+}
+// Suggestions sous une fiche produit ou service : même catégorie d'abord, puis même boutique ou même commerce ;
+// uniquement des offres disponibles, jamais la fiche ouverte.
+export function similaires(idx,x,max=4){
+ if(!x||(x.kind!=='produits'&&x.kind!=='services'))return [];
+ const proche=y=>(x.categorie&&y.categorie===x.categorie?2:0)+(x.parent_id&&y.parent_id===x.parent_id?1:0);
+ return idx.liste.filter(y=>y.kind===x.kind&&y.id!==x.id&&disponible(y)&&proche(y)>0).sort((a,b)=>proche(b)-proche(a)||a.ordre-b.ordre).slice(0,max);
 }
 export function compter(idx,options){return Object.fromEntries(ONGLETS.map(o=>[o.kind,filtrer(idx,{...options,kind:o.kind,categorie:'',tri:'recent'}).length]));}
 // Contacts : numéro d'appel de la fiche ; WhatsApp de la boutique, sinon de la fiche, sinon son téléphone.
