@@ -31,7 +31,7 @@ function prixBloc(x){
  const p=node('p',null,'cat-price');
  if(x.kind==='services'){p.append(node('strong',x.tarif==='devis'||!Number.isInteger(x.prix)?'Sur devis':'À partir de '+C.formaterPrix(x.prix)));return p;}
  if(x.kind!=='produits')return null;
- p.append(node('strong',C.formaterPrix(x.prix)));
+ p.append(node('strong',C.formaterPrix(x.prix)||'Prix sur demande'));
  if(promotion(x)){const s=node('s',C.formaterPrix(x.ancien_prix));s.setAttribute('aria-label','Ancien prix : '+C.formaterPrix(x.ancien_prix));p.append(' ',s);}
  return p;
 }
@@ -109,7 +109,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
  function carte(x,classe=''){
   const a=node('article',null,'cat-card '+classe);a.dataset.kind=x.kind;
   const b=node('button',null,'cat-card-open');b.type='button';
-  b.setAttribute('aria-label',x.nom+(x.kind==='produits'||x.kind==='services'?' — '+(x.kind==='services'&&(x.tarif==='devis'||!Number.isInteger(x.prix))?'sur devis':C.formaterPrix(x.prix)):'')+' : voir la fiche');
+  b.setAttribute('aria-label',x.nom+(x.kind==='produits'||x.kind==='services'?' — '+(x.kind==='services'&&(x.tarif==='devis'||!Number.isInteger(x.prix))?'sur devis':C.formaterPrix(x.prix)||'prix sur demande'):'')+' : voir la fiche');
   const media=node('span',null,'cat-media');media.append(vignette(x.photos[0],'',x));
   if(promotion(x))media.append(node('span','−'+promotion(x)+' %','cat-promo'));
   b.append(media);const body=node('span',null,'cat-card-body');
@@ -130,7 +130,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const boutique=idx.boutique(idx.get(ls[0].id)||{})?.nom;if(boutique)aside.append(node('p','Boutique : '+boutique,'cat-hint'));
   const liste=node('div',null,'cat-lines');
   for(const l of ls){const x=idx.get(l.id)||{id:l.id,nom:l.nom,stock:l.stock};const row=node('div',null,'cat-line');
-   const info=node('div',null,'cat-line-info');info.append(node('strong',l.nom),node('span',l.quantite+' × '+C.formaterPrix(l.prix),'cat-hint'));
+   const info=node('div',null,'cat-line-info');info.append(node('strong',l.nom),node('span',l.quantite+' × '+(C.formaterPrix(l.prix)||'prix sur demande'),'cat-hint'));
    const st=compteur({...x,nom:l.nom,stock:Number.isInteger(x.stock)?x.stock:l.stock},'cat-stepper-mini');
    const retirer=button('Retirer',()=>changer(l.id,0),'link');retirer.setAttribute('aria-label','Retirer « '+l.nom+' » du panier');
    const actions=node('div',null,'cat-line-actions');actions.append(st,retirer);

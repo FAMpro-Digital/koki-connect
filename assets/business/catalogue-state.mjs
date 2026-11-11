@@ -80,7 +80,7 @@ export function lienCarte(x,idx){const p=x.localisation||idx.boutique(x)?.locali
 export function totalPanier(lignes){return (Array.isArray(lignes)?lignes:[]).reduce((s,l)=>s+(Number.isInteger(l.prix)&&Number.isInteger(l.quantite)?l.prix*l.quantite:0),0);}
 export function lienPanierWhatsApp(lignes,idx,{mode='retrait',adresse=''}={}){
  if(!Array.isArray(lignes)||!lignes.length)return null;const p=idx.get(lignes[0].id);if(!p)return null;const c=contacts(p,idx);if(!c?.numero)return null;
- const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+' ('+C.formaterPrix(l.prix)+')'),'Total indicatif : '+C.formaterPrix(totalPanier(lignes)),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
+ const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+(C.formaterPrix(l.prix)?' ('+C.formaterPrix(l.prix)+')':'')),'Total indicatif : '+C.formaterPrix(totalPanier(lignes)),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
  return C.lienWhatsApp(c.numero,texte);
 }
 // Promotions mises en avant : produits disponibles avec un ancien prix, plus forte remise d'abord.
