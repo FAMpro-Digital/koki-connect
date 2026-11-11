@@ -110,7 +110,7 @@ jobs:
             5000) test -f tests/load/reports/.niveau-1000-valide || { echo "Le niveau 1000 doit d'abord réussir et être validé par le propriétaire."; exit 1; } ;;
           esac
       - name: Install k6
-        uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1
+        uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece # v1
       - name: Prepare fictitious accounts (from a TEST-only secret)
         if: ${{ inputs.scenario != 'public-read' }}
         env:
