@@ -46,11 +46,14 @@ async function detail(x,focusComments=false){
  // (l'ancienne position de la liste n'a aucun sens sur l'accueil).
  const retour=()=>{if(window.KokiNavigation?.profondeur?.()===1){window.KokiNavigation.retour();return;}fermerOpportunites();};
  const top=b('← Retour à l’accueil',retour);top.className='publication-retour';box.prepend(top);
+ const zoneVideo=n('div');zoneVideo.className='publication-video';zoneVideo.hidden=true;box.append(zoneVideo);ajouterVideo(x,generation,zoneVideo);
  box.append(window.KokiSocial.actions(x,()=>section.scrollIntoView({block:'start',behavior:'smooth'})));
  const section=n('section');box.append(section);window.KokiSocial.comments(x,section);
  const bottom=b('Retour à l’accueil',retour);bottom.className='publication-retour';box.append(bottom);
  if(focusComments){section.scrollIntoView({block:'start'});section.querySelector('textarea')?.focus();}
 }
+// Vidéo d'une publication (fichier envoyé depuis l'administration ou lien YouTube) : chargée après le texte, sans bloquer la page.
+async function ajouterVideo(x,generation,zone){if(!window.KokiVideo||!KokiPublicFeed.videos)return;let videos;try{videos=await KokiPublicFeed.videos(x.id);}catch{return;}if(generation!==detailGeneration||!zone.isConnected)return;for(const v of videos){const el=KokiVideo.renderVideo({...v,titre:x.titre});if(el){el.className='publication-video-lecteur';zone.append(el);}}zone.hidden=!zone.childElementCount;}
 function detailBase(x){if(x.type==='Opportunités'&&window.KokiOpportunites){return KokiOpportunites.detail(x);}if(x.type==='Événements'&&window.KokiEvenements){return KokiEvenements.detail(x);}if(window.KokiSport&&window.KokiSportContract){if(KokiSportContract.decodeMatch(x)){return KokiSport.match(x.id);}if(KokiSportContract.decodeEquipe(x)){return KokiSport.equipe(x.id);}}if(KokiEducationContract.decode(x)){return educationDetail(x);}if(window.KokiLivreContract&&KokiLivreContract.decode(x)&&window.KokiBibliotheque){return KokiBibliotheque.detail(x);}if(window.KokiSanteContract&&KokiSanteContract.decode(x)&&window.KokiSante){return KokiSante.detail(x);}if(window.KokiServiceContract&&(KokiServiceContract.decodeService(x)||KokiServiceContract.decodeDemarche(x))&&window.KokiServicesPublics){return KokiServicesPublics.detail(x);}if(window.KokiNumeroContract&&KokiNumeroContract.decode(x)){return numerosUtiles();}const box=ouvrir(x.titre);box.append(card(x,true));}
 function remplir(id,xs,message){const box=$(id);box.replaceChildren();if(!xs.length)box.append(n('p',message||'Aucun contenu publié pour le moment.'));else xs.forEach(x=>box.append(card(x)));}
 // Opportunités jeunes : chaque rubrique est alimentée par les contenus « Opportunités » publiés dans Koki Connect Admin.
