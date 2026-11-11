@@ -48,6 +48,10 @@ jobs:
       - name: Install development tools
         run: if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        # Le navigateur d'abord (CDN Playwright), puis les paquets système au mieux : les miroirs Ubuntu du
+        # runner sont parfois injoignables et ne doivent pas bloquer les tests (l'image contient déjà les bibliothèques).
+        run: |
+          npx playwright install chromium
+          timeout 180 npx playwright install-deps chromium || echo "::warning::Paquets système non installés (miroirs Ubuntu injoignables) : poursuite avec ceux de l'image."
       - name: End-to-end tests
         run: npm run test:e2e
