@@ -68,7 +68,8 @@
       "fix/village-saisie-libre": false,
       "feature/stock-facultatif": false,
       "feature/prix-facultatif": false,
-      "feature/videos-publiques": false
+      "feature/videos-publiques": false,
+      "feature/video-accueil": false
     }
   },
   "headers": [

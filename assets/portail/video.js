@@ -23,7 +23,7 @@
     video.controls = true;
     video.preload = 'metadata';
     video.playsInline = true;
-    video.src = url;
+    video.src = url + '#t=0.001';
     return video;
   }
 

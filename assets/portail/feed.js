@@ -3,7 +3,7 @@ let config;
 // Réutilisation en mémoire uniquement, sans prolonger les droits des liens signés.
 const imagesSignees=new Map();
 function memoriserImage(row){if(row.image)imagesSignees.set(row.image_path,{url:row.image,expire:Date.now()+110000});}
-function empreinte(contenus){return JSON.stringify(contenus.map(({image,...contenu})=>contenu));}
+function empreinte(contenus){return JSON.stringify(contenus.map(({image,video,...contenu})=>({...contenu,video:video?video.video_source+':'+(video.youtube_video_id||video.chemin||''):null})));}
 
 async function request(url,options={}){const response=await fetch(url,{...options,cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Contenus momentanément indisponibles');return response.json();}
 // Supabase en ligne (https://<réf>.supabase.co) ; Supabase LOCAL accepté seulement si la page elle-même
@@ -23,12 +23,12 @@ async function chargerReseau(){const c=await settings();const headers={apikey:c.
 // Les images ont une URL temporaire ; chaque actualisation renouvelle leur accès.
 const queue=rows.filter(x=>x.image_path&&/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(x.image_path));
 // Signature par lot : une seule requête pour toutes les images ; repli image par image si le lot échoue.
-await signerImages(c,headers,queue);return {version:1,contenus:rows};}
+await signerImages(c,headers,queue);try{await attacherVideos(c,headers,rows);}catch(_){}return {version:1,contenus:rows};}
 // Dernier flux public réussi, gardé sur l'appareil : affiché si le réseau ou le serveur est indisponible.
 // Uniquement des contenus publiés (publics) ; les URL d'images temporaires ne sont pas conservées.
 const CLE_COPIE='koki.flux.public.v1',COPIE_MAX=1500000;
-function garderCopie(flux){try{const lot={version:1,date:Date.now(),contenus:flux.contenus.slice(0,60).map(x=>({...x,image:null}))};const texte=JSON.stringify(lot);if(texte.length<=COPIE_MAX)root.localStorage.setItem(CLE_COPIE,texte);}catch(_){}}
-function lireCopie(){try{const lot=JSON.parse(root.localStorage.getItem(CLE_COPIE));if(lot&&lot.version===1&&Array.isArray(lot.contenus)&&lot.contenus.every(x=>x&&x.statut==='publié'&&typeof x.id==='string'))return {version:1,contenus:lot.contenus.map(x=>({...x,image:null})),horsLigne:true,date:lot.date};}catch(_){}return null;}
+function garderCopie(flux){try{const lot={version:1,date:Date.now(),contenus:flux.contenus.slice(0,60).map(x=>({...x,image:null,video:null}))};const texte=JSON.stringify(lot);if(texte.length<=COPIE_MAX)root.localStorage.setItem(CLE_COPIE,texte);}catch(_){}}
+function lireCopie(){try{const lot=JSON.parse(root.localStorage.getItem(CLE_COPIE));if(lot&&lot.version===1&&Array.isArray(lot.contenus)&&lot.contenus.every(x=>x&&x.statut==='publié'&&typeof x.id==='string'))return {version:1,contenus:lot.contenus.map(x=>({...x,image:null,video:null})),horsLigne:true,date:lot.date};}catch(_){}return null;}
 async function charger(){try{const flux=await chargerReseau();garderCopie(flux);return flux;}catch(e){const copie=lireCopie();if(copie)return copie;throw e;}}
 // Livres gratuits : lien temporaire (5 min) vers un fichier du bucket privé koki-livres ; jamais d'autre origine ni d'autre bucket.
 // Le serveur ne signe que les fichiers de livres gratuits publiés (politique livres_public_read).
@@ -39,6 +39,17 @@ async function detail(id){const c=await settings();const row=await request(c.url
 // Vidéos d'une publication publiée : fichier du bucket privé koki-videos (lien temporaire d'une heure, signé seulement
 // pour les publications publiées) ou identifiant YouTube. Une vidéo de chaque sorte au plus : la plus récente.
 function videoPermise(value){try{const u=new URL(value);return !!config&&u.origin===config.url&&/^\/storage\/v1\/object\/sign\/koki-videos\/[a-f0-9-]+\/[a-f0-9-]+\.(mp4|webm)$/.test(u.pathname);}catch(_){return false;}}
+// Accueil et listes : la vidéo la plus récente de chaque publication publiée (une requête pour les médias, une signature par lot).
+// La sécurité reste côté serveur : seules les lignes et les fichiers de publications publiées sont lisibles.
+async function attacherVideos(c,headers,rows){const parId=new Map(rows.map(x=>[x.id,x]));for(const x of rows)x.video=null;
+const medias=await request(c.url+'/rest/v1/koki_content_media?select=content_id,source,storage_path,youtube_video_id,created_at&order=created_at.desc&limit=300',{headers});if(!Array.isArray(medias))return;
+const aSigner=[];for(const m of medias){const x=m&&parId.get(m.content_id);if(!x||x.video)continue;
+ if(m.source==='youtube'&&/^[A-Za-z0-9_-]{11}$/.test(m.youtube_video_id||''))x.video={video_source:'youtube',youtube_video_id:m.youtube_video_id};
+ else if(m.source==='upload'&&/^[a-f0-9-]+\/[a-f0-9-]+\.(mp4|webm)$/.test(m.storage_path||'')){x.video={video_source:'upload',chemin:m.storage_path,video_url:null};aSigner.push(x);}}
+if(!aSigner.length)return;
+try{const lot=await request(c.url+'/storage/v1/object/sign/koki-videos',{method:'POST',headers,body:JSON.stringify({expiresIn:3600,paths:aSigner.map(x=>x.video.chemin)})});const parChemin=new Map((Array.isArray(lot)?lot:[]).map(r=>[r&&r.path,r]));
+ for(const x of aSigner){const r=parChemin.get(x.video.chemin);const url=r&&!r.error&&typeof r.signedURL==='string'?c.url+'/storage/v1'+r.signedURL:null;if(url&&videoPermise(url))x.video.video_url=url;else x.video=null;}}
+catch(_){for(const x of aSigner)x.video=null;}}
 async function videos(id){if(!/^[a-f0-9-]{36}$/.test(String(id)))return [];const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};
 const rows=await request(c.url+'/rest/v1/koki_content_media?content_id=eq.'+id+'&select=source,storage_path,youtube_video_id,created_at&order=created_at.desc&limit=10',{headers});if(!Array.isArray(rows))return [];
 const out=[];const yt=rows.find(r=>r&&r.source==='youtube'&&/^[A-Za-z0-9_-]{11}$/.test(r.youtube_video_id||''));if(yt)out.push({video_source:'youtube',youtube_video_id:yt.youtube_video_id});

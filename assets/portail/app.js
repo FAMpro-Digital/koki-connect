@@ -20,13 +20,14 @@ function photo(x,parent){if(x.image&&(/^data:image\/(png|jpeg|webp);base64,/.tes
 function card(x,full=false){
  const e=n('article');
  if(!full){e.addEventListener('click',ev=>{
-  if(ev.target.closest('button,a,input,textarea,select,label,[role="button"]')||window.getSelection()?.toString())return;
+  if(ev.target.closest('button,a,input,textarea,select,label,video,iframe,[role="button"]')||window.getSelection()?.toString())return;
   detail(x);
  });}
  e.className=(full?'':'publication-apercu ')+'portail-card'+(x.type==='Publicités'?' portail-ad':'')+(full?' publication-detail':'');
  if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');
  if(x.type==='Publicités')e.append(n('strong','Sponsorisé · '+(x.emplacement||'Carte sponsorisée')));
  const imageBox=n('div');photo(x,imageBox);if(imageBox.firstChild){const img=imageBox.firstChild;const link=b('',()=>full?window.KokiSocial.zoom(img):detail(x));link.className='publication-photo-link';link.setAttribute('aria-label',full?'Agrandir la photo de '+x.titre:'Lire '+x.titre);link.append(img);e.append(link);}
+ if(x.video&&window.KokiVideo){const lecteur=KokiVideo.renderVideo({...x.video,titre:x.titre});if(lecteur){lecteur.className='publication-video-lecteur';const zone=n('div');zone.className='publication-video';zone.append(lecteur);e.append(zone);}}
  const heading=n('h3');if(full)heading.textContent=x.titre;else{const link=b(x.titre,()=>detail(x));link.className='publication-title';heading.append(link);}
  e.append(n('p',x.categorie+' · '+date(x.publication)),heading,n('p',x.resume));
  if(x.evenement)e.append(n('p',date(x.evenement)+' · '+x.lieu));if(x.source)e.append(n('p','Source / auteur : '+x.source));
@@ -46,7 +47,7 @@ async function detail(x,focusComments=false){
  // (l'ancienne position de la liste n'a aucun sens sur l'accueil).
  const retour=()=>{if(window.KokiNavigation?.profondeur?.()===1){window.KokiNavigation.retour();return;}fermerOpportunites();};
  const top=b('← Retour à l’accueil',retour);top.className='publication-retour';box.prepend(top);
- const zoneVideo=n('div');zoneVideo.className='publication-video';zoneVideo.hidden=true;box.append(zoneVideo);ajouterVideo(x,generation,zoneVideo);
+ const zoneVideo=n('div');zoneVideo.className='publication-video';zoneVideo.hidden=true;box.append(zoneVideo);if(!x.video)ajouterVideo(x,generation,zoneVideo);
  box.append(window.KokiSocial.actions(x,()=>section.scrollIntoView({block:'start',behavior:'smooth'})));
  const section=n('section');box.append(section);window.KokiSocial.comments(x,section);
  const bottom=b('Retour à l’accueil',retour);bottom.className='publication-retour';box.append(bottom);

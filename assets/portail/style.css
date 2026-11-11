@@ -47,4 +47,6 @@
 .pro-choix-carte:focus-visible{outline:3px solid #ff9500;outline-offset:2px}.pro-choix-actuel{border-color:#087a3d;background:#eaf6ef}
 /* Vidéo d'une publication : pleine largeur, format 16:9, sans débordement sur téléphone. */
 .publication-video{margin:12px 0}
-.publication-video-lecteur{display:block;width:100%;max-width:100%;aspect-ratio:16/9;border:0;border-radius:14px;background:#0b3b2a}
+.publication-video-lecteur{display:block;width:100%;max-width:100%;border:0;border-radius:14px;background:#000}
+iframe.publication-video-lecteur{aspect-ratio:16/9}
+video.publication-video-lecteur{max-height:70vh}
