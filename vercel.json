@@ -69,7 +69,8 @@
       "feature/stock-facultatif": false,
       "feature/prix-facultatif": false,
       "feature/videos-publiques": false,
-      "feature/video-accueil": false
+      "feature/video-accueil": false,
+      "feature/algorithme-recommandations": false
     }
   },
   "headers": [

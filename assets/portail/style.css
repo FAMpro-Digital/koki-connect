@@ -50,3 +50,6 @@
 .publication-video-lecteur{display:block;width:100%;max-width:100%;border:0;border-radius:14px;background:#000}
 iframe.publication-video-lecteur{aspect-ratio:16/9}
 video.publication-video-lecteur{max-height:70vh}
+/* Suggestions sous une publication. */
+.publication-suggestions{margin-top:18px;display:grid;gap:12px}
+.publication-suggestions>h3{margin:0}

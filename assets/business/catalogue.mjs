@@ -2,7 +2,7 @@ import {requireClientAccount} from './client-access.mjs';
 // Catalogue public Commerces & Services — boutique en ligne adaptative (téléphone d'abord, panier latéral sur grand écran).
 // Recherche, onglets, puces de catégories, promotions, cartes « Ajouter au panier », fiches détaillées avec galerie,
 // Appeler / WhatsApp / Commander sur WhatsApp, panier (une boutique) avec retrait ou livraison, paiement à la réception.
-import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,totalPanier,lienPanierWhatsApp} from './catalogue-state.mjs';
+import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,totalPanier,lienPanierWhatsApp,similaires} from './catalogue-state.mjs';
 import {etatOuverture,distanceKm,libelleDistance,positionDe,lireFavoris,basculerFavori,messagePartage,lienPartageWhatsApp,lienFiche,sauverCatalogue,lireCatalogue,libelleDate}from './catalogue-extras.mjs';
 import {lirePosition}from './position-gps.mjs';
 import {transitoire}from './client.mjs';
@@ -192,7 +192,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
     const l=node('label',null,'cat-toggle'),c=node('input');c.type='checkbox';c.checked=f.disponibles;c.onchange=()=>{f.disponibles=c.checked;limite=PAGE;dessiner();};l.append(c,' Disponibles seulement');filtres.append(l);
    }
    // Tri : « Les plus proches » demande la position du téléphone (une seule fois, jamais enregistrée).
-   const triOptions=f.kind==='produits'||f.kind==='services'?[{value:'recent',label:'Plus récents'},{value:'prix',label:'Prix croissant'},{value:'prix-desc',label:'Prix décroissant'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}]:[{value:'recent',label:'Plus récents'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}];
+   const triOptions=f.kind==='produits'||f.kind==='services'?[{value:'recent',label:'Recommandés'},{value:'prix',label:'Prix croissant'},{value:'prix-desc',label:'Prix décroissant'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}]:[{value:'recent',label:'Recommandés'},{value:'proche',label:'Les plus proches'},{value:'nom',label:'Nom'}];
    select(filtres,'Trier',triOptions,f.tri,async v=>{
     if(v==='proche'&&!maPosition){say('Recherche de votre position…');try{const p=await lirePosition();maPosition={latitude:p.latitude,longitude:p.longitude};say('');}catch(e){say(e.message);f.tri='recent';dessiner();return;}}
     f.tri=v;limite=PAGE;dessiner();});
@@ -293,6 +293,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const groupe=(titre,rows)=>{if(!rows.length)return;lies.append(node('h4',titre));const g=node('div',null,'cat-grid');for(const r of rows)g.append(carte(r));lies.append(g);};
   if(x.kind==='boutiques')groupe('Produits de la boutique',idx.enfants(x.id,'produits'));
   if(x.kind==='professionnels'){groupe('Boutiques',idx.enfants(x.id,'boutiques'));groupe('Services',idx.enfants(x.id,'services'));}
+  if(x.kind==='produits')groupe('Produits similaires',similaires(idx,x));if(x.kind==='services')groupe('Services similaires',similaires(idx,x));
   if(lies.children.length)art.append(lies);
   art.append(sectionAvis(x));
   majPanier=()=>{for(const card of art.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);};
