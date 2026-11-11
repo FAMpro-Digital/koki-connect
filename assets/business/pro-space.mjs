@@ -266,7 +266,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   let where=null;gps(plus,p.localisation,status).then(g=>{where=g;});const photos=photosField(plus,{existing:p.photos||[],api,upload,imageSelection,status});
   const send=button(row?'Enregistrer la boutique':'Envoyer pour validation');body.append(send);
   send.onclick=()=>guarded(send,async()=>{
-   const values={name:name.value.trim(),village:village.value.trim(),photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Indiquez le village ou quartier.');
+   const values={name:name.value.trim(),village:village.value.trim(),photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Indiquez la localité.');
    if(category.value.trim())values.category=category.value.trim();if(address.value.trim())values.address=address.value.trim();if(hours.value.trim())values.hours=hours.value.trim();if(description.value.trim())values.description=description.value.trim();
    if(whatsapp.value.trim()){const w=C.normaliserTelephone(whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');values.whatsapp=w;}
    if(where?.value)values.location=where.value;
