@@ -36,5 +36,14 @@ function fichierPermis(value){try{const u=new URL(value);return !!config&&u.orig
 async function signerFichier(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(pdf|epub|mp3|m4a)$/.test(String(path)))throw Error('Fichier non disponible');const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};const signed=await request(c.url+'/storage/v1/object/sign/koki-livres/'+path,{method:'POST',headers,body:JSON.stringify({expiresIn:300})});const url=c.url+'/storage/v1'+signed.signedURL;if(!fichierPermis(url))throw Error('Lien de téléchargement refusé');return url;}
 async function renouvelerImage(path){if(!/^[a-f0-9-]+\/[a-f0-9-]+\.(jpg|png|webp)$/.test(String(path)))return null;const c=await settings(),row={image_path:path};await signerUne(c,{apikey:c.publishableKey,'Content-Type':'application/json'},row);return row.image;}
 async function detail(id){const c=await settings();const row=await request(c.url+'/rest/v1/rpc/koki_public_content',{method:'POST',headers:{apikey:c.publishableKey,'Content-Type':'application/json'},body:JSON.stringify({p_id:id})});if(!row||row.id!==id)throw Error('Publication indisponible');if(row.image_path)row.image=await renouvelerImage(row.image_path);return row;}
-root.KokiPublicFeed={empreinte,detail,renouvelerImage,charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
+// Vidéos d'une publication publiée : fichier du bucket privé koki-videos (lien temporaire d'une heure, signé seulement
+// pour les publications publiées) ou identifiant YouTube. Une vidéo de chaque sorte au plus : la plus récente.
+function videoPermise(value){try{const u=new URL(value);return !!config&&u.origin===config.url&&/^\/storage\/v1\/object\/sign\/koki-videos\/[a-f0-9-]+\/[a-f0-9-]+\.(mp4|webm)$/.test(u.pathname);}catch(_){return false;}}
+async function videos(id){if(!/^[a-f0-9-]{36}$/.test(String(id)))return [];const c=await settings();const headers={apikey:c.publishableKey,'Content-Type':'application/json'};
+const rows=await request(c.url+'/rest/v1/koki_content_media?content_id=eq.'+id+'&select=source,storage_path,youtube_video_id,created_at&order=created_at.desc&limit=10',{headers});if(!Array.isArray(rows))return [];
+const out=[];const yt=rows.find(r=>r&&r.source==='youtube'&&/^[A-Za-z0-9_-]{11}$/.test(r.youtube_video_id||''));if(yt)out.push({video_source:'youtube',youtube_video_id:yt.youtube_video_id});
+const up=rows.find(r=>r&&r.source==='upload'&&/^[a-f0-9-]+\/[a-f0-9-]+\.(mp4|webm)$/.test(r.storage_path||''));
+if(up){try{const signed=await request(c.url+'/storage/v1/object/sign/koki-videos/'+up.storage_path,{method:'POST',headers,body:JSON.stringify({expiresIn:3600})});const url=c.url+'/storage/v1'+signed.signedURL;if(videoPermise(url))out.push({video_source:'upload',video_url:url});}catch(_){}}
+return out;}
+root.KokiPublicFeed={empreinte,detail,videos,videoPermise,renouvelerImage,charger,imagePermise,cibleAutorisee,signerFichier,fichierPermis};
 })(globalThis);

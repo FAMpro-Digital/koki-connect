@@ -45,3 +45,6 @@
 .pro-choix-carte{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:96px;padding:14px;border:1.5px solid #d8e2da;border-radius:14px;background:#f7faf8;color:#17201b;font:inherit;cursor:pointer}
 .pro-choix-carte span:first-child{font-size:26px;line-height:1}.pro-choix-carte strong{font-size:16px}.pro-choix-carte span:last-child{font-size:14px;color:#4a564d;line-height:1.4}
 .pro-choix-carte:focus-visible{outline:3px solid #ff9500;outline-offset:2px}.pro-choix-actuel{border-color:#087a3d;background:#eaf6ef}
+/* Vidéo d'une publication : pleine largeur, format 16:9, sans débordement sur téléphone. */
+.publication-video{margin:12px 0}
+.publication-video-lecteur{display:block;width:100%;max-width:100%;aspect-ratio:16/9;border:0;border-radius:14px;background:#0b3b2a}
