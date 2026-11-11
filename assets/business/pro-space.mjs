@@ -156,7 +156,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   fields.profile=choice(panel,{legend:'Vous proposez',name:'type',value:v.profile,values:[{value:'Commerçant',label:'Des produits (commerce)'},{value:'Prestataire de services',label:'Des services (métier)'},{value:'Les deux',label:'Les deux'}]});
   fields.category=input(panel,{label:'Catégorie ou métier principal',value:v.category,required:true,list:[...C.categoriesCommerce,...C.metiers],hint:'Exemple : Alimentation, Couture, Plomberie.',attrs:{maxlength:'100'}});
   fields.phone=input(panel,{label:'Téléphone',type:'tel',value:v.phone,required:true,hint:'Exemple : 77 123 45 67. Le +221 est ajouté automatiquement.',attrs:{autocomplete:'tel'}});
-  fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,list:state.localites,hint:'Choisissez une suggestion ou saisissez votre propre localité.',attrs:{maxlength:'180'}});
+  fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,list:state.localites,hint:'Saisissez votre village ou quartier (des suggestions sont proposées, mais ce n’est pas obligatoire).',attrs:{maxlength:'180'}});
   const plus=node('details',null,'pro-autre');plus.open=!!edit;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));panel.append(plus);
   fields.address=input(plus,{label:'Adresse ou repère',value:v.address,hint:'Exemple : près du marché central.',attrs:{maxlength:'500'}});
   fields.zone=input(plus,{label:'Zone d’intervention (services)',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
@@ -255,7 +255,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
   const body=frame(row?'Modifier la boutique':'Nouvelle boutique');if(row?.statut==='Actif')body.append(node('p','Les changements de cette boutique sont appliqués directement après enregistrement. Ils ne créent pas de demande dans les validations.','pro-hint'));const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   const name=input(f,{label:'Nom de la boutique',value:p.nom||pro.nom||'',required:true,attrs:{maxlength:'180'}});
-  const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',list:state.localites,hint:'Choisissez une suggestion ou saisissez votre propre localité.',attrs:{maxlength:'180'}});
+  const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',list:state.localites,hint:'Saisissez votre village ou quartier (des suggestions sont proposées, mais ce n’est pas obligatoire).',attrs:{maxlength:'180'}});
   if(!row)f.append(node('p','Nom et village suffisent : vous pourrez ajouter le reste plus tard.','pro-hint'));
   const plus=node('details',null,'pro-autre');plus.open=!!row;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));f.append(plus);
   const category=input(plus,{label:'Catégorie',value:p.categorie||pro.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
