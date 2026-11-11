@@ -19,7 +19,7 @@ function nettoyer(row,ordre){
  if(!row||typeof row.id!=='string'||!CHAMPS[row.kind]||typeof row.nom!=='string')return null;
  // Ancien serveur sans statut : déjà filtré côté serveur. Sinon, statut publiable uniquement.
  if(row.statut!==undefined&&!C.estPublic(row.kind,row.statut))return null;
- const x={id:row.id,kind:row.kind,parent_id:typeof row.parent_id==='string'?row.parent_id:null,statut:row.statut??(row.kind==='produits'?(row.stock>0?'Disponible':'Épuisé'):row.kind==='services'?'Disponible':'Actif'),ordre};
+ const x={id:row.id,kind:row.kind,parent_id:typeof row.parent_id==='string'?row.parent_id:null,statut:row.statut??(row.kind==='produits'?(row.stock===0?'Épuisé':'Disponible'):row.kind==='services'?'Disponible':'Actif'),ordre};
  for(const k of CHAMPS[row.kind])if(row[k]!==undefined&&row[k]!==null)x[k]=row[k];
  if(x.localisation!==undefined)x.localisation=point(x.localisation)||undefined;
  for(const k of ['prix','ancien_prix','stock'])if(x[k]!==undefined&&!(Number.isInteger(x[k])&&x[k]>=0))delete x[k];
@@ -47,7 +47,7 @@ export function villageDe(x,idx){return x.village||idx.boutique(x)?.village||idx
 function recherche(x,idx){const b=idx.boutique(x),v=idx.vendeur(x);return texte([x.nom,x.categorie,x.description,x.zone,x.adresse,villageDe(x,idx),b&&b!==x?b.nom:'',v&&v!==x?v.nom:'',v?.categorie,v?.type].join(' '));}
 export function categories(idx,kind){return [...new Set(idx.liste.filter(x=>x.kind===kind&&x.categorie).map(x=>x.categorie))].sort((a,b)=>a.localeCompare(b,'fr'));}
 export function villages(idx,kind){return [...new Set(idx.liste.filter(x=>x.kind===kind).map(x=>villageDe(x,idx)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));}
-export function disponible(x){return x.kind==='produits'?x.statut==='Disponible'&&Number.isInteger(x.stock)&&x.stock>0:x.kind==='services'?x.statut==='Disponible':true;}
+export function disponible(x){return x.kind==='produits'?x.statut==='Disponible'&&(x.stock===undefined||x.stock>0):x.kind==='services'?x.statut==='Disponible':true;}
 export function filtrer(idx,{kind='produits',query='',categorie='',village='',disponibles=false,tri='recent',promo=false,ouvert=false,favoris=null,position=null,maintenant=new Date()}={}){
  const termes=texte(query).split(/\s+/).filter(Boolean);
  const res=idx.liste.filter(x=>x.kind===kind&&(!categorie||x.categorie===categorie)&&(!village||villageDe(x,idx)===village)&&(!disponibles||disponible(x))
@@ -69,7 +69,7 @@ export function contacts(x,idx){
 }
 export function lienCommande(x,idx,quantite=1){
  if(x.kind!=='produits'||!disponible(x))return null;const c=contacts(x,idx);if(!c?.numero)return null;
- const q=Math.max(1,Math.min(Number.isInteger(quantite)?quantite:1,x.stock));
+ const q=Math.max(1,Math.min(Number.isInteger(quantite)?quantite:1,x.stock??99));
  return C.lienCommandeWhatsApp(c.numero,{produit:x.nom,prix:x.prix,boutique:c.boutique||c.vendeur,quantite:q});
 }
 export function lienDevis(x,idx){if(x.kind!=='services')return null;const c=contacts(x,idx);if(!c?.numero)return null;return C.lienWhatsApp(c.numero,'Bonjour '+c.vendeur+', je souhaite un devis via Koki Connect pour : '+x.nom+'.');}

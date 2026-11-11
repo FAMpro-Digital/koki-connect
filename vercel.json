@@ -65,7 +65,8 @@
       "perf/cache-delai-reseau": false,
       "feature/livre-autorise-lecteur-pdf": false,
       "fix/formulaire-photo-reste-ouvert": false,
-      "fix/village-saisie-libre": false
+      "fix/village-saisie-libre": false,
+      "feature/stock-facultatif": false
     }
   },
   "headers": [

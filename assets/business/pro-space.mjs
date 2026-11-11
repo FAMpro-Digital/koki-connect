@@ -233,7 +233,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const products=state.produits.filter(x=>x.parent_id===row.id&&x.statut!=='Archivé');
   const section=node('section',null,'pro-shop-products');section.append(node('h5','Produits de la boutique ('+products.length+')'));
   if(!products.length)section.append(node('p','Aucun produit pour le moment.','pro-hint'));
-  for(const product of products){const item=listCard('produits',product,{details:[C.formaterPrix(product.payload.prix),'Stock : '+product.payload.stock],actions:[button('Modifier le produit',()=>go('produit',{id:product.id}),{kind:'secondary'})]});addPhotos(item,product);section.append(item);}
+  for(const product of products){const item=listCard('produits',product,{details:[C.formaterPrix(product.payload.prix),'Stock : '+(product.payload.stock??'non précisé')],actions:[button('Modifier le produit',()=>go('produit',{id:product.id}),{kind:'secondary'})]});addPhotos(item,product);section.append(item);}
   if(activeShops().some(b=>b.id===row.id))section.append(button('Ajouter un produit',()=>go('produit',{shopId:row.id}),{kind:'secondary'}));
   card.append(section);
   return card;
@@ -282,7 +282,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   if(!rows.length)body.append(node('p','Aucun produit pour le moment.'));
   for(const x of rows){const shop=state.boutiques.find(b=>b.id===x.parent_id);
    const price=node('p',null,'pro-price');price.append(node('strong',C.formaterPrix(x.payload.prix)));if(x.payload.ancien_prix){const s=node('s',C.formaterPrix(x.payload.ancien_prix));s.setAttribute('aria-label','Ancien prix '+C.formaterPrix(x.payload.ancien_prix));price.append(' ',s);}
-   const card=listCard('produits',x,{details:[shops.length>1||shop?.statut!=='Actif'?'Boutique : '+(shop?.payload.nom||'—')+(shop&&shop.statut!=='Actif'?' ('+shop.statut+')':''):null,'Stock : '+x.payload.stock],actions:[button('Modifier le prix ou le stock',()=>go('produit',{id:x.id}),{kind:'secondary'}),archiveButton('produits',x,'Il disparaîtra du catalogue.')]});
+   const card=listCard('produits',x,{details:[shops.length>1||shop?.statut!=='Actif'?'Boutique : '+(shop?.payload.nom||'—')+(shop&&shop.statut!=='Actif'?' ('+shop.statut+')':''):null,'Stock : '+(x.payload.stock??'non précisé')],actions:[button('Modifier le prix ou le stock',()=>go('produit',{id:x.id}),{kind:'secondary'}),archiveButton('produits',x,'Il disparaîtra du catalogue.')]});
    addPhotos(card,x);card.querySelector('h4').after(price);const d=availability('produits',x);if(d)card.querySelector('.pro-actions').before(d);
    const rapide=stockRapide(x);if(rapide)card.querySelector('.pro-actions').before(rapide);body.append(card);}
   archived(body,state.produits);
@@ -292,14 +292,14 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   if(row.statut==='Archivé'||row.payload.moderation_lock)return null;
   const p=row.payload,niveau=niveauStock(p.stock);
   const wrap=node('div',null,'pro-field pro-inline pro-stock-rapide');const id=nextId('st'),l=node('label','Stock');l.htmlFor=id;
-  const champ=node('input');champ.id=id;champ.type='number';champ.inputMode='numeric';champ.min='0';champ.step='1';champ.value=String(p.stock??0);champ.setAttribute('aria-label','Nouveau stock de '+p.nom);
+  const champ=node('input');champ.id=id;champ.type='number';champ.inputMode='numeric';champ.min='0';champ.step='1';champ.value=p.stock==null?'':String(p.stock);champ.placeholder='non précisé';champ.setAttribute('aria-label','Nouveau stock de '+p.nom);
   if(niveau==='bas'||niveau==='epuise'){const e=node('span',niveau==='epuise'?'Épuisé':'Stock bas','pro-pastille-stock');wrap.append(l,champ,e);}else wrap.append(l,champ);
   const ok=button('Mettre à jour',()=>guarded(ok,async()=>{
-   const n=champ.value.trim()===''?NaN:Number(champ.value);if(!Number.isInteger(n)||n<0)throw Error('Indiquez un stock entier, 0 ou plus.');
-   if(n===p.stock){status.textContent='Le stock n’a pas changé.';return;}
-   const values={name:p.nom,price:p.prix,stock:n,photos:p.photos||(p.image_path?[p.image_path]:[])};if(p.ancien_prix)values.old_price=p.ancien_prix;if(p.categorie)values.category=p.categorie;if(p.description)values.description=p.description;
+   const n=champ.value.trim()===''?null:Number(champ.value);if(n!==null&&(!Number.isInteger(n)||n<0))throw Error('Indiquez un stock entier, 0 ou plus, ou laissez vide.');
+   if(n===(p.stock??null)){status.textContent='Le stock n’a pas changé.';return;}
+   const values={name:p.nom,price:p.prix,...(n===null?{}:{stock:n}),photos:p.photos||(p.image_path?[p.image_path]:[])};if(p.ancien_prix)values.old_price=p.ancien_prix;if(p.categorie)values.category=p.categorie;if(p.description)values.description=p.description;
    const errors=C.verifierOffre('produits',{nom:values.name,prix:values.price,ancien_prix:values.old_price,stock:values.stock});if(errors.length)throw Error(errors.join(' '));
-   await api.saveProduct(values,row);await done('Stock de « '+p.nom+' » mis à jour : '+n+'.',0);
+   await api.saveProduct(values,row);await done('Stock de « '+p.nom+' » mis à jour : '+(n??'non précisé')+'.',0);
   }),{kind:'secondary'});
   wrap.append(ok);return wrap;
  }
@@ -331,13 +331,13 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const category=input(f,{label:'Catégorie',value:p.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
   const price=input(f,{label:'Prix (FCFA)',type:'number',value:p.prix??'',required:true});
   const old=input(f,{label:'Ancien prix (FCFA)',type:'number',value:p.ancien_prix??'',hint:'Pour afficher une promotion : doit être supérieur au prix.'});
-  const stock=input(f,{label:'Stock disponible',type:'number',value:p.stock??1,required:true,hint:'À 0, le produit s’affiche « Épuisé ».'});
+  const stock=input(f,{label:'Stock disponible',type:'number',value:p.stock??'',hint:'Facultatif. Laissez vide si vous ne comptez pas le stock. À 0, le produit s’affiche « Épuisé ».'});
   const description=input(f,{label:'Description',type:'textarea',value:p.description||'',attrs:{maxlength:'2000'}});
   const photos=photosField(f,{existing:p.photos||(p.image_path?[p.image_path]:[]),api,upload,imageSelection,status});
   const send=button(row?'Enregistrer le produit':'Envoyer le produit pour validation');body.append(send);
   send.onclick=()=>guarded(send,async()=>{
    const num=el=>el.value.trim()===''?null:Number(el.value);
-   const values={name:name.value.trim(),price:num(price),stock:num(stock)};if(num(old)!==null)values.old_price=num(old);
+   const values={name:name.value.trim(),price:num(price)};if(num(stock)!==null)values.stock=num(stock);if(num(old)!==null)values.old_price=num(old);
    const errors=C.verifierOffre('produits',{nom:values.name,prix:values.price,ancien_prix:values.old_price,stock:values.stock});if(errors.length)throw Error(errors.join(' '));
    if(category.value.trim())values.category=category.value.trim();if(description.value.trim())values.description=description.value.trim();
    values.photos=await photos.collect();if(shop)values.parent_id=shop.value;
