@@ -27,17 +27,20 @@ export function messageInscription(error){const code=String(error?.code||''),sta
 export function lienRetour(retour){try{const url=new URL(retour||location.origin+location.pathname,location.href);if(url.origin!==location.origin)return null;if(!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))return null;url.hash='';return url.href;}catch{return null;}}
 export function nextStatus(row){const chain=row.kind==='courses'?['En attente','Acceptée','Chauffeur en route','Course en cours','Terminée']:row.kind==='commandes'?(row.payload.mode==='retrait'?['Commande reçue','Confirmée','Préparation','Prête au retrait','Retirée']:['Commande reçue','Confirmée','Préparation','En livraison','Livrée']):['Demande envoyée','Acceptée','Prestataire en route','Service en cours','Terminé'];return chain[chain.indexOf(row.statut)+1]||null;}
 export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>crypto.randomUUID(),notify=()=>{},beforeLogout=async()=>{},sessionLocale=()=>null,secours={lire:()=>null,ecrire:()=>{},effacer:()=>{}}}={}){
- let recovering=false,voulue=false,restauration=false,sessionGeneration=0,sortieConfirmee=false;
+ let dernierCompte=null,recovering=false,voulue=false,restauration=false,sessionGeneration=0,sortieConfirmee=false;
  // Jamais de déconnexion automatique : seule la déconnexion demandée par le client ferme le compte.
  // Copie de secours de la session ; si elle disparaît sans demande du client, on la rétablit une fois.
  db?.auth.onAuthStateChange?.((event,session)=>{
   if(session?.refresh_token&&event!=='SIGNED_OUT'){try{secours.ecrire({access_token:session.access_token,refresh_token:session.refresh_token});}catch{}}
-  if(event==='SIGNED_OUT'){
+  if(event==='SIGNED_OUT'){dernierCompte=null;
    if(voulue){sortieConfirmee=true;try{secours.effacer();}catch{}}
    else if(!restauration){let c=null;try{c=secours.lire();}catch{}
     if(c?.refresh_token){restauration=true;setTimeout(async()=>{try{const r=await db.auth.setSession(c);if(r?.error&&!transitoire(r.error))secours.effacer();}catch{}finally{restauration=false;}},0);}}
   }
-  if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){setTimeout(()=>emit({state:'signed-in'}),0);}});
+  if(event==='PASSWORD_RECOVERY'){recovering=true;queueMicrotask(()=>emit({state:'recovery'}));}else if(event==='SIGNED_IN'){
+   // supabase-js renvoie SIGNED_IN chaque fois que l'application revient au premier plan (retour de la galerie ou de l'appareil photo) :
+   // seul un changement de compte doit recharger l'écran, sinon le formulaire en cours (produit, photos…) est effacé.
+   const id=session?.user?.id||null;if(id&&id===dernierCompte)return;dernierCompte=id;setTimeout(()=>emit({state:'signed-in'}),0);}});
  const UUID=/^[0-9a-f-]{36}$/,EVENEMENTS=['vue','appel','whatsapp','commander','partage','panier','devis'],deja=new Set();let suiviIndisponible=false;
  let user=null,mediaFolder=null;const pending=new Map(),listeners=new Set(),waiters=[];let busy=false;const emit=value=>{notify(value);for(const listener of listeners)listener(value);};
  const requireReady=()=>{if(!enabled||!db)throw Error('Service connecté en préparation : activation après validation des migrations.');};
