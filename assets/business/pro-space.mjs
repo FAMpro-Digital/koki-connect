@@ -58,7 +58,7 @@ function photosField(host,{existing=[],api,upload,imageSelection,status}){
 }
 async function gps(host,initial,status){
  let value=initial||null;const box=node('div',null,'pro-gps');const info=node('p',null,'pro-hint');info.setAttribute('role','status');
- const show=()=>{info.textContent=value?'Position enregistrée : '+value.latitude.toFixed(5)+', '+value.longitude.toFixed(5):'Aucune position : seul votre village ou quartier sera affiché.';remove.hidden=!value;};
+ const show=()=>{info.textContent=value?'Position enregistrée : '+value.latitude.toFixed(5)+', '+value.longitude.toFixed(5):'Aucune position : seule votre localité sera affiché.';remove.hidden=!value;};
  const take=button('Ajouter ma position actuelle',async()=>{take.disabled=true;try{if(typeof window.obtenirPositionActuelle!=='function')throw Error('Localisation indisponible sur cet appareil.');const p=await window.obtenirPositionActuelle();value={latitude:Number(p.coords.latitude.toFixed(6)),longitude:Number(p.coords.longitude.toFixed(6))};show();status.textContent='Position ajoutée. Vérifiez qu’elle correspond bien à votre activité.';}catch(e){status.textContent=e.message||'Position indisponible.';}finally{take.disabled=false;}},{kind:'secondary'});
  const remove=button('Retirer la position',()=>{value=null;show();},{kind:'secondary'});
  box.append(node('p','Localisation GPS (facultative)','pro-label'),info,take,remove);host.append(box);show();
@@ -156,7 +156,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   fields.profile=choice(panel,{legend:'Vous proposez',name:'type',value:v.profile,values:[{value:'Commerçant',label:'Des produits (commerce)'},{value:'Prestataire de services',label:'Des services (métier)'},{value:'Les deux',label:'Les deux'}]});
   fields.category=input(panel,{label:'Catégorie ou métier principal',value:v.category,required:true,list:[...C.categoriesCommerce,...C.metiers],hint:'Exemple : Alimentation, Couture, Plomberie.',attrs:{maxlength:'100'}});
   fields.phone=input(panel,{label:'Téléphone',type:'tel',value:v.phone,required:true,hint:'Exemple : 77 123 45 67. Le +221 est ajouté automatiquement.',attrs:{autocomplete:'tel'}});
-  fields.village=input(panel,{label:'Village ou quartier',required:true,value:v.village,list:state.localites,hint:'Choisissez une suggestion ou saisissez votre propre localité.',attrs:{maxlength:'180'}});
+  fields.village=input(panel,{label:'Localité',required:true,value:v.village,list:state.localites,hint:'Saisissez votre localité (des suggestions sont proposées, mais ce n’est pas obligatoire).',attrs:{maxlength:'180'}});
   const plus=node('details',null,'pro-autre');plus.open=!!edit;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));panel.append(plus);
   fields.address=input(plus,{label:'Adresse ou repère',value:v.address,hint:'Exemple : près du marché central.',attrs:{maxlength:'500'}});
   fields.zone=input(plus,{label:'Zone d’intervention (services)',value:v.zone,hint:'Exemple : Koki et villages voisins.',attrs:{maxlength:'180'}});
@@ -171,7 +171,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
    v.name=fields.name.value.trim();v.profile=fields.profile.value;v.category=fields.category.value.trim();
    if(!v.name||!v.category)throw Error('Indiquez le nom et la catégorie de votre activité.');
    const t=C.normaliserTelephone(fields.phone.value);if(!t)throw Error('Téléphone invalide. Exemple : 77 123 45 67.');v.phone=t;
-   v.village=fields.village.value.trim();if(!v.village)throw Error('Indiquez votre village ou quartier.');
+   v.village=fields.village.value.trim();if(!v.village)throw Error('Indiquez votre localité.');
    v.sameWhatsapp=cb.checked;if(!v.sameWhatsapp){const w=C.normaliserTelephone(fields.whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');v.whatsapp=w;}
    v.address=fields.address.value.trim();if(v.address&&v.address.length<3)throw Error('Adresse trop courte.');
    v.zone=fields.zone.value.trim();v.hours=fields.hours.value.trim();if(v.hours&&v.hours.length<3)throw Error('Horaires trop courts.');
@@ -255,7 +255,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const row=state.boutiques.find(b=>b.id===id)||null,p=row?.payload||{},pro=state.profile.payload;
   const body=frame(row?'Modifier la boutique':'Nouvelle boutique');if(row?.statut==='Actif')body.append(node('p','Les changements de cette boutique sont appliqués directement après enregistrement. Ils ne créent pas de demande dans les validations.','pro-hint'));const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   const name=input(f,{label:'Nom de la boutique',value:p.nom||pro.nom||'',required:true,attrs:{maxlength:'180'}});
-  const village=input(f,{label:'Village ou quartier',required:true,value:p.village||pro.village||'',list:state.localites,hint:'Choisissez une suggestion ou saisissez votre propre localité.',attrs:{maxlength:'180'}});
+  const village=input(f,{label:'Localité',required:true,value:p.village||pro.village||'',list:state.localites,hint:'Saisissez votre localité (des suggestions sont proposées, mais ce n’est pas obligatoire).',attrs:{maxlength:'180'}});
   if(!row)f.append(node('p','Nom et village suffisent : vous pourrez ajouter le reste plus tard.','pro-hint'));
   const plus=node('details',null,'pro-autre');plus.open=!!row;plus.append(node('summary','Ajouter plus d’informations (facultatif)'));f.append(plus);
   const category=input(plus,{label:'Catégorie',value:p.categorie||pro.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
@@ -266,7 +266,7 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   let where=null;gps(plus,p.localisation,status).then(g=>{where=g;});const photos=photosField(plus,{existing:p.photos||[],api,upload,imageSelection,status});
   const send=button(row?'Enregistrer la boutique':'Envoyer pour validation');body.append(send);
   send.onclick=()=>guarded(send,async()=>{
-   const values={name:name.value.trim(),village:village.value.trim(),photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Indiquez le village ou quartier.');
+   const values={name:name.value.trim(),village:village.value.trim(),photos:await photos.collect()};if(!values.name)throw Error('Indiquez le nom de la boutique.');if(!values.village)throw Error('Indiquez la localité.');
    if(category.value.trim())values.category=category.value.trim();if(address.value.trim())values.address=address.value.trim();if(hours.value.trim())values.hours=hours.value.trim();if(description.value.trim())values.description=description.value.trim();
    if(whatsapp.value.trim()){const w=C.normaliserTelephone(whatsapp.value);if(!w)throw Error('Numéro WhatsApp invalide.');values.whatsapp=w;}
    if(where?.value)values.location=where.value;

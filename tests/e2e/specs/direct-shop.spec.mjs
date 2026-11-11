@@ -27,7 +27,7 @@ test('les modifications de boutique restent visibles dans le compte professionne
  const host=page.locator('#profil-pro');
  await host.getByRole('button',{name:'Modifier la boutique',exact:true}).click();
  await host.getByLabel('Nom de la boutique',{exact:true}).fill('Boutique mise à jour');
- await host.getByLabel('Village ou quartier',{exact:true}).fill('Diourbel');
+ await host.getByLabel('Localité',{exact:true}).fill('Diourbel');
  await host.getByLabel('Description (facultatif)',{exact:true}).fill('Nouvelle description enregistrée');
  await host.getByRole('button',{name:'Enregistrer la boutique',exact:true}).click();
  await expect(host.getByRole('heading',{name:'Boutique mise à jour',exact:true})).toBeVisible();
@@ -36,7 +36,7 @@ test('les modifications de boutique restent visibles dans le compte professionne
  await expect(host.getByRole('img',{name:'Photo de Boutique mise à jour',exact:true})).toBeVisible();
  await expect(host.getByRole('status')).toContainText('sans nouvelle validation');
  await host.getByRole('button',{name:'Modifier la boutique',exact:true}).click();
- await expect(host.getByLabel('Village ou quartier',{exact:true})).toHaveValue('Diourbel');
+ await expect(host.getByLabel('Localité',{exact:true})).toHaveValue('Diourbel');
 });
 
 test('partage de la boutique active et copie du lien avec repli manuel',async({page})=>{

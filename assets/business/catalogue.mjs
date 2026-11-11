@@ -187,7 +187,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    puces.replaceChildren();puces.setAttribute('aria-label',f.kind==='services'?'Métiers':'Catégories');puces.hidden=!cats.length;
    for(const c of ['',...cats]){const b=button(c||'Tout',()=>{f.categorie=c;limite=PAGE;dessiner();},'chip');b.setAttribute('aria-pressed',String(f.categorie===c));puces.append(b);}
    filtres.replaceChildren();
-   if(vils.length>1||f.village)select(filtres,'Village ou quartier',[{value:'',label:'Tous'},...vils],f.village,v=>{f.village=v;limite=PAGE;dessiner();});
+   if(vils.length>1||f.village)select(filtres,'Localité',[{value:'',label:'Tous'},...vils],f.village,v=>{f.village=v;limite=PAGE;dessiner();});
    if(f.kind==='produits'||f.kind==='services'){
     const l=node('label',null,'cat-toggle'),c=node('input');c.type='checkbox';c.checked=f.disponibles;c.onchange=()=>{f.disponibles=c.checked;limite=PAGE;dessiner();};l.append(c,' Disponibles seulement');filtres.append(l);
    }
@@ -223,7 +223,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
  function infos(x){
   const dl=node('dl',null,'cat-infos');const add=(k,v)=>{if(v){dl.append(node('dt',k),node('dd',String(v)));}};
   add(x.kind==='services'?'Métier':'Catégorie',x.categorie);if(x.kind==='professionnels')add('Activité',x.type);
-  add('Village ou quartier',villageDe(x,idx));add('Adresse',x.adresse);add('Horaires',x.horaires||idx.boutique(x)?.horaires||(x.kind!=='professionnels'?idx.vendeur(x)?.horaires:''));
+  add('Localité',villageDe(x,idx));add('Adresse',x.adresse);add('Horaires',x.horaires||idx.boutique(x)?.horaires||(x.kind!=='professionnels'?idx.vendeur(x)?.horaires:''));
   add('Zone d’intervention',x.zone);if(x.kind==='produits')add('Stock',disponible(x)?x.stock+' disponible'+(x.stock>1?'s':''):'Épuisé');
   return dl.children.length?dl:null;
  }
