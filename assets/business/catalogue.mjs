@@ -90,7 +90,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
 
  function compteur(x,classe){
   const q=quantite(x.id);const w=node('div',null,'cat-stepper '+(classe||''));
-  const moins=button('−',()=>changer(x.id,q-1),'step'),plus=button('+',()=>q<x.stock?changer(x.id,q+1):say('Stock indiqué atteint.'),'step');
+  const moins=button('−',()=>changer(x.id,q-1),'step'),plus=button('+',()=>q<(x.stock??99)?changer(x.id,q+1):say('Stock indiqué atteint.'),'step');
   moins.setAttribute('aria-label','Retirer un « '+x.nom+' »');plus.setAttribute('aria-label','Ajouter un « '+x.nom+' »');
   const out=node('span',null,'cat-stepper-n');out.append(node('strong',String(q)),node('span',' dans le panier','cat-sr'));w.append(moins,out,plus);return w;
  }
@@ -224,7 +224,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const dl=node('dl',null,'cat-infos');const add=(k,v)=>{if(v){dl.append(node('dt',k),node('dd',String(v)));}};
   add(x.kind==='services'?'Métier':'Catégorie',x.categorie);if(x.kind==='professionnels')add('Activité',x.type);
   add('Localité',villageDe(x,idx));add('Adresse',x.adresse);add('Horaires',x.horaires||idx.boutique(x)?.horaires||(x.kind!=='professionnels'?idx.vendeur(x)?.horaires:''));
-  add('Zone d’intervention',x.zone);if(x.kind==='produits')add('Stock',disponible(x)?x.stock+' disponible'+(x.stock>1?'s':''):'Épuisé');
+  add('Zone d’intervention',x.zone);if(x.kind==='produits')add('Stock',!disponible(x)?'Épuisé':Number.isInteger(x.stock)?x.stock+' disponible'+(x.stock>1?'s':''):null);
   return dl.children.length?dl:null;
  }
  function liens(x,qte,apresCommande){
@@ -277,7 +277,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   let qte=1;const contact=node('div');
   const dessinerContact=()=>{contact.replaceChildren(liens(x,qte,boutonPanier));};
   if(x.kind==='produits'&&disponible(x)){
-   const w=node('div',null,'cat-qty'),qid=nid('n'),l=node('label','Quantité'),moins=button('−',()=>{if(qte>1){qte--;maj();}},'step'),plus=button('+',()=>{if(qte<Math.min(x.stock,99)){qte++;maj();}},'step'),out=node('output','1');
+   const w=node('div',null,'cat-qty'),qid=nid('n'),l=node('label','Quantité'),moins=button('−',()=>{if(qte>1){qte--;maj();}},'step'),plus=button('+',()=>{if(qte<Math.min(x.stock??99,99)){qte++;maj();}},'step'),out=node('output','1');
    l.htmlFor=qid;out.id=qid;moins.setAttribute('aria-label','Diminuer la quantité');plus.setAttribute('aria-label','Augmenter la quantité');
    const maj=()=>{out.textContent=String(qte);dessinerContact();};w.append(l,moins,out,plus);corps.append(w);
   }
