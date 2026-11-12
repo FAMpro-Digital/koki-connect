@@ -12,7 +12,7 @@
   const like=button('♡ J’aime',async()=>{like.disabled=true;status.replaceChildren();try{const current=await api({p_content:x.id});const data=await api({p_content:x.id,p_action:'like',p_liked:!current.liked});publish(x.id,data);}catch(e){error(status,e);}finally{like.disabled=false;}});like.dataset.socialLike=x.id;like.setAttribute('aria-pressed','false');
   host.append(like,button('💬 Commenter',open));
   // Partage : feuille de partage du téléphone, sinon WhatsApp. Le lien rouvre la publication dans l'application.
-  if(/^[a-f0-9-]{36}$/.test(String(x.id))){const url=location.origin+'/?publication='+x.id,texte=String(x.titre||'Koki Connect');
+  if(/^[a-f0-9-]{36}$/.test(String(x.id))){const url=location.origin+'/p/'+x.id,texte=String(x.titre||'Koki Connect');
    host.append(button('↗ Partager',async()=>{try{if(navigator.share){await navigator.share({title:texte,text:texte,url});return;}}catch(e){if(e&&e.name==='AbortError')return;}
     window.open('https://wa.me/?text='+encodeURIComponent(texte+'\n'+url),'_blank','noopener');}));}
   host.append(status);scheduleSummary(x.id);return host;

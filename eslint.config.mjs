@@ -22,6 +22,7 @@ export default [
   { files: ['assets/**/*.mjs', 'assets/business/business-state.js'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.browser }, rules: regles },
   { files: ['scripts/**/*.mjs', 'eslint.config.mjs', 'tests/e2e/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   { files: ['tests/fixtures/**/*.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.node } }, rules: regles },
+  { files: ['api/**/*.js'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   { files: ['tests/**/*.cjs'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   // Ces fonctions sont des points d’entrée globaux consommés par le HTML et les modules différés.
   { files: ['assets/portail/accueil.js', 'assets/portail/app.js', 'assets/transport/app.js', 'tests/transport-interface.test.cjs'], rules: { 'no-unused-vars': 'off' } },
