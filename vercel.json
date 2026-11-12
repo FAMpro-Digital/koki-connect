@@ -70,7 +70,8 @@
       "feature/prix-facultatif": false,
       "feature/videos-publiques": false,
       "feature/video-accueil": false,
-      "feature/algorithme-recommandations": false
+      "feature/algorithme-recommandations": false,
+      "feature/accueil-attractif": false
     }
   },
   "headers": [
