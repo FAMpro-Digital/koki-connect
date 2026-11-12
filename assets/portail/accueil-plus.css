@@ -71,3 +71,8 @@
 .bienvenue-passer { border: 1px solid #cfdcd5; background: #ffffff; color: #33423b; }
 .bienvenue-suite { border: 0; background: #0b5a3c; color: #ffffff; }
 .bienvenue-actions button:focus-visible { outline: 3px solid #f28c28; outline-offset: 2px; }
+
+/* ----- Accès aux vidéos depuis l'accueil ----- */
+.accueil-videos { margin-top: 10px; }
+.accueil-videos-bouton { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 14px; background: #f28c28; color: #17201b; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
+.accueil-videos-bouton:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 3px; }

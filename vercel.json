@@ -71,9 +71,13 @@
       "feature/videos-publiques": false,
       "feature/video-accueil": false,
       "feature/algorithme-recommandations": false,
-      "feature/accueil-attractif": false
+      "feature/accueil-attractif": false,
+      "feature/partage-apercu-videos": false
     }
   },
+  "rewrites": [
+    { "source": "/p/:id", "destination": "/api/partage?id=:id" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
