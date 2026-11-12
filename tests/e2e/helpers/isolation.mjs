@@ -63,6 +63,8 @@ export const test = base.extend({
   // Journal de ce que la page a tenté ; vérifié automatiquement à la fin de chaque test.
   journal: [async ({ context }, use) => {
     const journal = { flux: 0, commandes: [], authentifications: 0, nonPrevues: [], interdites: [], externesBloquees: [] };
+    // Le message de bienvenue (première ouverture) masquerait la page : il est marqué comme déjà vu pour les parcours.
+    await context.addInitScript(() => { try { localStorage.setItem('koki.bienvenue.v1', 'vu'); } catch (e) { /* stockage indisponible */ } });
     await context.route('**/*', (route) => {
       const url = new URL(route.request().url());
       const hote = url.hostname;

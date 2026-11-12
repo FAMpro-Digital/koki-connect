@@ -43,3 +43,31 @@
 .pastille-notifs[hidden] { display: none; }
 
 @media (prefers-reduced-motion: no-preference) { #portail-une { scroll-behavior: smooth; } }
+
+/* ----- Aujourd'hui à Koki : heures de prière et pharmacie de garde ----- */
+.infos-jour { margin-top: 10px; padding: 12px; border-radius: 14px; background: #ffffff; border: 1px solid #d9e6df; color: #17201b; }
+.infos-jour-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 14px; }
+.infos-jour-tete small { color: #5b6b63; font-size: 11px; }
+.infos-jour-prieres { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.infos-jour-priere { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 10px; background: #f1f6f3; font-size: 11px; color: #33423b; min-width: 0; }
+.infos-jour-priere strong { font-size: 14px; color: #0b5a3c; }
+.infos-jour-priere.prochaine { background: #0b5a3c; color: #ffffff; }
+.infos-jour-priere.prochaine strong { color: #ffffff; }
+.infos-jour-garde { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; margin-top: 10px; padding: 8px 12px; border: 1px solid #f0c9a0; border-radius: 12px; background: #fff6ec; color: #7a3d00; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.infos-jour-garde strong { text-align: right; overflow-wrap: anywhere; }
+.infos-jour-garde:focus-visible { outline: 3px solid #17201b; outline-offset: 2px; }
+
+/* ----- Bienvenue (première ouverture) ----- */
+.bienvenue { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6, 40, 27, .72); }
+.bienvenue-boite { width: min(100%, 380px); padding: 26px 22px 20px; border-radius: 22px; background: #ffffff; color: #17201b; text-align: center; box-shadow: 0 18px 48px rgba(0, 0, 0, .28); border-top: 6px solid #f28c28; }
+.bienvenue-icone { font-size: 52px; line-height: 1; margin-bottom: 10px; }
+.bienvenue-boite h2 { margin: 0 0 8px; font-size: 21px; color: #0b5a3c; }
+.bienvenue-boite p { margin: 0; font-size: 15px; line-height: 1.5; min-height: 4.5em; }
+.bienvenue-points { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
+.bienvenue-points span { width: 9px; height: 9px; border-radius: 50%; background: #cfdcd5; }
+.bienvenue-points span.actif { background: #f28c28; width: 22px; border-radius: 6px; }
+.bienvenue-actions { display: flex; gap: 10px; }
+.bienvenue-actions button { flex: 1; min-height: 48px; border-radius: 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.bienvenue-passer { border: 1px solid #cfdcd5; background: #ffffff; color: #33423b; }
+.bienvenue-suite { border: 0; background: #0b5a3c; color: #ffffff; }
+.bienvenue-actions button:focus-visible { outline: 3px solid #f28c28; outline-offset: 2px; }
