@@ -72,7 +72,8 @@
       "feature/video-accueil": false,
       "feature/algorithme-recommandations": false,
       "feature/accueil-attractif": false,
-      "feature/partage-apercu-videos": false
+      "feature/partage-apercu-videos": false,
+      "fix/reseau-coupe-session": false
     }
   },
   "rewrites": [

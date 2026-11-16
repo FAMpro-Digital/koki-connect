@@ -25,6 +25,8 @@ export async function renderNotifications(host,db,{vapidPublicKey='',smsEnabled=
  if(!db){status.textContent='Connectez-vous pour consulter vos notifications personnelles.';return;}
  const userResponse=await db.auth.getUser();const user=userResponse.data?.user;
  if(host.notificationRender!==renderId)return;
+ // Connexion coupée pendant la vérification du compte : message réseau, pas une invitation à se reconnecter.
+ if(userResponse.error&&(userResponse.error.name==='AuthRetryableFetchError'||userResponse.error.status===0||/Failed to fetch|NetworkError|Load failed|fetch failed/i.test(String(userResponse.error.message||'')))){status.textContent='Connexion internet indisponible. Vérifiez votre connexion puis réessayez.';return;}
  if(userResponse.error||!user){status.textContent='Connectez-vous dans Profil pour consulter vos notifications personnelles.';return;}
  let disposed=false;
  let timer;const listener=db.auth.onAuthStateChange((event,session)=>{if(session?.user?.id!==user.id){disposed=true;clearInterval(timer);host.replaceChildren(element('p','Connectez-vous pour consulter vos notifications personnelles.'));listener.data.subscription.unsubscribe();}});
