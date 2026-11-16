@@ -6,7 +6,7 @@ import {isProcessedImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver} from './business-state.js';
 import {indexCatalogue} from './catalogue-state.mjs';
 import {imageSelection} from './ui.mjs';
-import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE} from './client.mjs';
+import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE,transitoire} from './client.mjs';
 // Message d'erreur affichable : jamais d'erreur technique brute (« TypeError: Failed to fetch »…).
 const lisible=e=>HORS_LIGNE.test(String(e?.message||e||''))||e?.name==='TypeError'?MESSAGE_HORS_LIGNE:(e?.message||'Une erreur est survenue. Réessayez.');
 import {node,action,form,accountPanel,history,professional,retries} from './ui.mjs';
@@ -245,6 +245,8 @@ window.KokiSocialAPI=async args=>{
  await initialise();if(!db)throw Error('Interactions momentanément indisponibles.');
  if(args.p_action&&args.p_action!=='read'){
   const {data,error}=await db.auth.getUser();
+  // Connexion coupée (ERR_CONNECTION_CLOSED, réseau faible…) : ce n'est pas une déconnexion, on le dit sans demander de se reconnecter.
+  if(error&&transitoire(error)){const e=Error(MESSAGE_HORS_LIGNE);e.code='RESEAU';throw e;}
   if(error||!data?.user||data.user.is_anonymous){const e=Error('Connectez-vous pour aimer ou commenter.');e.code='LOGIN';throw e;}
  }
  const {data,error}=await db.rpc('koki_content_social',args);
