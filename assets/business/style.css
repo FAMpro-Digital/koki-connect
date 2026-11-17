@@ -224,3 +224,9 @@
 
 .pro-shop-photos{display:flex;gap:8px;overflow-x:auto;margin:12px 0}.pro-shop-photos img{width:7.5rem;height:7.5rem;flex:none;object-fit:contain;border-radius:12px;background:#f5f7f6}
 .pro-shop-products{margin-top:16px;border-top:1px solid #d8dce1;padding-top:12px}.pro-shop-products h5{font-size:1rem;margin:0 0 12px}.pro-shop-products .pro-card{background:#fff}
+
+/* Signaler une fiche : bouton discret, formulaire replié sous la rangée Favori / Partager. */
+#vue-commerce .business-panel .cat-share .cat-signaler{color:#5b6168}
+#vue-commerce .business-panel .cat-signal{display:grid;gap:8px;margin:0 0 12px;padding:12px;border:1px solid #d8dce1;border-radius:12px;background:#fff}
+#vue-commerce .business-panel .cat-signal[hidden]{display:none}
+#vue-commerce .business-panel .cat-signal textarea,#vue-commerce .business-panel .cat-signal select{width:100%}
