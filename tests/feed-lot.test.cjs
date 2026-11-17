@@ -73,7 +73,7 @@ test('les liens valides sont réutilisés puis renouvelés après expiration', a
   const initial = count();
   await ctx.KokiPublicFeed.charger();
   assert.equal(count(), initial);
-  now += 111000;
+  now += 23 * 3600 * 1000 + 1000;
   await ctx.KokiPublicFeed.charger();
   assert.ok(count() > initial);
 });
