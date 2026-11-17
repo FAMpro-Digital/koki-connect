@@ -10,6 +10,8 @@ export async function enablePush(db,vapidPublicKey,permission=Notification.reque
  window.dispatchEvent(new Event('koki-push-enabled'));return true;
 }
 export async function disablePush(db){
+ // Application iPhone : le jeton APNs est retiré du compte, puis du téléphone.
+ if(globalThis.KokiNatif?.estApp?.()){await globalThis.KokiNatif.desactiverNotifications?.(async t=>{const {error}=await db.rpc('koki_apns_unregister',{p_token:t});if(error)throw error;});return;}
  if(!('serviceWorker' in navigator))return;
  const registration=await navigator.serviceWorker.getRegistration();
  const subscription=await registration?.pushManager?.getSubscription();
@@ -47,6 +49,14 @@ export async function renderNotifications(host,db,{vapidPublicKey='',smsEnabled=
  host.append(button('Actualiser',refresh));
  const settings=element('section');settings.className='card';settings.append(element('h4','Recevoir mes alertes'));host.append(settings);
  if(!vapidPublicKey)settings.append(element('p','Les alertes sur téléphone seront disponibles prochainement.'));
+ else if(globalThis.KokiNatif?.notificationsDisponibles?.()){
+  const N=globalThis.KokiNatif,enregistrer=async t=>{const {error}=await db.rpc('koki_apns_register',{p_token:t});if(error)throw Error(error.code==='PGRST202'?'Les notifications de l’application ne sont pas encore ouvertes sur le serveur.':error.message||'Enregistrement impossible.');};
+  settings.append(element('p',N.notificationsActives()?'Notifications activées sur cet iPhone.':'Recevez une alerte quand une commande, une course ou une publication vous concerne.'));
+  settings.append(button('Activer les notifications sur cet iPhone',async()=>{try{await N.activerNotifications(enregistrer);status.textContent='Notifications activées sur cet iPhone.';}catch(e){status.textContent=e.message;}}),
+   button('Désactiver sur cet iPhone',async()=>{try{await disablePush(db);status.textContent='Notifications désactivées sur cet iPhone.';}catch{status.textContent='Notifications coupées sur cet iPhone ; le serveur sera mis à jour à la prochaine connexion.';}}));
+  // Le jeton d'un iPhone peut changer (restauration, mise à jour) : il est renvoyé discrètement à chaque ouverture.
+  if(N.notificationsActives())N.activerNotifications(enregistrer).catch(()=>{});
+ }
  else if(globalThis.KokiNatif?.estApp?.())settings.append(element('p','Les notifications de l’application arrivent dans une prochaine version. En attendant, vos alertes restent visibles ici.'));
  else if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))settings.append(element('p','Sur iPhone : ajoutez Koki Connect à l’écran d’accueil, puis ouvrez son icône pour activer les notifications.'));
  else{

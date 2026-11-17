@@ -35,7 +35,41 @@
     await FO.openFile({ path: ecrit.uri, mimeType: blob.type || undefined });
     return true;
   }
-  var api = { SITE: SITE, estApp: estApp, plateforme: plateforme, estIOS: estIOS, siteUrl: siteUrl, ouvrirFichier: ouvrirFichier };
+  // Notifications de l'application iPhone (APNs, extension @capacitor/push-notifications). Le jeton de l'appareil est
+  // gardé sur le téléphone pour pouvoir le retirer du compte à la désactivation ou à la déconnexion.
+  var CLE_JETON = 'koki.apns.jeton';
+  function push() { var c = cap(); return (estIOS() && c && c.Plugins && c.Plugins.PushNotifications) || null; }
+  function lireJeton() { try { return root.localStorage.getItem(CLE_JETON) || ''; } catch (_) { return ''; } }
+  function ecrireJeton(v) { try { if (v) root.localStorage.setItem(CLE_JETON, v); else root.localStorage.removeItem(CLE_JETON); } catch (_) { /* stockage indisponible */ } }
+  function notificationsDisponibles() { return !!push(); }
+  function notificationsActives() { return !!push() && !!lireJeton(); }
+  // Demande l'autorisation (une seule fois par iOS), récupère le jeton et l'enregistre sur le compte via « enregistrer ».
+  async function activerNotifications(enregistrer) {
+    var P = push(); if (!P) return false;
+    var perm = await P.checkPermissions();
+    if (perm.receive !== 'granted') perm = await P.requestPermissions();
+    if (perm.receive !== 'granted') throw new Error('Notifications refusées. Autorisez-les dans Réglages › Koki Connect › Notifications.');
+    var jeton = await new Promise(function (ok, ko) {
+      var fini = false, poignees = [];
+      function stop() { fini = true; poignees.forEach(function (h) { Promise.resolve(h).then(function (x) { if (x && x.remove) x.remove(); }); }); }
+      poignees.push(P.addListener('registration', function (t) { if (!fini) { stop(); ok(String(t && t.value || '')); } }));
+      poignees.push(P.addListener('registrationError', function () { if (!fini) { stop(); ko(new Error('Inscription aux notifications impossible. Réessayez plus tard.')); } }));
+      setTimeout(function () { if (!fini) { stop(); ko(new Error('Le téléphone ne répond pas. Vérifiez la connexion puis réessayez.')); } }, 15000);
+      Promise.resolve(P.register()).catch(function (e) { if (!fini) { stop(); ko(e); } });
+    });
+    if (!/^[0-9a-fA-F]{64,200}$/.test(jeton)) throw new Error('Jeton de notification invalide.');
+    await enregistrer(jeton.toLowerCase());
+    ecrireJeton(jeton.toLowerCase());
+    return true;
+  }
+  // Retire le jeton du compte (via « retirer ») puis du téléphone. Sans effet hors de l'application.
+  async function desactiverNotifications(retirer) {
+    var P = push(), jeton = lireJeton(); if (!P) return false;
+    try { if (jeton && retirer) await retirer(jeton); } finally { ecrireJeton(''); try { await P.unregister(); } catch (_) { /* déjà désinscrit */ } }
+    return true;
+  }
+  var api = { SITE: SITE, estApp: estApp, plateforme: plateforme, estIOS: estIOS, siteUrl: siteUrl, ouvrirFichier: ouvrirFichier,
+    notificationsDisponibles: notificationsDisponibles, notificationsActives: notificationsActives, activerNotifications: activerNotifications, desactiverNotifications: desactiverNotifications };
   root.KokiNatif = api;
   try { if (estApp()) root.document.documentElement.classList.add('koki-app', 'koki-app-' + plateforme()); } catch (_) { /* sans DOM */ }
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

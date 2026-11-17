@@ -19,7 +19,8 @@ Adaptations du code, sans effet sur le site web :
 - « Continuer avec Google » est masqué dans l'application iOS (règle Apple 4.8) ;
 - les liens partagés pointent toujours vers www.kokiconnect.com ;
 - les livres PDF s'ouvrent aussi dans la visionneuse de l'iPhone ;
-- l'invitation « Ajouter à l'écran d'accueil » et le Web Push sont désactivés dans l'application (notifications natives à venir).
+- l'invitation « Ajouter à l'écran d'accueil » et le Web Push sont désactivés dans l'application ;
+- Profil › Mes notifications propose « Activer les notifications sur cet iPhone » (notifications Apple, APNs).
 
 ## Commandes sur le MacBook Air M1
 
@@ -42,9 +43,11 @@ npm run ouvrir             # ouvre Xcode
 
 Dans Xcode :
 
-1. Cible **App** › **Signing & Capabilities** : choisir l'équipe « Mourtada Fam » (compte Apple Developer).
-2. Vérifier que `PrivacyInfo.xcprivacy` apparaît dans la cible App ; sinon, Fichier › Ajouter des fichiers.
-3. Brancher l'iPhone, le choisir en haut, puis cliquer sur ▶ (Lecture).
+1. Cible **App** › **General** › **Supported Destinations** : garder seulement **iPhone** (pas d'iPad, pas de Mac).
+2. Cible **App** › **Signing & Capabilities** : choisir l'équipe. Avant l'inscription payante, l'équipe « Personal Team » de votre identifiant Apple suffit pour le simulateur et pour votre iPhone (7 jours).
+3. Après l'inscription au programme développeur : **+ Capability** › **Push Notifications** (impossible avec « Personal Team »).
+4. Vérifier que `PrivacyInfo.xcprivacy` apparaît dans la cible App ; sinon, Fichier › Ajouter des fichiers.
+5. Choisir « iPhone 17 Pro Max » (simulateur) ou votre iPhone en haut, puis cliquer sur ▶ (Lecture).
 
 Après chaque modification du site : `npm run sync` dans `mobile/`, puis relancer depuis Xcode.
 
@@ -58,9 +61,18 @@ Après chaque modification du site : `npm run sync` dans `mobile/`, puis relance
 - Bibliothèque : lecture d'un PDF et bouton « Ouvrir avec le lecteur du téléphone ».
 - Encoche, barre d'accueil, clavier, connexion faible.
 
-## Encore à faire avant la soumission (avec accord pour la production)
+## Notifications iPhone (APNs) : mise en service
 
-1. Bouton « Supprimer mon compte » dans Profil + fonction Supabase de suppression (règle Apple 5.1.1(v)).
-2. Notifications natives Apple (APNs) : extension Capacitor, enregistrement des iPhone et envoi par l'API de l'admin.
-3. « Signaler » sur les fiches de produits et de boutiques (règle Apple 1.2).
-4. Captures d'écran, fiche App Store, compte de démonstration pour Apple, TestFlight.
+Le code est prêt (application, base de données, envoi par l'admin) mais rien n'est actif tant que ces étapes ne sont pas faites :
+
+1. Compte développeur : **Certificates, Identifiers & Profiles** › **Keys** › **+** › cocher **Apple Push Notifications service (APNs)**. Télécharger la clé `.p8` (une seule fois possible) et noter son **Key ID** et votre **Team ID**.
+2. Dans Vercel (projet de l'admin), ajouter les variables : `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY` (contenu complet du `.p8`), `APNS_BUNDLE_ID=com.kokiconnect.app`, et `APNS_SANDBOX=true` seulement pour les essais lancés depuis Xcode (TestFlight et App Store utilisent le serveur de production).
+3. Avec accord : appliquer `database/notifications-iphone.sql` en production.
+4. Sur l'iPhone : Profil › Mes notifications › « Activer les notifications sur cet iPhone ».
+
+## Encore à faire avant la soumission
+
+1. Captures d'écran, compte de démonstration pour Apple, fiche App Store (document « KOKI CONNECT — Fiche App Store »).
+2. TestFlight, puis soumission.
+
+Déjà en ligne : « Supprimer mon compte » (5.1.1(v)) et « Signaler » sur les fiches (1.2).

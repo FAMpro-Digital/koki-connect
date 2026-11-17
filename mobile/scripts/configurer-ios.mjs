@@ -29,11 +29,30 @@ export function completerPlist(xml, cles = CLES) {
   return sortie;
 }
 
+// Notifications (extension @capacitor/push-notifications) : AppDelegate.swift doit transmettre le jeton APNs à Capacitor.
+export const METHODES_PUSH = `
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+    }
+`;
+export function completerAppDelegate(swift) {
+  if (/didRegisterForRemoteNotificationsWithDeviceToken/.test(swift)) return swift;
+  const fin = swift.lastIndexOf('}');
+  if (fin < 0 || !/class AppDelegate/.test(swift)) throw new Error('AppDelegate.swift inattendu : classe AppDelegate introuvable');
+  return swift.slice(0, fin) + METHODES_PUSH + swift.slice(fin);
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const plist = path.join(MOBILE, 'ios', 'App', 'App', 'Info.plist');
   if (!fs.existsSync(plist)) { console.error('Info.plist introuvable : lancez d’abord « npx cap add ios ».'); process.exit(1); }
   fs.writeFileSync(plist, completerPlist(fs.readFileSync(plist, 'utf8')));
   const privacy = path.join(MOBILE, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
   if (!fs.existsSync(privacy)) fs.copyFileSync(path.join(MOBILE, 'ios-modeles', 'PrivacyInfo.xcprivacy'), privacy);
+  const delegue = path.join(MOBILE, 'ios', 'App', 'App', 'AppDelegate.swift');
+  if (fs.existsSync(delegue)) fs.writeFileSync(delegue, completerAppDelegate(fs.readFileSync(delegue, 'utf8')));
   console.log('Info.plist complété. Dans Xcode, ajoutez PrivacyInfo.xcprivacy à la cible App s’il n’y figure pas.');
 }
