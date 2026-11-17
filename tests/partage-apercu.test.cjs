@@ -25,7 +25,7 @@ test('identifiant invalide, publication absente ou serveur en panne : simple ren
  r=res();await handler({query:{id:ID}},r,async()=>{throw Error('réseau');});assert.equal(r.statusCode,302);
 });
 test('site : /p/<id> réécrit vers la fonction, image d’aperçu présente',()=>{
- const v=JSON.parse(fs.readFileSync('vercel.json','utf8'));assert.deepEqual(v.rewrites,[{source:'/p/:id',destination:'/api/partage?id=:id'}]);
+ const v=JSON.parse(fs.readFileSync('vercel.json','utf8'));assert.deepEqual(v.rewrites,[{source:'/p/:id',destination:'/api/partage?id=:id'},{source:'/f/:id',destination:'/api/partage?fiche=:id'}]);
  assert.ok(fs.existsSync('assets/entete-horizontal.webp'));
 });
 test('vidéos : page dédiée et bouton d’accueil seulement s’il y a des vidéos ; lien partagé repris hors connexion',()=>{

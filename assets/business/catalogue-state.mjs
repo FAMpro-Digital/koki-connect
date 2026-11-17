@@ -81,10 +81,13 @@ export function contacts(x,idx){
  const whatsapp=b?.whatsapp||v.whatsapp||v.telephone;
  return {vendeur:v.nom,boutique:b?.nom||null,appel:C.lienAppel(v.telephone),telephone:C.afficherTelephone(v.telephone),whatsapp:C.lienWhatsApp(whatsapp),numeroWhatsApp:C.afficherTelephone(whatsapp),numero:C.normaliserTelephone(whatsapp)};
 }
+// Lien court vers la fiche d'un produit : WhatsApp en affiche l'aperçu (photo, nom, prix) dans la conversation du vendeur.
+export function lienProduit(id){let o='https://www.kokiconnect.com';try{const l=globalThis.location;if(l&&/^https?:$/.test(l.protocol)&&l.host)o=l.origin;}catch{}return /^[a-f0-9-]{36}$/.test(String(id))?o+'/f/'+id:'';}
 export function lienCommande(x,idx,quantite=1){
  if(x.kind!=='produits'||!disponible(x))return null;const c=contacts(x,idx);if(!c?.numero)return null;
  const q=Math.max(1,Math.min(Number.isInteger(quantite)?quantite:1,x.stock??99));
- return C.lienCommandeWhatsApp(c.numero,{produit:x.nom,prix:x.prix,boutique:c.boutique||c.vendeur,quantite:q});
+ const lien=lienProduit(x.id);
+ return C.lienWhatsApp(c.numero,C.messageCommande({produit:x.nom,prix:x.prix,boutique:c.boutique||c.vendeur,quantite:q})+(lien?'\nVoir le produit : '+lien:''));
 }
 export function lienDevis(x,idx){if(x.kind!=='services')return null;const c=contacts(x,idx);if(!c?.numero)return null;return C.lienWhatsApp(c.numero,'Bonjour '+c.vendeur+', je souhaite un devis via Koki Connect pour : '+x.nom+'.');}
 export function etiquetteDisponibilite(x){if(x.kind==='produits')return disponible(x)?'Disponible':'Épuisé';if(x.kind==='services')return 'Disponible';return '';}
@@ -94,7 +97,7 @@ export function lienCarte(x,idx){const p=x.localisation||idx.boutique(x)?.locali
 export function totalPanier(lignes){return (Array.isArray(lignes)?lignes:[]).reduce((s,l)=>s+(Number.isInteger(l.prix)&&Number.isInteger(l.quantite)?l.prix*l.quantite:0),0);}
 export function lienPanierWhatsApp(lignes,idx,{mode='retrait',adresse=''}={}){
  if(!Array.isArray(lignes)||!lignes.length)return null;const p=idx.get(lignes[0].id);if(!p)return null;const c=contacts(p,idx);if(!c?.numero)return null;
- const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+(C.formaterPrix(l.prix)?' ('+C.formaterPrix(l.prix)+')':'')),'Total indicatif : '+C.formaterPrix(totalPanier(lignes)),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
+ const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+(C.formaterPrix(l.prix)?' ('+C.formaterPrix(l.prix)+')':'')+(lienProduit(l.id)?'\n  '+lienProduit(l.id):'')),'Total indicatif : '+C.formaterPrix(totalPanier(lignes)),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
  return C.lienWhatsApp(c.numero,texte);
 }
 // Promotions mises en avant : produits disponibles avec un ancien prix, plus forte remise d'abord.
