@@ -66,3 +66,10 @@ test('liens kokiconnect:// : seules les rubriques connues sont ouvertes', () => 
  assert.equal(N.ecranDuLien('kokiconnect://ecran/profil/'), 'profil');
  for (const x of ['kokiconnect://ecran/admin', 'https://ecran/boutique', 'kokiconnect://ecran/boutique?x=1', '', null]) assert.equal(N.ecranDuLien(x), null, String(x));
 });
+test('captures App Store : rubrique ouverte au lancement, simulateur seulement, ajout unique',async()=>{
+ const {ajouterCaptures,completerAppDelegate}=await import('../mobile/scripts/configurer-ios.mjs');
+ const t='import UIKit\nimport Capacitor\n@UIApplicationMain\nclass AppDelegate: UIResponder, UIApplicationDelegate {\n    var window: UIWindow?\n    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {\n        return true\n    }\n}\n';
+ const r=ajouterCaptures(completerAppDelegate(t));
+ assert.ok(r.includes('#if targetEnvironment(simulator)'));assert.ok(r.indexOf('kokiEcran')<r.indexOf('return true'));assert.equal(ajouterCaptures(r),r);
+ const wf=fs.readFileSync('.github/workflows/ios.yml','utf8');assert.ok(wf.includes('-kokiEcran "$ECRAN"'));assert.ok(!wf.includes('simctl openurl'));
+});

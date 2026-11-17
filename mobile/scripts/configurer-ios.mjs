@@ -55,6 +55,25 @@ export function completerAppDelegate(swift) {
   return swift.slice(0, fin) + METHODES_PUSH + swift.slice(fin);
 }
 
+// Captures App Store (simulateur seulement, absent des versions iPhone) : « -kokiEcran boutique » au lancement
+// ouvre la rubrique comme le lien kokiconnect://ecran/boutique, sans la fenêtre « Ouvrir dans… » d'iOS.
+export const CAPTURES = `
+        #if targetEnvironment(simulator)
+        if let ecran = UserDefaults.standard.string(forKey: "kokiEcran"), let lien = URL(string: "kokiconnect://ecran/" + ecran) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+                _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, open: lien, options: [:])
+            }
+        }
+        #endif
+`;
+export function ajouterCaptures(swift) {
+  if (/kokiEcran/.test(swift)) return swift;
+  const m = /didFinishLaunchingWithOptions[^{]*\{\n/.exec(swift);
+  if (!m) throw new Error('AppDelegate.swift inattendu : didFinishLaunchingWithOptions introuvable');
+  const i = m.index + m[0].length;
+  return swift.slice(0, i) + CAPTURES.slice(1) + swift.slice(i);
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const plist = path.join(MOBILE, 'ios', 'App', 'App', 'Info.plist');
   if (!fs.existsSync(plist)) { console.error('Info.plist introuvable : lancez d’abord « npx cap add ios ».'); process.exit(1); }
@@ -62,6 +81,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const privacy = path.join(MOBILE, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
   if (!fs.existsSync(privacy)) fs.copyFileSync(path.join(MOBILE, 'ios-modeles', 'PrivacyInfo.xcprivacy'), privacy);
   const delegue = path.join(MOBILE, 'ios', 'App', 'App', 'AppDelegate.swift');
-  if (fs.existsSync(delegue)) fs.writeFileSync(delegue, completerAppDelegate(fs.readFileSync(delegue, 'utf8')));
+  if (fs.existsSync(delegue)) fs.writeFileSync(delegue, ajouterCaptures(completerAppDelegate(fs.readFileSync(delegue, 'utf8'))));
   console.log('Info.plist complété. Dans Xcode, ajoutez PrivacyInfo.xcprivacy à la cible App s’il n’y figure pas.');
 }

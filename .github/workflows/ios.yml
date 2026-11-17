@@ -73,15 +73,16 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           APP=$(find build/Build/Products -name 'App.app' -maxdepth 3 | head -1)
           xcrun simctl install "$UDID" "$APP"
-          echo "Accès au service météo depuis ce Mac :"; curl -s -o /dev/null -w '%{http_code}\n' --max-time 10 'https://api.open-meteo.com/v1/forecast?latitude=15.5&longitude=-15.99&current=temperature_2m' || true
+          echo "Accès au service météo depuis ce Mac :"; curl -sS -o /dev/null -w '%{http_code}\n' --max-time 20 'https://api.open-meteo.com/v1/forecast?latitude=15.5&longitude=-15.99&current=temperature_2m' || true
           xcrun simctl status_bar "$UDID" override --time '9:41' --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl launch "$UDID" com.kokiconnect.app
           sleep 20
           xcrun simctl io "$UDID" screenshot captures/0-premier-lancement.png
-          # Captures App Store : chaque rubrique ouverte par un lien kokiconnect:// (écran de bienvenue fermé).
+          # Captures App Store : l'application est relancée sur chaque rubrique (écran de bienvenue fermé).
           for ECRAN in accueil boutique transport activite profil; do
-            xcrun simctl openurl "$UDID" "kokiconnect://ecran/$ECRAN"
-            sleep 10
+            xcrun simctl terminate "$UDID" com.kokiconnect.app || true
+            xcrun simctl launch "$UDID" com.kokiconnect.app -kokiEcran "$ECRAN"
+            sleep 16
             xcrun simctl io "$UDID" screenshot "captures/$ECRAN.png"
           done
           sips -g pixelWidth -g pixelHeight captures/accueil.png

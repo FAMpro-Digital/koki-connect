@@ -91,8 +91,13 @@
     try { A.addListener('appUrlOpen', function (e) { ouvrirLien(e && e.url); }); } catch (_) { /* extension absente */ }
     try { Promise.resolve(A.getLaunchUrl && A.getLaunchUrl()).then(function (r) { if (r && r.url) setTimeout(function () { ouvrirLien(r.url); }, 800); }); } catch (_) { /* pas de lien au lancement */ }
   }
+  // Barre d'état iPhone : fond vert foncé Koki Connect (texte blanc) au lieu du noir par défaut.
+  function colorerBarreEtat() {
+    var c = cap(), S = c && c.Plugins && c.Plugins.StatusBar; if (!estIOS() || !S) return;
+    try { Promise.resolve(S.setBackgroundColor && S.setBackgroundColor({ color: '#0b5a3c' })).catch(function () {}); } catch (_) { /* extension absente */ }
+  }
   api.ecranDuLien = ecranDuLien; api.ouvrirLien = ouvrirLien;
-  try { if (root.document && root.document.readyState !== 'loading') ecouterLiens(); else if (root.document) root.document.addEventListener('DOMContentLoaded', ecouterLiens); } catch (_) { /* sans DOM */ }
+  try { if (root.document && root.document.readyState !== 'loading') { ecouterLiens(); colorerBarreEtat(); } else if (root.document) root.document.addEventListener('DOMContentLoaded', function () { ecouterLiens(); colorerBarreEtat(); }); } catch (_) { /* sans DOM */ }
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
