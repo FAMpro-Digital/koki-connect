@@ -1,0 +1,117 @@
+name: Application iOS
+
+# Construit l'application iPhone sur un Mac de GitHub (pas besoin de Xcode sur l'ordinateur de Mourtada).
+# 1. Toujours : construction pour le simulateur + capture de l'écran d'accueil (artefacts téléchargeables).
+# 2. Seulement si les secrets App Store Connect existent ET si le lancement manuel le demande :
+#    archive signée et envoi sur TestFlight.
+# Rien n'est publié sur le site ni sur l'App Store par ce workflow.
+on:
+  push:
+    branches: [feature/ios-app-store]
+    paths: ['mobile/**', 'assets/**', 'index.html', '.github/workflows/ios.yml']
+  workflow_dispatch:
+    inputs:
+      testflight:
+        description: 'Envoyer aussi sur TestFlight (compte développeur requis)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: ios
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Versions
+        run: |
+          xcodebuild -version
+          sw_vers
+          node -v
+      - name: Dépendances de l'application
+        run: npm install --no-audit --no-fund
+      - name: Fichiers de l'application (www)
+        run: npm run build
+      - name: Projet Xcode
+        run: |
+          npx cap add ios
+          npm run configurer
+          npm run icones
+          npx cap sync ios
+          sudo gem install xcodeproj --no-document
+          ruby scripts/ajouter-privacy.rb
+      - name: Construction pour le simulateur (iPhone seulement)
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build TARGETED_DEVICE_FAMILY=1 CODE_SIGNING_ALLOWED=NO build | tail -40
+      - name: Lancement dans le simulateur et capture d'écran
+        run: |
+          mkdir -p captures
+          NOM=$(xcrun simctl list devices available | grep -oE 'iPhone 1[6-9] Pro Max' | sort -r | head -1)
+          echo "Simulateur : $NOM"
+          UDID=$(xcrun simctl list devices available | grep "$NOM (" | head -1 | grep -oE '[0-9A-F-]{36}')
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find build/Build/Products -name 'App.app' -maxdepth 3 | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.kokiconnect.app
+          sleep 25
+          xcrun simctl io "$UDID" screenshot captures/accueil.png
+          sips -g pixelWidth -g pixelHeight captures/accueil.png
+      - name: Artefacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-simulateur
+          path: |
+            mobile/captures
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Archive signée et envoi sur TestFlight
+        if: ${{ inputs.testflight && env.ASC_KEY_ID != '' }}
+        env:
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -o pipefail
+          mkdir -p ~/.appstoreconnect/private_keys
+          CLE=~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          printf '%s' "$ASC_KEY_P8" > "$CLE"
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $CLE -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER_ID"
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/App.xcarchive \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic TARGETED_DEVICE_FAMILY=1 \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} $AUTH archive | tail -40
+          cat > build/export.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist build/export.plist \
+            -exportPath build/export $AUTH | tail -40
+          rm -f "$CLE"
