@@ -74,11 +74,13 @@
       "feature/accueil-attractif": false,
       "feature/partage-apercu-videos": false,
       "fix/reseau-coupe-session": false,
-      "feature/koki-en-direct": false
+      "feature/koki-en-direct": false,
+      "feature/commande-avec-produit": false
     }
   },
   "rewrites": [
-    { "source": "/p/:id", "destination": "/api/partage?id=:id" }
+    { "source": "/p/:id", "destination": "/api/partage?id=:id" },
+    { "source": "/f/:id", "destination": "/api/partage?fiche=:id" }
   ],
   "headers": [
     {

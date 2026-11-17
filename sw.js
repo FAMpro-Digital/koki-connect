@@ -52,7 +52,7 @@ async function copie(req){
   const hit=await caches.match(req,{ignoreSearch:req.mode==='navigate'});
   if(hit)return hit;
   // Lien de partage /p/<id> sans réseau : on rouvre l'application sur la publication (jamais index.html servi sous /p/).
-  if(req.mode==='navigate'){const m=/^\/p\/([a-f0-9-]{36})$/.exec(new URL(req.url).pathname);if(m)return Response.redirect('/?publication='+m[1],302);}
+  if(req.mode==='navigate'){const chemin=new URL(req.url).pathname,m=/^\/p\/([a-f0-9-]{36})$/.exec(chemin),f=/^\/f\/([a-f0-9-]{36})$/.exec(chemin);if(m)return Response.redirect('/?publication='+m[1],302);if(f)return Response.redirect('/?fiche='+f[1],302);}
   if(req.mode==='navigate')return (await caches.match('index.html'))||(await caches.match('./'))||null;
   return null;
 }
