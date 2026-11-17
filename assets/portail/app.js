@@ -124,7 +124,7 @@ function parametres(){
  const notifications=n('section');notifications.className='card';notifications.append(n('h3','Notifications'),n('p','Consultez vos notifications et les options disponibles sur cet appareil.'),b('Ouvrir les notifications',()=>window.afficherNotifications()));box.append(notifications);
  const commentaires=n('section');commentaires.className='card';commentaires.append(n('h3','Commentaires et membres bloqués'),n('p','Dans les commentaires d’une publication, utilisez « Bloquer ce membre » pour masquer ses commentaires pour votre compte. Pour annuler vos blocages, utilisez « Réafficher les commentaires des membres bloqués » au même endroit.'));box.append(commentaires);
  const aide=n('section');aide.className='card';aide.append(n('h3','Aide et informations'));
- for(const [label,url] of [['Signaler un problème','/tests-application.html'],['Politique de confidentialité','/confidentialite.html'],['Conditions d’utilisation','/conditions.html'],['Suppression du compte','/suppression-compte.html']]){const p=n('p'),a=n('a',label);a.href=url;p.append(a);aide.append(p);}box.append(aide);
+ for(const [label,url] of [['Assistance','/assistance.html'],['Signaler un problème','/tests-application.html'],['Politique de confidentialité','/confidentialite.html'],['Conditions d’utilisation','/conditions.html'],['Suppression du compte','/suppression-compte.html']]){const p=n('p'),a=n('a',label);a.href=url;p.append(a);aide.append(p);}box.append(aide);
 }
 async function profil(){const box=ouvrir('Profil utilisateur');let P=window.KokiPro;
  const zone=n('div');zone.className='profil-espace';box.append(zone);
