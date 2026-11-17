@@ -30,7 +30,8 @@ async function monter(){const api=fauxApi();const {host}=setup(api);const {accou
 
 test('email seul : inscription et reconnexion attendent la confirmation',async()=>{
  const {api,host,status}=await monter();const f=formulaire(host,'connexion');
- assert.equal(all(host).filter(e=>e.tagName==='INPUT').length,1);
+ assert.equal(all(f).filter(e=>e.tagName==='INPUT').length,1);
+ assert.equal(all(host).filter(e=>e.tagName==='INPUT'&&e.type==='password').every(e=>{let p=e.parent;while(p&&p.tagName!=='DETAILS')p=p.parent;return !!p;}),true,'mot de passe seulement dans « Se connecter avec un mot de passe », replié');
  assert.equal(champ(f,'Adresse e-mail').type,'email');
  await envoyer(f);assert.deepEqual(api.appels,[]);
  champ(f,'Adresse e-mail').value='awa@exemple.sn';await envoyer(f);
@@ -91,4 +92,21 @@ test('Google : bouton sans formulaire, erreur récupérable et session confirmé
  await button.onclick();assert.equal(calls,1);assert.equal(button.disabled,false);assert.match(status.textContent,/Google indisponible/);
  api.signInGoogle=async options=>{assert.deepEqual(options,{retour:undefined});calls++;};
  await button.onclick();assert.equal(calls,2);assert.match(status.textContent,/Redirection vers Google/);
+});
+test('client : connexion avec mot de passe et lien pour en choisir un, sans code e-mail sur le site',async()=>{
+ const {api,host,status}=await monter();const f=formulaire(host,'connexion-mdp');assert.ok(f);
+ assert.equal(formulaire(host,'code-email'),undefined,'le code e-mail est réservé à l’application iPhone');
+ champ(f,'Adresse e-mail').value='awa@exemple.sn';champ(f,'Mot de passe').value='secret123';await envoyer(f);
+ assert.deepEqual(api.appels.at(-1),['login','awa@exemple.sn','secret123']);assert.equal(champ(f,'Mot de passe').value,'');assert.match(status.textContent,/Connexion refusée/);
+ await bouton(host,'Mot de passe oublié ou pas encore choisi').onclick();await tick();
+ assert.equal(api.appels.at(-1)[0],'recover');assert.match(api.appels.at(-1)[2],/koki-recovery=1/);
+});
+test('application iPhone : code reçu par e-mail validé sans quitter l’application',async()=>{
+ globalThis.KokiNatif={estApp:()=>true};
+ const api=fauxApi();const codes=[];api.verifyEmailCode=async(e,c)=>{codes.push([e,c]);throw Error('Code invalide ou expiré. Demandez un nouvel e-mail.');};
+ const {host}=setup(api);const {accountPanel}=await import('../assets/business/ui.mjs');const status=accountPanel(host,api,async()=>{});await tick();
+ const lien=formulaire(host,'connexion');champ(lien,'Adresse e-mail').value='awa@exemple.sn';await envoyer(lien);
+ const f=formulaire(host,'code-email');assert.ok(f);champ(f,'Code à 6 chiffres').value='123456';await envoyer(f);
+ assert.deepEqual(codes,[['awa@exemple.sn','123456']]);assert.match(status.textContent,/Code invalide/);
+ delete globalThis.KokiNatif;
 });

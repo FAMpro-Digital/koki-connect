@@ -88,6 +88,10 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
    if(error.status===429||/rate_limit/.test(error.code||''))throw Error('Trop de demandes. Patientez une minute avant de demander un nouveau lien.');
    throw Error('Impossible d’envoyer le lien de connexion. Vérifiez votre adresse ou réessayez plus tard.');}
  },
+ // Code à usage unique reçu par e-mail (même envoi que le lien) : connexion sans quitter l'application iPhone.
+ async verifyEmailCode(email,code){requireReady();const address=String(email||'').trim(),token=String(code??'').replace(/\s/g,'');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))throw Error('Vérifiez votre adresse e-mail.');if(!/^\d{6,10}$/.test(token))throw Error('Saisissez le code reçu par e-mail.');
+  const {error}=await db.auth.verifyOtp({email:address,token,type:'email'});if(error)throw Error(HORS_LIGNE.test(String(error.message||''))?MESSAGE_HORS_LIGNE:'Code invalide ou expiré. Demandez un nouvel e-mail.');return identity();},
  async setProfessionalPassword(password){requireReady();await identity();if(password.length<8)throw Error('Choisissez au moins 8 caractères.');const {error}=await db.auth.updateUser({password,data:{professional_password_set:true}});if(error)throw Error('Mot de passe non enregistré. Réessayez.');return identity();},
  async login(email,password){requireReady();const {error}=await db.auth.signInWithPassword({email:email.trim(),password});if(error)throw Error('Connexion refusée. Vérifiez vos identifiants.');return identity();},
  async sendCode(phone){requireReady();const number=normalizePhone(phone);const {error}=await db.auth.signInWithOtp({phone:number,options:{shouldCreateUser:true,channel:'sms'}});if(error)throw Error(error.status===429||/rate|second/i.test(error.message||'')?'Trop de demandes. Patientez avant de redemander un code.':'Envoi du code impossible. Vérifiez le numéro et réessayez.');return number;},
