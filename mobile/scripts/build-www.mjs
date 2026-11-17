@@ -23,13 +23,22 @@ export function preparerIndex(html, csp) {
   return html.replace('<head>', '<head>\n  <meta http-equiv="Content-Security-Policy" content="' + echappee + '">');
 }
 
+// Application : la page occupe tout l'écran ; la barre du bas s'écarte de la barre d'accueil de l'iPhone
+// grâce à env(safe-area-inset-bottom) (sans effet sur le site, où ce réglage n'est pas ajouté).
+export function pleinEcran(html) {
+  if (/viewport-fit=cover/.test(html)) return html;
+  const m = /<meta name="viewport" content="([^"]*)">/.exec(html);
+  if (!m) throw new Error('index.html sans balise viewport');
+  return html.replace(m[0], '<meta name="viewport" content="' + m[1] + ', viewport-fit=cover">');
+}
+
 export function construire(sortie = path.join(RACINE, 'mobile', 'www')) {
   fs.rmSync(sortie, { recursive: true, force: true });
   fs.mkdirSync(sortie, { recursive: true });
   for (const f of A_COPIER) fs.cpSync(path.join(RACINE, f), path.join(sortie, f), { recursive: true });
   const vercel = JSON.parse(fs.readFileSync(path.join(RACINE, 'vercel.json'), 'utf8'));
   const index = path.join(sortie, 'index.html');
-  fs.writeFileSync(index, preparerIndex(fs.readFileSync(index, 'utf8'), cspApplication(vercel)));
+  fs.writeFileSync(index, pleinEcran(preparerIndex(fs.readFileSync(index, 'utf8'), cspApplication(vercel))));
   return sortie;
 }
 

@@ -73,3 +73,25 @@ test('captures App Store : rubrique ouverte au lancement, simulateur seulement, 
  assert.ok(r.includes('#if targetEnvironment(simulator)'));assert.ok(r.indexOf('kokiEcran')<r.indexOf('return true'));assert.equal(ajouterCaptures(r),r);
  const wf=fs.readFileSync('.github/workflows/ios.yml','utf8');assert.ok(wf.includes('-kokiEcran "$ECRAN"'));assert.ok(!wf.includes('simctl openurl'));
 });
+test('position iPhone : extension native (une seule demande), erreurs traduites, rien sur le site',async()=>{
+ delete require.cache[require.resolve('../assets/portail/natif.js')];
+ const geo={getCurrentPosition(){throw Error('WebKit ne doit pas être appelé');}};
+ const nav=d=>Object.defineProperty(globalThis,'navigator',{value:d,configurable:true,writable:true});const avant=Object.getOwnPropertyDescriptor(globalThis,'navigator');nav({geolocation:geo});
+ globalThis.Capacitor={isNativePlatform:()=>true,getPlatform:()=>'ios',Plugins:{Geolocation:{getCurrentPosition:async o=>{assert.equal(o.enableHighAccuracy,true);return {coords:{latitude:15.5,longitude:-15.99,accuracy:8},timestamp:1};}}}};
+ const N=require('../assets/portail/natif.js');
+ const p=await new Promise((ok,ko)=>geo.getCurrentPosition(ok,ko,{enableHighAccuracy:true}));
+ assert.equal(p.coords.latitude,15.5);
+ assert.equal(N.codeErreurPosition(Error('Location permission was denied')),1);assert.equal(N.codeErreurPosition(Error('Timeout expired')),3);
+ globalThis.Capacitor={isNativePlatform:()=>false,getPlatform:()=>'web',Plugins:{}};nav({geolocation:{getCurrentPosition(){}}});
+ assert.equal(N.positionNative(),false);
+ delete globalThis.Capacitor;if(avant)Object.defineProperty(globalThis,'navigator',avant);else delete globalThis.navigator;
+ assert.ok(JSON.parse(fs.readFileSync('mobile/package.json','utf8')).dependencies['@capacitor/geolocation']);
+});
+test('plein écran dans l’application seulement : barre du bas au-dessus de la barre d’accueil',async()=>{
+ const {pleinEcran}=await import('../mobile/scripts/build-www.mjs');
+ const h='<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>';
+ const r=pleinEcran(h);assert.ok(r.includes('viewport-fit=cover'));assert.equal(pleinEcran(r),r);
+ const site=fs.readFileSync('index.html','utf8');assert.ok(!site.includes('viewport-fit=cover'),'le site public garde son réglage');
+ assert.ok(site.includes('padding: 12px 4px calc(18px + env(safe-area-inset-bottom, 0px));'));
+ assert.equal(JSON.parse(fs.readFileSync('mobile/capacitor.config.json','utf8')).ios.contentInset,'never');
+});

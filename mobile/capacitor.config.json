@@ -3,7 +3,7 @@
   "appName": "KOKI CONNECT",
   "webDir": "www",
   "ios": {
-    "contentInset": "automatic",
+    "contentInset": "never",
     "backgroundColor": "#0b5a3c",
     "preferredContentMode": "mobile"
   },

@@ -96,6 +96,32 @@
     var c = cap(), S = c && c.Plugins && c.Plugins.StatusBar; if (!estIOS() || !S) return;
     try { Promise.resolve(S.setBackgroundColor && S.setBackgroundColor({ color: '#0b5a3c' })).catch(function () {}); } catch (_) { /* extension absente */ }
   }
+  // Position sur iPhone : passe par l'extension native (une seule demande, au nom de « Koki Connect »)
+  // au lieu de WebKit, qui redemande l'autorisation au nom de « localhost » après celle d'iOS.
+  function codeErreurPosition(e) {
+    var m = String((e && (e.message || e.code)) || '');
+    if (/denied|refus|permission|not authorized/i.test(m)) return 1;
+    if (/timeout|time out|délai/i.test(m)) return 3;
+    return 2;
+  }
+  function positionNative() {
+    var c = cap(), G = c && c.Plugins && c.Plugins.Geolocation, nav = root.navigator;
+    if (!estIOS() || !G || !nav || !nav.geolocation) return false;
+    var options = function (o) { o = o || {}; return { enableHighAccuracy: !!o.enableHighAccuracy, timeout: Number.isFinite(o.timeout) ? o.timeout : 20000, maximumAge: Number.isFinite(o.maximumAge) ? o.maximumAge : 0 }; };
+    try {
+      Object.defineProperty(nav.geolocation, 'getCurrentPosition', { configurable: true, writable: true, value: function (ok, ko, o) {
+        Promise.resolve(G.getCurrentPosition(options(o))).then(function (p) {
+          if (typeof ok === 'function') ok({ coords: p.coords, timestamp: p.timestamp || Date.now() });
+        }, function (e) {
+          var code = codeErreurPosition(e);
+          if (typeof ko === 'function') ko({ code: code, message: String((e && e.message) || 'Position indisponible'), PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 });
+        });
+      } });
+      return true;
+    } catch (_) { return false; }
+  }
+  positionNative();
+  api.positionNative = positionNative; api.codeErreurPosition = codeErreurPosition;
   api.ecranDuLien = ecranDuLien; api.ouvrirLien = ouvrirLien;
   try { if (root.document && root.document.readyState !== 'loading') { ecouterLiens(); colorerBarreEtat(); } else if (root.document) root.document.addEventListener('DOMContentLoaded', function () { ecouterLiens(); colorerBarreEtat(); }); } catch (_) { /* sans DOM */ }
 
