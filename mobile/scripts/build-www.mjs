@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const ici = path.dirname(fileURLToPath(import.meta.url));
 export const RACINE = path.resolve(ici, '..', '..');
-export const A_COPIER = ['index.html', 'manifest.webmanifest', 'favicon.ico', 'confidentialite.html', 'conditions.html', 'suppression-compte.html', 'tests-application.html', 'assets'];
+export const A_COPIER = ['index.html', 'manifest.webmanifest', 'favicon.ico', 'confidentialite.html', 'conditions.html', 'suppression-compte.html', 'tests-application.html', 'assistance.html', 'assets'];
 
 // CSP de l'application : celle du site, sans les directives qu'une balise <meta> ignore ou refuse.
 export function cspApplication(vercel) {

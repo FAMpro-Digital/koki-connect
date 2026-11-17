@@ -188,7 +188,7 @@ function raccourcis(){
 }
 function entete(tete,u,qui){
  tete.replaceChildren();const a=nc('span',u?String(qui||'K').replace(/^\+?221\s?/,'').trim().charAt(0).toUpperCase()||'K':'👤','pf-avatar');
- const t=nc('div','','pf-tete-texte');t.append(node('strong',u?(u.user_metadata?.full_name||u.user_metadata?.name||qui):'Bienvenue sur Koki Connect'),node('span',u?qui:'Connectez-vous avec Google ou le lien reçu par e-mail pour commander, réserver une course et suivre vos demandes. Les professionnels peuvent aussi utiliser leur mot de passe.'));
+ const t=nc('div','','pf-tete-texte');t.append(node('strong',u?(u.user_metadata?.full_name||u.user_metadata?.name||qui):'Bienvenue sur Koki Connect'),node('span',u?qui:(globalThis.KokiNatif?.estIOS?.()?'Connectez-vous avec le code reçu par e-mail ou votre mot de passe pour commander, réserver une course et suivre vos demandes.':'Connectez-vous avec Google ou le lien reçu par e-mail pour commander, réserver une course et suivre vos demandes. Les professionnels peuvent aussi utiliser leur mot de passe.')));
  tete.append(a,t);tete.classList.toggle('pf-tete-connecte',!!u);
 }
 async function espaceProfil(host){

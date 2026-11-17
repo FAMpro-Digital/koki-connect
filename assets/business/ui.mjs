@@ -51,19 +51,20 @@ export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=
   if(vue!=='connexion')action(box,'Retour à la connexion',()=>changer('connexion'),status);
   return;
  }
- box.append(node('p','Créez votre compte Koki Connect ou retrouvez-le avec votre compte Google, sans mot de passe ni lien de confirmation par e-mail.'));
- // Application iOS : pas de « Continuer avec Google » (règle Apple 4.8) ; e-mail et mot de passe restent disponibles.
- if(!globalThis.KokiNatif?.estIOS?.()){const google=action(box,'Continuer avec Google',async()=>{await api.signInGoogle({retour:retour()});status.textContent='Redirection vers Google…';},status);
- google.className='google-signin';}
+ // Application iOS : pas de « Continuer avec Google » (règle Apple 4.8), ni de texte qui en parle ; e-mail, code et mot de passe restent disponibles.
+ if(globalThis.KokiNatif?.estIOS?.())box.append(node('p','Créez votre compte Koki Connect ou connectez-vous avec votre adresse e-mail : vous recevez un code à saisir ici. Vous pouvez aussi utiliser un mot de passe.'));
+ else{box.append(node('p','Créez votre compte Koki Connect ou retrouvez-le avec votre compte Google, sans mot de passe ni lien de confirmation par e-mail.'));
+ const google=action(box,'Continuer avec Google',async()=>{await api.signInGoogle({retour:retour()});status.textContent='Redirection vers Google…';},status);
+ google.className='google-signin';
  box.append(node('p','Google partage votre nom, votre adresse e-mail et votre photo de profil. Koki Connect n’accède pas à vos messages.'));
- box.append(node('p','Vous pouvez aussi recevoir un lien de connexion par e-mail.'));
+ box.append(node('p','Vous pouvez aussi recevoir un lien de connexion par e-mail.'));}
  const fields=form(box,'Continuer avec mon adresse e-mail',[['email','Adresse e-mail','email',courriel]],async x=>{
   courriel=x.email.value.trim();await api.sendEmailLink(courriel,{retour:retour()});
-  status.textContent='Consultez votre boîte e-mail et vos spams. Cliquez sur le dernier lien reçu pour confirmer votre adresse et accéder à votre compte. Aucun mot de passe à saisir.';
+  status.textContent=globalThis.KokiNatif?.estApp?.()?'Consultez votre boîte e-mail et vos spams, puis saisissez ci-dessous le code reçu.':'Consultez votre boîte e-mail et vos spams. Cliquez sur le dernier lien reçu pour confirmer votre adresse et accéder à votre compte. Aucun mot de passe à saisir.';
   fields.b.textContent='Recevoir un nouveau lien';
  },status);
- fields.f.dataset.vue='connexion';fields.inputs.email.autocomplete='email';fields.b.textContent='Recevoir mon lien de connexion';
- box.append(node('p','Première visite ? Votre compte sera accessible après confirmation. À chaque nouvelle connexion, demandez un nouveau lien avec la même adresse e-mail.'));
+ fields.f.dataset.vue='connexion';fields.inputs.email.autocomplete='email';fields.b.textContent=globalThis.KokiNatif?.estApp?.()?'Recevoir mon code par e-mail':'Recevoir mon lien de connexion';
+ if(!globalThis.KokiNatif?.estApp?.())box.append(node('p','Première visite ? Votre compte sera accessible après confirmation. À chaque nouvelle connexion, demandez un nouveau lien avec la même adresse e-mail.'));
  // Application iPhone : le lien s'ouvrirait dans Safari ; le code du même e-mail connecte dans l'application.
  if(globalThis.KokiNatif?.estApp?.()&&api.verifyEmailCode){const code=form(box,'Saisir le code reçu par e-mail',[['code','Code à 6 chiffres','text']],async x=>{await api.verifyEmailCode(courriel||fields.inputs.email.value,x.code.value);await render();},status);
   code.f.dataset.vue='code-email';code.inputs.code.inputMode='numeric';code.inputs.code.autocomplete='one-time-code';code.b.textContent='Valider le code';}

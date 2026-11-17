@@ -25,7 +25,9 @@ test('PDF dans l’appli : écrit dans le cache puis ouvert dans la visionneuse 
 });
 test('code du site : Google masqué sur iOS, partage, PDF et notifications adaptés à l’appli',async()=>{
  const html=fs.readFileSync('index.html','utf8');assert.ok(html.indexOf('assets/portail/natif.js')>0&&html.indexOf('assets/portail/natif.js')<html.indexOf('assets/business/runtime.mjs'));
- assert.match(fs.readFileSync('assets/business/ui.mjs','utf8'),/if\(!globalThis\.KokiNatif\?\.estIOS\?\.\(\)\)\{const google=action\(box,'Continuer avec Google'/);
+ const ui=fs.readFileSync('assets/business/ui.mjs','utf8');const i=ui.indexOf("if(globalThis.KokiNatif?.estIOS?.())box.append(");
+ assert.ok(i>0);const branche=ui.slice(i,ui.indexOf('else{',i));assert.ok(!/Google/.test(branche),'aucune mention de Google sur iPhone');
+ assert.ok(ui.indexOf("const google=action(box,'Continuer avec Google'")>ui.indexOf('else{',i),'bouton Google seulement hors iPhone');
  assert.ok(fs.readFileSync('assets/portail/bibliotheque.js','utf8').includes("KokiNatif.ouvrirFichier(f.blob,nomFichier)"));
  assert.ok(fs.readFileSync('assets/business/catalogue-extras.mjs','utf8').includes("globalThis.KokiNatif?.estApp?.()?globalThis.KokiNatif.SITE+'/'"));
  const {promptMode}=await import('../assets/business/notification-prompt.mjs');
