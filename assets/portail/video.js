@@ -21,9 +21,11 @@
     }
     const video = doc.createElement('video');
     video.controls = true;
-    video.preload = 'metadata';
+    // Rien n'est téléchargé avant que la personne appuie sur Lecture (forfait mobile et quota d'envoi du serveur).
+    video.preload = 'none';
     video.playsInline = true;
-    video.src = url + '#t=0.001';
+    if (row.poster) video.poster = row.poster;
+    video.src = url;
     return video;
   }
 
