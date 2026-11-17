@@ -17,6 +17,15 @@ export const CLES = [
   ['ITSAppUsesNonExemptEncryption', 'false', null],
 ];
 
+// Schéma de lien « kokiconnect:// » (raccourcis vers une rubrique, captures App Store automatiques).
+export const SCHEMA_URL = '\t<key>CFBundleURLTypes</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>CFBundleURLName</key>\n\t\t\t<string>com.kokiconnect.app</string>\n\t\t\t<key>CFBundleURLSchemes</key>\n\t\t\t<array>\n\t\t\t\t<string>kokiconnect</string>\n\t\t\t</array>\n\t\t</dict>\n\t</array>\n';
+export function ajouterSchema(xml) {
+  if (/<string>kokiconnect<\/string>/.test(xml)) return xml;
+  if (/<key>CFBundleURLTypes<\/key>/.test(xml)) throw new Error('Info.plist : CFBundleURLTypes existe déjà, ajouter « kokiconnect » à la main');
+  const fin = xml.lastIndexOf('</dict>');
+  return xml.slice(0, fin) + SCHEMA_URL + xml.slice(fin);
+}
+
 export function completerPlist(xml, cles = CLES) {
   let sortie = xml;
   for (const [cle, type, valeur] of cles) {
@@ -49,7 +58,7 @@ export function completerAppDelegate(swift) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const plist = path.join(MOBILE, 'ios', 'App', 'App', 'Info.plist');
   if (!fs.existsSync(plist)) { console.error('Info.plist introuvable : lancez d’abord « npx cap add ios ».'); process.exit(1); }
-  fs.writeFileSync(plist, completerPlist(fs.readFileSync(plist, 'utf8')));
+  fs.writeFileSync(plist, ajouterSchema(completerPlist(fs.readFileSync(plist, 'utf8'))));
   const privacy = path.join(MOBILE, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
   if (!fs.existsSync(privacy)) fs.copyFileSync(path.join(MOBILE, 'ios-modeles', 'PrivacyInfo.xcprivacy'), privacy);
   const delegue = path.join(MOBILE, 'ios', 'App', 'App', 'AppDelegate.swift');

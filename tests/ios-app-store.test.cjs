@@ -59,3 +59,10 @@ test('configuration Apple : identifiant, autorisations en français, confidentia
  const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));assert.ok(!JSON.stringify(pkg).includes('@capacitor'),'le site garde ses dépendances');
  for(const f of ['mobile/resources/icon.png','mobile/resources/splash.png'])assert.ok(fs.statSync(f).size>10000,f);
 });
+test('liens kokiconnect:// : seules les rubriques connues sont ouvertes', () => {
+ delete require.cache[require.resolve('../assets/portail/natif.js')];
+ const N = require('../assets/portail/natif.js');
+ assert.equal(N.ecranDuLien('kokiconnect://ecran/boutique'), 'boutique');
+ assert.equal(N.ecranDuLien('kokiconnect://ecran/profil/'), 'profil');
+ for (const x of ['kokiconnect://ecran/admin', 'https://ecran/boutique', 'kokiconnect://ecran/boutique?x=1', '', null]) assert.equal(N.ecranDuLien(x), null, String(x));
+});

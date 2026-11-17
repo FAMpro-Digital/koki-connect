@@ -4,7 +4,7 @@
   "webDir": "www",
   "ios": {
     "contentInset": "automatic",
-    "backgroundColor": "#ffffff",
+    "backgroundColor": "#0b5a3c",
     "preferredContentMode": "mobile"
   },
   "plugins": {

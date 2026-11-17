@@ -72,5 +72,27 @@
     notificationsDisponibles: notificationsDisponibles, notificationsActives: notificationsActives, activerNotifications: activerNotifications, desactiverNotifications: desactiverNotifications };
   root.KokiNatif = api;
   try { if (estApp()) root.document.documentElement.classList.add('koki-app', 'koki-app-' + plateforme()); } catch (_) { /* sans DOM */ }
+  // Liens « kokiconnect://ecran/<boutique|transport|activite|profil|accueil> » : ouvrent directement une rubrique
+  // de l'application (raccourcis, et captures d'écran automatiques pour l'App Store). L'écran de bienvenue est fermé.
+  var ECRANS = ['accueil', 'transport', 'boutique', 'activite', 'profil'];
+  function ecranDuLien(url) {
+    var m = /^kokiconnect:\/\/ecran\/([a-z]+)\/?$/.exec(String(url || ''));
+    return m && ECRANS.indexOf(m[1]) >= 0 ? m[1] : null;
+  }
+  function ouvrirLien(url) {
+    var ecran = ecranDuLien(url), doc = root.document; if (!ecran || !doc) return false;
+    try { root.localStorage.setItem('koki.bienvenue.v1', 'vu'); } catch (_) { /* stockage indisponible */ }
+    var accueil = doc.getElementById('bienvenue'); if (accueil) accueil.remove();
+    var bouton = doc.querySelector('[data-nav="' + ecran + '"]'); if (bouton) bouton.click();
+    return !!bouton;
+  }
+  function ecouterLiens() {
+    var c = cap(), A = c && c.Plugins && c.Plugins.App; if (!estApp() || !A) return;
+    try { A.addListener('appUrlOpen', function (e) { ouvrirLien(e && e.url); }); } catch (_) { /* extension absente */ }
+    try { Promise.resolve(A.getLaunchUrl && A.getLaunchUrl()).then(function (r) { if (r && r.url) setTimeout(function () { ouvrirLien(r.url); }, 800); }); } catch (_) { /* pas de lien au lancement */ }
+  }
+  api.ecranDuLien = ecranDuLien; api.ouvrirLien = ouvrirLien;
+  try { if (root.document && root.document.readyState !== 'loading') ecouterLiens(); else if (root.document) root.document.addEventListener('DOMContentLoaded', ecouterLiens); } catch (_) { /* sans DOM */ }
+
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
