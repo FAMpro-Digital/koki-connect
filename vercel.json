@@ -73,7 +73,8 @@
       "feature/algorithme-recommandations": false,
       "feature/accueil-attractif": false,
       "feature/partage-apercu-videos": false,
-      "fix/reseau-coupe-session": false
+      "fix/reseau-coupe-session": false,
+      "feature/koki-en-direct": false
     }
   },
   "rewrites": [
