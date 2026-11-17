@@ -76,3 +76,16 @@
 .accueil-videos { margin-top: 10px; }
 .accueil-videos-bouton { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 14px; background: #f28c28; color: #17201b; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
 .accueil-videos-bouton:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 3px; }
+
+/* ----- Koki en direct : informations urgentes des trois derniers jours ----- */
+.koki-direct { margin-top: 10px; padding: 12px; border-radius: 14px; background: #ffffff; border: 1px solid #f0c9a0; border-left: 5px solid #f28c28; color: #17201b; }
+.koki-direct-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 14px; color: #0b5a3c; }
+.koki-direct-point { width: 10px; height: 10px; border-radius: 50%; background: #d62828; animation: koki-direct-pouls 1.6s ease-in-out infinite; }
+@keyframes koki-direct-pouls { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .koki-direct-point { animation: none; } }
+.koki-direct-ligne { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 4px; border: 0; border-top: 1px solid #eef3f0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.koki-direct-icone { font-size: 20px; flex: none; }
+.koki-direct-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.koki-direct-texte strong { font-size: 14px; overflow-wrap: anywhere; }
+.koki-direct-texte small { font-size: 12px; color: #5b6b63; }
+.koki-direct-ligne:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 2px; }
