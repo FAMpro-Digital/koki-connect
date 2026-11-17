@@ -10,6 +10,7 @@ export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votr
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 // Lectures et actions uniques sans clé de reprise (le serveur refuse le doublon : note, signalement).
+export const MOTIFS_SIGNALEMENT=Object.freeze(['Arnaque ou fraude','Contenu choquant','Produit interdit','Fausses informations','Autre']);
 const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder','ride_code','ride_tracking','rate_ride','report_ride','driver_stats']);
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
 // Numéros sénégalais (77 123 45 67, 33 …) complétés en +221 ; autres pays au format international. Règle du contrat partagé.
@@ -62,6 +63,13 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  if(mutation&&runGeneration===sessionGeneration){pending.delete(operation);persist();}emit({state:'success',command});return data;
  }catch(e){if(mutation&&runGeneration===sessionGeneration&&e.definitive){pending.delete(operation);persist();}emit({state:'error',command,retry:mutation&&pending.has(operation)});throw e;}finally{busy=false;emit({state:'idle',command});waiters.shift()?.();}}
  return {subscribe(listener){listeners.add(listener);return ()=>listeners.delete(listener);},get enabled(){return enabled&&!!db;},get busy(){return busy;},get user(){return user;},get recovering(){return recovering;},identity,run,
+ // Suppression du compte par son titulaire (Apple, règle 5.1.1(v)) : contenus, puis photos devenues libres, puis compte.
+ async supprimerCompte(confirmation){requireReady();if(confirmation!=='SUPPRIMER')throw Error('Saisissez SUPPRIMER pour confirmer.');await identity();
+  const etape=async e=>{const {data,error}=await db.rpc('koki_account_delete',{p_etape:e,p_confirmation:'SUPPRIMER'});if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'La suppression dans l’application n’est pas encore ouverte : écrivez à kokiconnect221@gmail.com.':error.code==='42501'||error.code==='P0001'?String(error.message||'Suppression refusée.'):'Suppression impossible. Réessayez plus tard.');return data;};
+  const bilan=await etape('contenus');
+  for(const dossier of Array.isArray(bilan?.dossiers)?bilan.dossiers:[]){if(!UUID.test(String(dossier)))continue;try{const {data:fichiers}=await db.storage.from('koki-media').list(dossier,{limit:1000});const chemins=(fichiers||[]).filter(f=>f&&f.id&&f.name).map(f=>dossier+'/'+f.name);for(let i=0;i<chemins.length;i+=100)await db.storage.from('koki-media').remove(chemins.slice(i,i+100));}catch{}}
+  await etape('compte');
+  voulue=true;try{await db.auth.signOut({scope:'local'});}catch{}finally{voulue=false;}try{secours.effacer();}catch{}try{storage?.removeItem(scope());}catch{}sessionGeneration++;purgerDonneesCompte();user=null;pending.clear();return bilan;},
  async recover(email,redirect){requireReady();const url=new URL(redirect);if(url.origin!==location.origin||!(url.protocol==='https:'||url.hostname==='127.0.0.1'||url.hostname==='localhost'))throw Error('Lien de récupération invalide.');const {error}=await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:url.href});if(error)throw Error('Envoi indisponible. Patientez avant de réessayer.');},
  async changePassword(password){requireReady();await identity();if(password.length<8)throw Error('Choisissez au moins 8 caractères.');const {error}=await db.auth.updateUser({password});if(error)throw Error('Modification refusée. Vérifiez votre session et la double authentification si elle est activée.');recovering=false;},
  async signInGoogle({retour}={}){
@@ -98,6 +106,11 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async ajouterAvis(id,note,commentaire=''){requireReady();await identity();if(!UUID.test(String(id))||!Number.isInteger(note)||note<1||note>5)throw Error('Choisissez une note de 1 à 5.');
   const {error}=await db.rpc('koki_review_save',{p_target:id,p_rating:note,p_comment:String(commentaire).slice(0,500)});
   if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'Les avis ne sont pas encore ouverts.':error.code==='42501'?'Connectez-vous avec un compte client pour donner un avis.':error.code==='P0001'?error.message:'Avis refusé. Réessayez plus tard.');},
+ // Signaler une fiche publique (Apple, règle 1.2) : compte permanent connecté, jamais sa propre fiche (contrôles serveur).
+ async signalerFiche(id,motif,details=''){requireReady();await identity();if(!UUID.test(String(id))||!MOTIFS_SIGNALEMENT.includes(motif))throw Error('Choisissez un motif.');
+  const texte=String(details||'').trim().slice(0,500);if(motif==='Autre'&&texte.length<3)throw Error('Précisez le problème (3 caractères au moins).');
+  const {error}=await db.rpc('koki_record_report',{p_target:id,p_motif:motif,p_details:texte||null});
+  if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'Le signalement n’est pas encore ouvert : écrivez à kokiconnect221@gmail.com.':error.code==='42501'?'Connectez-vous avec votre compte pour signaler une fiche.':error.code==='P0001'?error.message:'Signalement refusé. Réessayez plus tard.');},
  suivre(id,evenement){
   if(!enabled||!db||suiviIndisponible||!UUID.test(String(id))||!EVENEMENTS.includes(evenement))return;
   const cle=id+':'+evenement;if(['vue','partage'].includes(evenement)){if(deja.has(cle))return;deja.add(cle);}

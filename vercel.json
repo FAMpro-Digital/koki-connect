@@ -76,6 +76,8 @@
       "fix/reseau-coupe-session": false,
       "feature/koki-en-direct": false,
       "feature/commande-avec-produit": false,
+      "feature/suppression-compte": false,
+      "feature/signaler-fiche": false,
       "feature/ios-app-store": false
     }
   },
