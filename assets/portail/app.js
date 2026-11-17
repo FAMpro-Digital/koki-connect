@@ -27,7 +27,7 @@ function card(x,full=false){
  if(x.type==='Publicités'&&x.emplacement==='Grande bannière')e.classList.add('portail-banner');
  if(x.type==='Publicités')e.append(n('strong','Sponsorisé · '+(x.emplacement||'Carte sponsorisée')));
  const imageBox=n('div');photo(x,imageBox);if(imageBox.firstChild){const img=imageBox.firstChild;const link=b('',()=>full?window.KokiSocial.zoom(img):detail(x));link.className='publication-photo-link';link.setAttribute('aria-label',full?'Agrandir la photo de '+x.titre:'Lire '+x.titre);link.append(img);e.append(link);}
- if(x.video&&window.KokiVideo){const lecteur=KokiVideo.renderVideo({...x.video,titre:x.titre});if(lecteur){lecteur.className='publication-video-lecteur';const zone=n('div');zone.className='publication-video';zone.append(lecteur);e.append(zone);}}
+ if(x.video&&window.KokiVideo){const lecteur=KokiVideo.renderVideo({...x.video,titre:x.titre,poster:x.image||null});if(lecteur){lecteur.className='publication-video-lecteur';const zone=n('div');zone.className='publication-video';zone.append(lecteur);e.append(zone);}}
  const heading=n('h3');if(full)heading.textContent=x.titre;else{const link=b(x.titre,()=>detail(x));link.className='publication-title';heading.append(link);}
  e.append(n('p',x.categorie+' · '+date(x.publication)),heading,n('p',x.resume));
  if(x.evenement)e.append(n('p',date(x.evenement)+' · '+x.lieu));if(x.source)e.append(n('p','Source / auteur : '+x.source));
@@ -124,7 +124,7 @@ function parametres(){
  const notifications=n('section');notifications.className='card';notifications.append(n('h3','Notifications'),n('p','Consultez vos notifications et les options disponibles sur cet appareil.'),b('Ouvrir les notifications',()=>window.afficherNotifications()));box.append(notifications);
  const commentaires=n('section');commentaires.className='card';commentaires.append(n('h3','Commentaires et membres bloqués'),n('p','Dans les commentaires d’une publication, utilisez « Bloquer ce membre » pour masquer ses commentaires pour votre compte. Pour annuler vos blocages, utilisez « Réafficher les commentaires des membres bloqués » au même endroit.'));box.append(commentaires);
  const aide=n('section');aide.className='card';aide.append(n('h3','Aide et informations'));
- for(const [label,url] of [['Signaler un problème','/tests-application.html'],['Politique de confidentialité','/confidentialite.html'],['Conditions d’utilisation','/conditions.html'],['Suppression du compte','/suppression-compte.html']]){const p=n('p'),a=n('a',label);a.href=url;p.append(a);aide.append(p);}box.append(aide);
+ for(const [label,url] of [['Assistance','/assistance.html'],['Signaler un problème','/tests-application.html'],['Politique de confidentialité','/confidentialite.html'],['Conditions d’utilisation','/conditions.html'],['Suppression du compte','/suppression-compte.html']]){const p=n('p'),a=n('a',label);a.href=url;p.append(a);aide.append(p);}box.append(aide);
 }
 async function profil(){const box=ouvrir('Profil utilisateur');let P=window.KokiPro;
  const zone=n('div');zone.className='profil-espace';box.append(zone);

@@ -2,7 +2,7 @@
 // Données de trajet conservées sur l'appareil (course en cours, notes de chauffeurs) : liées au compte, effacées à la déconnexion.
 // Les favoris et les fiches enregistrées par la personne sur son appareil ne sont pas touchés.
 const CLES_COMPTE=['koki.transport.demo.course.v1','koki.transport.notees.v1'];
-function purgerDonneesCompte(){for(const k of CLES_COMPTE){try{globalThis.localStorage?.removeItem(k);}catch{}try{globalThis.sessionStorage?.removeItem(k);}catch{}}}
+function purgerDonneesCompte(){liensImages=null;try{globalThis.localStorage?.removeItem('koki.photos.signees.v1');}catch{}for(const k of CLES_COMPTE){try{globalThis.localStorage?.removeItem(k);}catch{}try{globalThis.sessionStorage?.removeItem(k);}catch{}}}
 export const HORS_LIGNE=/Failed to fetch|NetworkError|Load failed|fetch failed|Network request failed|AuthRetryableFetchError/i;
 // Erreur passagère (réseau, serveur occupé ou en panne) : jamais une raison de déconnecter le client.
 export const transitoire=e=>!!e&&(HORS_LIGNE.test(String(e.message||e.name||''))||e.name==='AuthRetryableFetchError'||e.name==='AuthUnknownError'||e.status===0||e.status===429||e.status>=500||/timeout|timed out|temporar/i.test(String(e.message||'')));
@@ -10,6 +10,13 @@ export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votr
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 // Lectures et actions uniques sans clé de reprise (le serveur refuse le doublon : note, signalement).
+// Photos des fiches : lien valable 6 h, réutilisé 5 h (aussi après fermeture de l'app) pour que le téléphone garde
+// l'image en cache au lieu de la retélécharger (quota d'envoi Supabase).
+const DUREE_LIEN_IMAGE=21600,CLE_LIENS_IMAGES='koki.photos.signees.v1';
+let liensImages=null;
+function liens(){if(!liensImages){liensImages=new Map();try{for(const [k,e] of Object.entries(JSON.parse(globalThis.localStorage?.getItem(CLE_LIENS_IMAGES)||'{}')))if(e&&typeof e.url==='string'&&e.expire>Date.now())liensImages.set(k,e);}catch{}}return liensImages;}
+function lienGarde(path){const e=liens().get(path);return e&&e.expire>Date.now()?e.url:null;}
+function garderLien(path,url){const m=liens();m.set(path,{url,expire:Date.now()+(DUREE_LIEN_IMAGE-3600)*1000});if(m.size>300)m.delete(m.keys().next().value);try{const o={};for(const [k,e] of m)if(e.expire>Date.now())o[k]=e;globalThis.localStorage?.setItem(CLE_LIENS_IMAGES,JSON.stringify(o));}catch{}}
 export const MOTIFS_SIGNALEMENT=Object.freeze(['Arnaque ou fraude','Contenu choquant','Produit interdit','Fausses informations','Autre']);
 const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder','ride_code','ride_tracking','rate_ride','report_ride','driver_stats']);
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
@@ -88,6 +95,10 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
    if(error.status===429||/rate_limit/.test(error.code||''))throw Error('Trop de demandes. Patientez une minute avant de demander un nouveau lien.');
    throw Error('Impossible d’envoyer le lien de connexion. Vérifiez votre adresse ou réessayez plus tard.');}
  },
+ // Code à usage unique reçu par e-mail (même envoi que le lien) : connexion sans quitter l'application iPhone.
+ async verifyEmailCode(email,code){requireReady();const address=String(email||'').trim(),token=String(code??'').replace(/\s/g,'');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))throw Error('Vérifiez votre adresse e-mail.');if(!/^\d{6,10}$/.test(token))throw Error('Saisissez le code reçu par e-mail.');
+  const {error}=await db.auth.verifyOtp({email:address,token,type:'email'});if(error)throw Error(HORS_LIGNE.test(String(error.message||''))?MESSAGE_HORS_LIGNE:'Code invalide ou expiré. Demandez un nouvel e-mail.');return identity();},
  async setProfessionalPassword(password){requireReady();await identity();if(password.length<8)throw Error('Choisissez au moins 8 caractères.');const {error}=await db.auth.updateUser({password,data:{professional_password_set:true}});if(error)throw Error('Mot de passe non enregistré. Réessayez.');return identity();},
  async login(email,password){requireReady();const {error}=await db.auth.signInWithPassword({email:email.trim(),password});if(error)throw Error('Connexion refusée. Vérifiez vos identifiants.');return identity();},
  async sendCode(phone){requireReady();const number=normalizePhone(phone);const {error}=await db.auth.signInWithOtp({phone:number,options:{shouldCreateUser:true,channel:'sms'}});if(error)throw Error(error.status===429||/rate|second/i.test(error.message||'')?'Trop de demandes. Patientez avant de redemander un code.':'Envoi du code impossible. Vérifiez le numéro et réessayez.');return number;},
@@ -124,7 +135,7 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  transition:(row,next)=>run('transition',{id:row.id,revision:row.revision,next},'transition:'+row.id),
  async mine(kind){requireReady();await identity();const {data,error}=await db.from('koki_records').select('*').eq('kind',kind).eq('owner_id',user.id).order('updated_at',{ascending:false}).limit(100);if(error)throw Error('Chargement de votre espace impossible.');return data||[];},
  async rates(){requireReady();const {data,error}=await db.from('koki_transport_rates').select('*').order('category');if(error)throw Error('Tarifs indisponibles.');return data||[];},
- async image(path){requireReady();const {data,error}=await db.storage.from('koki-media').createSignedUrl(path,120);if(error)throw Error('Image inaccessible.');const url=new URL(data.signedUrl),base=new URL(db.supabaseUrl);const local=base.protocol==='http:'&&['127.0.0.1','localhost'].includes(base.hostname);if(url.origin!==base.origin||!(url.protocol==='https:'||(local&&url.protocol==='http:'))||!url.pathname.startsWith('/storage/v1/object/'))throw Error('Image invalide.');return url.href;},
+ async image(path){requireReady();const cleLien=db.supabaseUrl+'|'+path,deja=lienGarde(cleLien);if(deja)return deja;const {data,error}=await db.storage.from('koki-media').createSignedUrl(path,DUREE_LIEN_IMAGE);if(error)throw Error('Image inaccessible.');const url=new URL(data.signedUrl),base=new URL(db.supabaseUrl);const local=base.protocol==='http:'&&['127.0.0.1','localhost'].includes(base.hostname);if(url.origin!==base.origin||!(url.protocol==='https:'||(local&&url.protocol==='http:'))||!url.pathname.startsWith('/storage/v1/object/'))throw Error('Image invalide.');garderLien(cleLien,url.href);return url.href;},
  // Espace professionnel (Commerces & Services) : identifiants techniques jamais saisis, fournis par l'état chargé.
  async localites(){try{const rows=await run('localites');if(Array.isArray(rows)&&rows.length)return rows.map(x=>x.nom);}catch{}return [...C.localitesParDefaut];},
  async mediaFolder(){if(!mediaFolder){const {folder}=await run('media_folder');if(!/^[0-9a-f-]{36}$/.test(folder||''))throw Error('Dossier photo indisponible.');mediaFolder=folder;}return mediaFolder;},

@@ -78,6 +78,9 @@
       "feature/commande-avec-produit": false,
       "feature/suppression-compte": false,
       "feature/signaler-fiche": false,
+      "feature/page-assistance": false,
+      "feature/connexion-mot-de-passe": false,
+      "fix/trafic-medias": false,
       "feature/ios-app-store": false
     }
   },

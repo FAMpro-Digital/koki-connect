@@ -64,6 +64,15 @@ export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=
  },status);
  fields.f.dataset.vue='connexion';fields.inputs.email.autocomplete='email';fields.b.textContent='Recevoir mon lien de connexion';
  box.append(node('p','Première visite ? Votre compte sera accessible après confirmation. À chaque nouvelle connexion, demandez un nouveau lien avec la même adresse e-mail.'));
+ // Application iPhone : le lien s'ouvrirait dans Safari ; le code du même e-mail connecte dans l'application.
+ if(globalThis.KokiNatif?.estApp?.()&&api.verifyEmailCode){const code=form(box,'Saisir le code reçu par e-mail',[['code','Code à 6 chiffres','text']],async x=>{await api.verifyEmailCode(courriel||fields.inputs.email.value,x.code.value);await render();},status);
+  code.f.dataset.vue='code-email';code.inputs.code.inputMode='numeric';code.inputs.code.autocomplete='one-time-code';code.b.textContent='Valider le code';}
+ // Connexion par mot de passe pour un compte client qui en a défini un (« Mot de passe oublié » permet d'en choisir un).
+ const avecMdp=node('details');avecMdp.className='pf-mdp';avecMdp.append(node('summary','Se connecter avec un mot de passe'));box.append(avecMdp);
+ const mdp=form(avecMdp,'Connexion avec mot de passe',[['email','Adresse e-mail','email',courriel],['password','Mot de passe','password']],async x=>{
+  courriel=x.email.value.trim();try{await api.login(courriel,x.password.value);}finally{x.password.value='';}await render();
+ },status);mdp.f.dataset.vue='connexion-mdp';mdp.inputs.email.autocomplete='email';mdp.inputs.password.autocomplete='current-password';mdp.b.textContent='Se connecter';
+ action(avecMdp,'Mot de passe oublié ou pas encore choisi',async()=>{courriel=(mdp.inputs.email.value||fields.inputs.email.value||'').trim();if(!courriel)throw Error('Indiquez d’abord votre adresse e-mail.');const u=new URL(retour()||location.href);u.searchParams.set('koki-recovery','1');await api.recover(courriel,u.href);status.textContent='Consultez votre boîte e-mail et vos spams : le lien vous permet de choisir votre mot de passe.';},status);
 
  }
  const stop=api.subscribe?.(event=>{if(!host.isConnected){stop?.();return;}if(['recovery','signed-in'].includes(event.state))render().catch(e=>status.textContent=e.message);});render().catch(e=>{status.textContent=e.message;});return status;

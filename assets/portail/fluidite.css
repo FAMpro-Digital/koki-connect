@@ -148,3 +148,6 @@ nav[aria-label="Navigation principale"] button:active span { animation: koki-reb
 .pf-suppression p { font-size: 14px; line-height: 1.5; color: #33423b; }
 .pf-suppression input { width: 100%; min-height: 44px; margin: 6px 0 10px; padding: 0 12px; border: 1px solid #cfdcd5; border-radius: 12px; font: inherit; }
 .pf-supprimer { width: 100%; min-height: 48px; border: 0 !important; border-radius: 14px !important; background: #b42318 !important; color: #fff !important; font-weight: 700; }
+/* Connexion client avec mot de passe : repliée sous le lien par e-mail. */
+.pf-mdp { margin-top: 14px; padding: 10px 12px; border-radius: 14px; border: 1px solid #d8e3dc; background: #fff; }
+.pf-mdp summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: #1f5f43; font-weight: 600; }
