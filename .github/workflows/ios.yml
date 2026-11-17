@@ -74,6 +74,9 @@ jobs:
           APP=$(find build/Build/Products -name 'App.app' -maxdepth 3 | head -1)
           xcrun simctl install "$UDID" "$APP"
           echo "Accès au service météo depuis ce Mac :"; curl -sS -o /dev/null -w '%{http_code}\n' --max-time 20 'https://api.open-meteo.com/v1/forecast?latitude=15.5&longitude=-15.99&current=temperature_2m' || true
+          # Captures : position autorisée d'avance et placée à Koki (pas de fenêtre d'autorisation sur les images).
+          xcrun simctl privacy "$UDID" grant location com.kokiconnect.app || true
+          xcrun simctl location "$UDID" set 15.505949,-15.9919614 || true
           xcrun simctl status_bar "$UDID" override --time '9:41' --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl launch "$UDID" com.kokiconnect.app
           sleep 20
