@@ -46,8 +46,9 @@ export function accountPanel(host,api,onConnected,{intention=()=>null,retour=()=
   return;
  }
  box.append(node('p','Créez votre compte Koki Connect ou retrouvez-le avec votre compte Google, sans mot de passe ni lien de confirmation par e-mail.'));
- const google=action(box,'Continuer avec Google',async()=>{await api.signInGoogle({retour:retour()});status.textContent='Redirection vers Google…';},status);
- google.className='google-signin';
+ // Application iOS : pas de « Continuer avec Google » (règle Apple 4.8) ; e-mail et mot de passe restent disponibles.
+ if(!globalThis.KokiNatif?.estIOS?.()){const google=action(box,'Continuer avec Google',async()=>{await api.signInGoogle({retour:retour()});status.textContent='Redirection vers Google…';},status);
+ google.className='google-signin';}
  box.append(node('p','Google partage votre nom, votre adresse e-mail et votre photo de profil. Koki Connect n’accède pas à vos messages.'));
  box.append(node('p','Vous pouvez aussi recevoir un lien de connexion par e-mail.'));
  const fields=form(box,'Continuer avec mon adresse e-mail',[['email','Adresse e-mail','email',courriel]],async x=>{

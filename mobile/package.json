@@ -1,0 +1,25 @@
+{
+  "name": "koki-connect-mobile",
+  "private": true,
+  "description": "Application iOS de KOKI CONNECT (Capacitor). Embarque les fichiers du site public ; n'est jamais déployée sur Vercel.",
+  "scripts": {
+    "build": "node scripts/build-www.mjs",
+    "sync": "node scripts/build-www.mjs && npx cap sync ios",
+    "configurer": "node scripts/configurer-ios.mjs",
+    "icones": "npx capacitor-assets generate --ios --iconBackgroundColor '#ffffff' --splashBackgroundColor '#ffffff'",
+    "ouvrir": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
+    "@capawesome-team/capacitor-file-opener": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/assets": "^3.0.0"
+  }
+}

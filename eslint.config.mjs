@@ -16,11 +16,11 @@ const regles = {
 };
 
 export default [
-  { ignores: ['assets/leaflet/leaflet.js', 'assets/business/vendor/**', 'dist/**', 'node_modules/**', 'tests/e2e/rapports/**', 'tests/e2e/playwright-report/**', 'tests/e2e/test-results/**', 'tests/load/**'] },
+  { ignores: ['mobile/www/**', 'mobile/ios/**', 'mobile/node_modules/**', 'assets/leaflet/leaflet.js', 'assets/business/vendor/**', 'dist/**', 'node_modules/**', 'tests/e2e/rapports/**', 'tests/e2e/playwright-report/**', 'tests/e2e/test-results/**', 'tests/load/**'] },
   js.configs.recommended,
   { files: ['assets/**/*.js', 'sw.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.serviceworker } }, rules: regles },
   { files: ['assets/**/*.mjs', 'assets/business/business-state.js'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.browser }, rules: regles },
-  { files: ['scripts/**/*.mjs', 'eslint.config.mjs', 'tests/e2e/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.node }, rules: regles },
+  { files: ['scripts/**/*.mjs', 'mobile/scripts/**/*.mjs', 'eslint.config.mjs', 'tests/e2e/**/*.mjs'], languageOptions: { sourceType: 'module', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   { files: ['tests/fixtures/**/*.js'], languageOptions: { sourceType: 'script', ecmaVersion: 2023, globals: { ...globals.browser, ...globals.node } }, rules: regles },
   { files: ['api/**/*.js'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },
   { files: ['tests/**/*.cjs'], languageOptions: { sourceType: 'commonjs', ecmaVersion: 2023, globals: globals.node }, rules: regles },

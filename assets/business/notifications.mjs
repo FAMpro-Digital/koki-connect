@@ -47,6 +47,7 @@ export async function renderNotifications(host,db,{vapidPublicKey='',smsEnabled=
  host.append(button('Actualiser',refresh));
  const settings=element('section');settings.className='card';settings.append(element('h4','Recevoir mes alertes'));host.append(settings);
  if(!vapidPublicKey)settings.append(element('p','Les alertes sur téléphone seront disponibles prochainement.'));
+ else if(globalThis.KokiNatif?.estApp?.())settings.append(element('p','Les notifications de l’application arrivent dans une prochaine version. En attendant, vos alertes restent visibles ici.'));
  else if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))settings.append(element('p','Sur iPhone : ajoutez Koki Connect à l’écran d’accueil, puis ouvrez son icône pour activer les notifications.'));
  else{
   settings.append(button('Activer les notifications sur cet appareil',async()=>{

@@ -75,7 +75,8 @@
       "feature/partage-apercu-videos": false,
       "fix/reseau-coupe-session": false,
       "feature/koki-en-direct": false,
-      "feature/commande-avec-produit": false
+      "feature/commande-avec-produit": false,
+      "feature/ios-app-store": false
     }
   },
   "rewrites": [

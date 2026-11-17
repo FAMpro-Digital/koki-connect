@@ -81,7 +81,7 @@ export function basculerFavori(storage,id){
 
 // ---------- Partage ----------
 export function lienFiche(id,base){
- try{const u=new URL(base||(globalThis.location?.origin+globalThis.location?.pathname));u.search='';u.hash='';u.searchParams.set('fiche',id);return u.href;}catch{return '';}
+ try{const u=new URL(base||(globalThis.KokiNatif?.estApp?.()?globalThis.KokiNatif.SITE+'/':globalThis.location?.origin+globalThis.location?.pathname));u.search='';u.hash='';u.searchParams.set('fiche',id);return u.href;}catch{return '';}
 }
 export function messagePartage(x,idx,base){
  const v=idx.vendeur?.(x),b=idx.boutique?.(x);

@@ -106,6 +106,7 @@ async function lire(id,zone){
  if(f.type.startsWith('audio/')){const au=n('audio');au.controls=true;au.src=urlLecture;au.style.width='100%';panneau.append(au);}
  const meta=H.liste().find(x=>x.id===id),ext={'application/pdf':'.pdf','application/epub+zip':'.epub','audio/mpeg':'.mp3','audio/mp4':'.m4a','audio/x-m4a':'.m4a'}[f.type]||'';
  const garder=n('a','Enregistrer dans Fichiers','portail-more biblio-action');garder.href=urlLecture;garder.download=((meta&&meta.titre)||'livre').replace(/[\\/:*?"<>|]/g,'-')+ext;
+ if(window.KokiNatif&&KokiNatif.estApp()){const nomFichier=garder.download;garder.textContent='Ouvrir avec le lecteur du téléphone';garder.removeAttribute('download');garder.addEventListener('click',async ev=>{ev.preventDefault();let ok=false;try{ok=await KokiNatif.ouvrirFichier(f.blob,nomFichier);}catch(_){ok=false;}if(!ok)alert('Ouverture impossible sur cet appareil.');});}
  if(f.type==='application/pdf'){
   const key=LECTURE+':'+id,etat=JSON.parse(localStorage.getItem(key)||'{}');
   const barre=n('div',undefined,'biblio-lecteur-barre');

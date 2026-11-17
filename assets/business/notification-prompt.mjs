@@ -1,7 +1,7 @@
 // Invitation facultative. Le navigateur n'est sollicité qu'après un clic explicite.
 export const SNOOZE_KEY='koki.notifications.remind-after';
-export function promptMode({enabled,permission,subscribed,remindAfter=0,now=Date.now(),ios=false,standalone=false,supported=false,signedIn=false}){
- if(!enabled||permission==='denied'||subscribed||remindAfter>now)return 'hidden';
+export function promptMode({enabled,permission,subscribed,remindAfter=0,now=Date.now(),ios=false,standalone=false,supported=false,signedIn=false,natif=false}){
+ if(natif||!enabled||permission==='denied'||subscribed||remindAfter>now)return 'hidden';
  if(ios&&!standalone)return 'install';
  if(!supported)return 'hidden';
  return signedIn?'activate':'login';
@@ -14,7 +14,7 @@ export async function mountNotificationPrompt({signedIn,activate,openAccount,sto
  const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
  let subscription=null;try{subscription=await (await navigator.serviceWorker?.getRegistration())?.pushManager?.getSubscription();}catch{}
  let remindAfter=0;try{remindAfter=Number(storage?.getItem(SNOOZE_KEY))||0;}catch{}
- const mode=promptMode({enabled:!!config.vapidPublicKey,permission:globalThis.Notification?.permission,subscribed:!!subscription,remindAfter,ios,standalone,supported:'Notification' in window&&'PushManager' in window&&'serviceWorker' in navigator,signedIn:signedIn()});
+ const mode=promptMode({enabled:!!config.vapidPublicKey,permission:globalThis.Notification?.permission,subscribed:!!subscription,remindAfter,ios,standalone,supported:'Notification' in window&&'PushManager' in window&&'serviceWorker' in navigator,signedIn:signedIn(),natif:!!globalThis.KokiNatif?.estApp?.()});
  if(mode==='hidden'||document.getElementById('koki-notification-prompt'))return;
  const make=(tag,text)=>{const el=document.createElement(tag);el.textContent=text;return el;};
  const box=make('aside','');box.id='koki-notification-prompt';box.className='notification-invitation';box.setAttribute('aria-labelledby','notification-invitation-title');
