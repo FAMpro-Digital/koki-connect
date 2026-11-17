@@ -5,7 +5,7 @@ import {requireClientAccount} from './client-access.mjs';
 import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,totalPanier,lienPanierWhatsApp,similaires} from './catalogue-state.mjs';
 import {etatOuverture,distanceKm,libelleDistance,positionDe,lireFavoris,basculerFavori,messagePartage,lienPartageWhatsApp,lienFiche,sauverCatalogue,lireCatalogue,libelleDate}from './catalogue-extras.mjs';
 import {lirePosition}from './position-gps.mjs';
-import {transitoire}from './client.mjs';
+import {transitoire,MOTIFS_SIGNALEMENT}from './client.mjs';
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 const PAGE=24;
@@ -67,6 +67,18 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const texte=messagePartage(x,idx),url=lienFiche(x.id);
   try{if(navigator.share){await navigator.share({title:x.nom,text:texte,url});suivre(x,'partage');return;}}catch(e){if(e?.name==='AbortError')return;}
   suivre(x,'partage');window.open(lienPartageWhatsApp(x,idx),'_blank','noopener');
+ }
+ // Signaler une fiche (Apple, règle 1.2) : motif, détail facultatif (obligatoire pour « Autre »), compte exigé à l'envoi.
+ function signalement(x){
+  const zoneS=node('div',null,'cat-signal');zoneS.hidden=true;zoneS.id=nid('signal');
+  const ouvrir=button('Signaler',()=>{zoneS.hidden=!zoneS.hidden;ouvrir.setAttribute('aria-expanded',String(!zoneS.hidden));if(!zoneS.hidden)motif.focus();},'secondary');
+  ouvrir.classList.add('cat-signaler');ouvrir.setAttribute('aria-expanded','false');ouvrir.setAttribute('aria-controls',zoneS.id);
+  const titre=node('p','Cette fiche vous semble frauduleuse, choquante ou fausse ? L’équipe Koki Connect l’examinera.','cat-hint');
+  const lab=node('label','Motif'),motif=node('select');lab.htmlFor=motif.id=nid('motif');for(const m of MOTIFS_SIGNALEMENT){const o=node('option',m);o.value=m;motif.append(o);}
+  const detail=node('textarea');detail.maxLength=500;detail.rows=3;detail.placeholder='Précisez le problème (obligatoire pour « Autre »)';detail.setAttribute('aria-label','Détail du signalement');
+  const envoi=button('Envoyer le signalement',async()=>{envoi.disabled=true;try{await requireAccount();await api.signalerFiche(x.id,motif.value,detail.value.trim());say('Merci, votre signalement a été transmis à l’équipe Koki Connect.');detail.value='';zoneS.hidden=true;ouvrir.setAttribute('aria-expanded','false');}catch(e){say(e.message);}finally{envoi.disabled=false;}},'secondary');
+  zoneS.append(titre,lab,motif,detail,envoi);
+  return [ouvrir,zoneS];
  }
  async function photo(img,path,x){try{if(!images.has(path))images.set(path,api.image(path));img.src=await images.get(path);}catch{images.delete(path);if(x&&img.isConnected)img.replaceWith(tuile(x));else{img.alt='Photo indisponible';img.classList.add('cat-photo-off');}}}
  // Les images se chargent quand elles approchent de l'écran (économie de données mobiles).
@@ -271,7 +283,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const p=prixBloc(x);if(p)corps.append(p);const bd=badge(x);if(bd)corps.append(bd);
   if(x.kind!=='produits'){const po=pastilleOuverture(x);if(po)corps.append(po);}
   {const km=distanceDe(x);if(km!==null)corps.append(node('p','À '+libelleDistance(km)+' de vous','cat-meta'));}
-  {const rangee=node('div',null,'cat-share');const fav=coeur(x);fav.classList.add('cat-fav-fiche');fav.append(' ',node('span','Favori'));rangee.append(fav,button('Partager',()=>partager(x),'secondary'));corps.append(rangee);}
+  {const rangee=node('div',null,'cat-share');const fav=coeur(x);fav.classList.add('cat-fav-fiche');fav.append(' ',node('span','Favori'));rangee.append(fav,button('Partager',()=>partager(x),'secondary'));const [sig,zoneSig]=api.signalerFiche?signalement(x):[];if(sig)rangee.append(sig);corps.append(rangee);if(zoneSig)corps.append(zoneSig);}
   suivre(x,'vue');
   const i=infos(x);if(i)corps.append(i);if(x.description)corps.append(node('p',x.description,'cat-description'));
   let qte=1;const contact=node('div');

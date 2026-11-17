@@ -10,6 +10,7 @@ export const MESSAGE_HORS_LIGNE='Connexion internet indisponible. Vérifiez votr
 import './commerce-contract.js';
 const C=globalThis.KokiCommerceContract;
 // Lectures et actions uniques sans clé de reprise (le serveur refuse le doublon : note, signalement).
+export const MOTIFS_SIGNALEMENT=Object.freeze(['Arnaque ou fraude','Contenu choquant','Produit interdit','Fausses informations','Autre']);
 const reads=new Set(['catalog','history','get','quote','nearby_drivers','ride_contacts','localites','media_folder','ride_code','ride_tracking','rate_ride','report_ride','driver_stats']);
 export const vehicles=['Moto','Taxi','Voiture','Minicar'];
 // Numéros sénégalais (77 123 45 67, 33 …) complétés en +221 ; autres pays au format international. Règle du contrat partagé.
@@ -105,6 +106,11 @@ export function createBusinessClient(db,{enabled=false,storage=null,uuid=()=>cry
  async ajouterAvis(id,note,commentaire=''){requireReady();await identity();if(!UUID.test(String(id))||!Number.isInteger(note)||note<1||note>5)throw Error('Choisissez une note de 1 à 5.');
   const {error}=await db.rpc('koki_review_save',{p_target:id,p_rating:note,p_comment:String(commentaire).slice(0,500)});
   if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'Les avis ne sont pas encore ouverts.':error.code==='42501'?'Connectez-vous avec un compte client pour donner un avis.':error.code==='P0001'?error.message:'Avis refusé. Réessayez plus tard.');},
+ // Signaler une fiche publique (Apple, règle 1.2) : compte permanent connecté, jamais sa propre fiche (contrôles serveur).
+ async signalerFiche(id,motif,details=''){requireReady();await identity();if(!UUID.test(String(id))||!MOTIFS_SIGNALEMENT.includes(motif))throw Error('Choisissez un motif.');
+  const texte=String(details||'').trim().slice(0,500);if(motif==='Autre'&&texte.length<3)throw Error('Précisez le problème (3 caractères au moins).');
+  const {error}=await db.rpc('koki_record_report',{p_target:id,p_motif:motif,p_details:texte||null});
+  if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:error.code==='PGRST202'?'Le signalement n’est pas encore ouvert : écrivez à kokiconnect221@gmail.com.':error.code==='42501'?'Connectez-vous avec votre compte pour signaler une fiche.':error.code==='P0001'?error.message:'Signalement refusé. Réessayez plus tard.');},
  suivre(id,evenement){
   if(!enabled||!db||suiviIndisponible||!UUID.test(String(id))||!EVENEMENTS.includes(evenement))return;
   const cle=id+':'+evenement;if(['vue','partage'].includes(evenement)){if(deja.has(cle))return;deja.add(cle);}
