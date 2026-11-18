@@ -36,6 +36,6 @@ Le blocage par titre de « L’Autoroute du millionnaire » a été retiré (app
 ## Autorisation de diffusion obligatoire (18 novembre 2026)
 Décision du propriétaire : aucun livre téléchargeable sans autorisation écrite (ou domaine public / licence libre) enregistrée.
 « Un rien peut tout changer » (James Clear, Larousse) a été repassé en brouillon le 18 novembre 2026 ; « L’Autoroute du millionnaire » reste en brouillon tant qu’aucune autorisation écrite n’est enregistrée.
-Contrôle côté base : `database/livres-autorisation-ecrite.sql` (test : `database/test-livres-autorisation-ecrite.sql`). La fiche livre doit porter
+Contrôle côté base (préparé, **non appliqué en production** au 18 novembre 2026 ; application soumise à accord séparé) : `database/livres-autorisation-ecrite.sql` (test : `database/test-livres-autorisation-ecrite.sql`). La fiche livre doit porter
 `"autorisation": {"type": "ecrite" | "domaine_public" | "licence_libre", "detail": "≥ 10 caractères", "date": "AAAA-MM-JJ"}` (date obligatoire pour `ecrite`).
 Sans ce champ : publication refusée par la base et fichier non lisible par le public. Le formulaire Koki Connect Admin doit ajouter ce champ (à faire, avec accord).
