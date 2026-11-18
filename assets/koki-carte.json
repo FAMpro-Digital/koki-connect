@@ -500,7 +500,7 @@
  "lieux": [
   {
    "id": "node/1887615993",
-   "nom": "Château d’eau de Coki (nord-est)",
+   "nom": "Château d’eau de Koki (nord-est)",
    "categorie": "Eau",
    "latitude": 15.5081783,
    "longitude": -15.9895923,
@@ -530,7 +530,7 @@
   },
   {
    "id": "node/2199680639",
-   "nom": "Château d’eau de Coki (sud-ouest)",
+   "nom": "Château d’eau de Koki (sud-ouest)",
    "categorie": "Eau",
    "latitude": 15.5006354,
    "longitude": -15.9954922,
@@ -548,7 +548,7 @@
   },
   {
    "id": "node/3213024805",
-   "nom": "Coki",
+   "nom": "Koki",
    "categorie": "Villages et quartiers",
    "latitude": 15.505949,
    "longitude": -15.9919614,
@@ -580,7 +580,7 @@
   },
   {
    "id": "node/7262695068",
-   "nom": "Lieu de culte de Coki (sud)",
+   "nom": "Lieu de culte de Koki (sud)",
    "categorie": "Lieux religieux",
    "latitude": 15.50275,
    "longitude": -15.9929851,
@@ -630,7 +630,7 @@
   },
   {
    "id": "way/209349180",
-   "nom": "Lieu de culte près de Coki (sud-ouest, 1,6 km)",
+   "nom": "Lieu de culte près de Koki (sud-ouest, 1,6 km)",
    "categorie": "Lieux religieux",
    "latitude": 15.4952264,
    "longitude": -16.0015731,
@@ -640,7 +640,7 @@
   },
   {
    "id": "way/209349197",
-   "nom": "Marché de Coki (sud-est)",
+   "nom": "Marché de Koki (sud-est)",
    "categorie": "Commerces",
    "latitude": 15.5029369,
    "longitude": -15.989338,
@@ -658,7 +658,7 @@
   },
   {
    "id": "way/209565014",
-   "nom": "Lieu de culte près de Coki (nord-est, 0,9 km)",
+   "nom": "Lieu de culte près de Koki (nord-est, 0,9 km)",
    "categorie": "Lieux religieux",
    "latitude": 15.5124529,
    "longitude": -15.987547,
@@ -668,7 +668,7 @@
   },
   {
    "id": "way/209565015",
-   "nom": "Lieu de culte de Coki (nord)",
+   "nom": "Lieu de culte de Koki (nord)",
    "categorie": "Lieux religieux",
    "latitude": 15.5118236,
    "longitude": -15.9931207,

@@ -66,7 +66,7 @@ function detail(row){
  if(v?.contact){const t=n('a','📞 Appeler l’organisateur','ev-bouton ev-bouton-clair');t.href='tel:'+v.contact.replace(/[^+0-9]/g,'');actions.append(t);}
  box.append(actions);
  const dl=n('dl',undefined,'ev-infos');for(const [k,x] of [['Lieu',row.lieu],['Organisateur',v?.organisateur],['Entrée',v?.entree],['Contact',v?.contact],['Source',row.source]])if(x)dl.append(n('dt',k),n('dd',x));box.append(dl);
- const desc=n('section',undefined,'ev-bloc');desc.append(n('h3','À propos'),n('p',row.resume));if(!v&&row.texte)desc.append(n('p',row.texte));box.append(desc);
+ const desc=n('section',undefined,'ev-bloc');desc.append(n('h3','À propos'),KokiPortailCore.riche('p',row.resume));if(!v&&row.texte)desc.append(KokiPortailCore.riche('p',row.texte));box.append(desc);
  if(v?.programme){const p=n('section',undefined,'ev-bloc ev-programme');p.append(n('h3','📋 Programme'),n('p',v.programme));box.append(p);}
  box.append(b('📅 Voir tout l’agenda',ouvrir,'ev-bouton ev-bouton-clair'));
 }

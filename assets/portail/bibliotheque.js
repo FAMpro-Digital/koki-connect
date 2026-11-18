@@ -71,7 +71,7 @@ function detail(row){
  if(L.telechargeable(livre)&&livre.taille_mo)puces.append(n('span',livre.taille_mo+' Mo','biblio-badge biblio-format'));infos.append(puces);
  tete.append(couverture(row,livre,'grande'),infos);
  const a=n('article',undefined,'biblio-fiche');const zone=n('div',undefined,'biblio-zone');a.append(tete,zone);
- const apropos=n('section',undefined,'biblio-apropos');apropos.append(n('h3','À propos'),n('p',row.resume));if(livre.description)apropos.append(n('p',livre.description));
+ const apropos=n('section',undefined,'biblio-apropos');apropos.append(n('h3','À propos'),KokiPortailCore.riche('p',row.resume));if(livre.description)apropos.append(n('p',livre.description));
  const dl=n('dl',undefined,'biblio-infos');for(const [k,v] of [['Accès',livre.acces==='Gratuit'?'Gratuit':L.prix(livre.prix)],['Format',livre.format],['Niveau',livre.niveau],['Fourni par',livre.fournisseur||row.source||''],['Taille',L.telechargeable(livre)&&livre.taille_mo?livre.taille_mo+' Mo':'']])if(v)dl.append(n('dt',k),n('dd',v));apropos.append(dl);a.append(apropos);
  function actions(){zone.replaceChildren();
   if(L.telechargeable(livre)){

@@ -11,7 +11,7 @@ const portail = fs.readFileSync('assets/portail/app.js', 'utf8');
 const runtime = fs.readFileSync('assets/business/runtime.mjs', 'utf8');
 const catalogue = fs.readFileSync('assets/business/catalogue.mjs', 'utf8');
 // Empreintes vérifiées aussi dans l'admin (tests/lieux-admin.test.js).
-const EMPREINTE = 'c5c581043dc9116c1b03abe5aa5ce36260cffe8c58535fa766ad1092c956107e', REFERENCE = '8763e5d4991b0f287b2e171a65e5db09e98d098daf720a92ba402b5dc6500320';
+const EMPREINTE = 'c5c581043dc9116c1b03abe5aa5ce36260cffe8c58535fa766ad1092c956107e', REFERENCE = 'd39668aa4f0a6e967c186e9f4ec69924dcd31941682da7283ef70548fda9ee27';
 const sha = x => crypto.createHash('sha256').update(x).digest('hex');
 const row = (titre, v, extra = {}) => ({ id: 'id-' + titre, type: 'Informations utiles', categorie: 'Lieux de la carte', titre, resume: 'r', lieu: 'Koki', statut: 'publié', publication: '2026-10-01T00:00:00Z', texte: L.encode(v), ...extra });
 
@@ -47,8 +47,8 @@ test('accueil : les lieux ne sont pas des publications ; recherche : commerces v
   assert.match(portail, /!\(x\.type==='Informations utiles'&&x\.categorie==='Lieux de la carte'\)/);
   assert.match(portail, /KokiBusiness\.catalogueRecherche\(\)\.catch\(\(\)=>\[\]\)/);
   assert.match(portail, /ouvrir:\(\)=>KokiBusiness\.ouvrirFiche\(x\.id\)/);
-  assert.match(runtime, /indexCatalogue\(await api\.catalog\(\)\)\.liste/);
-  assert.match(runtime, /if\(!api\?\.enabled\|\|modules\.commerce===false\)return \[\];/);
-  assert.match(runtime, /window\.KokiBusiness=\{show,catalogueRecherche,ouvrirFiche,/);
+  assert.match(runtime, /const idx=indexCatalogue\(await api\.catalog\(\)\);/);
+  assert.match(runtime, /if\(!api\?\.enabled\|\|modules\.commerce===false\)return null;/);
+  assert.match(runtime, /window\.KokiBusiness=\{show,catalogueRecherche,apercuCommerces,ouvrirFiche,/);
   assert.match(catalogue, /ouvrir:id=>\{if\(idx\?\.get\(id\)\)go\('fiche',\{id\}\);\}/);
 });

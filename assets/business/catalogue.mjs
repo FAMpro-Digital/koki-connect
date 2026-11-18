@@ -2,7 +2,7 @@ import {requireClientAccount} from './client-access.mjs';
 // Catalogue public Commerces & Services — boutique en ligne adaptative (téléphone d'abord, panier latéral sur grand écran).
 // Recherche, onglets, puces de catégories, promotions, cartes « Ajouter au panier », fiches détaillées avec galerie,
 // Appeler / WhatsApp / Commander sur WhatsApp, panier (une boutique) avec retrait ou livraison, paiement à la réception.
-import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,totalPanier,lienPanierWhatsApp,similaires} from './catalogue-state.mjs';
+import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,libelleTotal,lienPanierWhatsApp,similaires} from './catalogue-state.mjs';
 import {etatOuverture,distanceKm,libelleDistance,positionDe,lireFavoris,basculerFavori,messagePartage,lienPartageWhatsApp,lienFiche,sauverCatalogue,lireCatalogue,libelleDate}from './catalogue-extras.mjs';
 import {lirePosition}from './position-gps.mjs';
 import {transitoire,MOTIFS_SIGNALEMENT}from './client.mjs';
@@ -153,7 +153,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   aside.append(choix);
   if(mode==='livraison'){const w=node('div',null,'cat-field'),id=nid('adr'),l=node('label','Adresse ou lieu de livraison'),i=node('input');l.htmlFor=id;i.id=id;i.type='text';i.autocomplete='street-address';i.maxLength=300;i.value=adresse;i.placeholder='Village, quartier, repère…';i.oninput=()=>{adresse=i.value;wa();};w.append(l,i);aside.append(w);
    if(panier?.position)aside.append(button('📍 Utiliser ma position',async()=>{try{adresse=await panier.position();i.value=adresse;wa();}catch(e){say(e.message);}},'link'));}
-  const total=totalPanier(ls);const t=node('dl',null,'cat-totals');for(const [k,v] of [['Sous-total',C.formaterPrix(total)],[mode==='livraison'?'Livraison':'Retrait',mode==='livraison'?'À confirmer par la boutique':'Gratuit']])t.append(node('dt',k),node('dd',v));aside.append(t);
+  const t=node('dl',null,'cat-totals');for(const [k,v] of [['Sous-total',libelleTotal(ls)],[mode==='livraison'?'Livraison':'Retrait',mode==='livraison'?'À confirmer par la boutique':'Gratuit']])t.append(node('dt',k),node('dd',v));aside.append(t);
   const cmd=button('Commander · paiement à la réception',async()=>{cmd.disabled=true;try{if(mode==='livraison'&&adresse.trim().length<3)throw Error('Indiquez l’adresse ou le lieu de livraison.');const r=await panier.commander(mode,adresse);say(r||'Commande enregistrée.');}catch(e){say(e.message);}finally{cmd.disabled=false;window.dispatchEvent(new Event('koki-cart'));}},'primary');
   if(!panier?.commander)cmd.disabled=true;aside.append(cmd);
   const zoneWa=node('div');aside.append(zoneWa);
@@ -166,7 +166,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const shell=node('div',null,'cat-shell');host.append(shell);
   // Barre du haut : recherche + accès au panier + raccourcis du compte.
   const bar=node('div',null,'cat-bar');
-  const recherche=node('div',null,'cat-search'),sid=nid('q'),sl=node('label','Rechercher un produit, un service, une boutique ou un village'),q=node('input');sl.htmlFor=sid;sl.className='cat-sr';q.id=sid;q.type='search';q.enterKeyHint='search';q.autocomplete='off';q.value=f.query;q.placeholder='Riz, pagne, plombier, Coki…';
+  const recherche=node('div',null,'cat-search'),sid=nid('q'),sl=node('label','Rechercher un produit, un service, une boutique ou un village'),q=node('input');sl.htmlFor=sid;sl.className='cat-sr';q.id=sid;q.type='search';q.enterKeyHint='search';q.autocomplete='off';q.value=f.query;q.placeholder='Riz, pagne, plombier, Koki…';
   let t;q.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{f.query=q.value;limite=PAGE;dessiner();},150);};recherche.append(sl,q);
   const cartBtn=node('button',null,'cat-cartbtn');cartBtn.type='button';cartBtn.append(icone(ICONES.produits,22));const pastille=node('span',null,'cat-cartbtn-n');cartBtn.append(pastille);
   const allerPanier=()=>{const a=host.querySelector('.cat-cart');a?.scrollIntoView({block:'start',behavior:'smooth'});a?.querySelector('h3')?.focus?.({preventScroll:true});};
@@ -186,7 +186,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const aside=node('aside',null,'cat-cart');aside.id=nid('panier');aside.setAttribute('aria-label','Panier');if(panier)layout.append(aside);
   const barre=node('button',null,'cat-cartbar');barre.type='button';barre.onclick=allerPanier;if(panier)main.append(barre);
   majPanier=()=>{const ls=lignes(),n=ls.reduce((s,l)=>s+l.quantite,0);pastille.textContent=n?String(n):'';pastille.hidden=!n;cartBtn.setAttribute('aria-label','Panier : '+n+' article'+(n>1?'s':''));
-   barre.hidden=!n;barre.replaceChildren(node('span',n+' article'+(n>1?'s':'')+' · '+C.formaterPrix(totalPanier(ls))),node('span','Panier →','cat-cartbar-go'));barre.setAttribute('aria-label','Voir le panier : '+n+' article'+(n>1?'s':'')+', '+C.formaterPrix(totalPanier(ls)));
+   barre.hidden=!n;barre.replaceChildren(node('span',n+' article'+(n>1?'s':'')+' · '+libelleTotal(ls)),node('span','Panier →','cat-cartbar-go'));barre.setAttribute('aria-label','Voir le panier : '+n+' article'+(n>1?'s':'')+', '+libelleTotal(ls));
    for(const card of host.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);if(panier)recapitulatif(aside);};
   function dessiner(){
    f.favoris=f.mesFavoris?mesFavoris:null;

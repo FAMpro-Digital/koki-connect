@@ -35,7 +35,7 @@ function carteDemarche({row,v}){const d=S.domaine(v.domaine),a=b('',()=>detail(r
  a.append(n('span',d.icone,'sp-demarche-icone'));const t=n('span',undefined,'sp-demarche-texte');t.append(n('span',v.domaine,'sp-genre'),n('strong',row.titre));
  const infos=[v.pieces.length?v.pieces.length+(v.pieces.length>1?' pièces':' pièce'):'',v.cout,v.delai].filter(Boolean).join(' · ');if(infos)t.append(n('span',infos,'sp-lieu'));a.append(t,n('span','›','sp-chevron'));return a;}
 function carteAvis(row){const a=b('',()=>KokiPortail.detail(row),'sp-avis'+(row.categorie==='Avis important'?' sp-avis-important':''));
- a.append(n('span',(row.categorie==='Avis important'?'⚠️ Avis important':'📢 '+(row.categorie||row.type))+' · '+date(row.publication),'sp-avis-date'),n('strong',row.titre),n('span',row.resume,'sp-lieu'));return a;}
+ a.append(n('span',(row.categorie==='Avis important'?'⚠️ Avis important':'📢 '+(row.categorie||row.type))+' · '+date(row.publication),'sp-avis-date'),n('strong',row.titre),KokiPortailCore.riche('span',row.resume,'sp-lieu'));return a;}
 function chips(liste,courant,fn,label){const box=n('div',undefined,'sp-chips');box.setAttribute('role','group');box.setAttribute('aria-label',label);
  for(const [cle,texte] of liste){const c=b(texte,()=>fn(cle),'sp-chip');c.setAttribute('aria-pressed',String(cle===courant));box.append(c);}return box;}
 
@@ -85,11 +85,11 @@ async function detail(row){
  if(!actif(row.titre))return;
  if(s){const a=carteService({row,v:s},false);a.classList.add('sp-fiche');
   if(row.image&&KokiPublicFeed.imagePermise(row.image)){const img=n('img');img.src=row.image;img.alt='';img.loading='lazy';img.className='sp-photo';a.prepend(img);}
-  a.append(n('p','🕒 '+S.horairesTexte(s),'sp-horaires'));if(row.resume)a.append(n('p',row.resume));if(s.description)a.append(n('p',s.description,'sp-texte'));
+  a.append(n('p','🕒 '+S.horairesTexte(s),'sp-horaires'));if(row.resume)a.append(KokiPortailCore.riche('p',row.resume));if(s.description)a.append(n('p',s.description,'sp-texte'));
   if(s.whatsapp)a.append(lien('💬 Écrire sur WhatsApp','https://wa.me/'+s.whatsapp.replace(/\D/g,'').replace(/^(\d{9})$/,'221$1'),'sp-btn',true));
   if(row.source)a.append(n('p','Source : '+row.source,'portail-meta'));box.append(a);
   const ici=(D?.demarches||[]).filter(x=>x.v.service===row.id);if(ici.length){const sec=n('section',undefined,'sp-bloc');sec.append(n('h3','📄 Démarches à faire ici'),...ici.map(carteDemarche));box.append(sec);}
- }else{const dm=S.domaine(d.domaine),tete=n('section',undefined,'sp-fiche-tete');tete.append(n('span',dm.icone+' '+d.domaine,'sp-genre'),n('h2',row.titre),n('p',row.resume));box.append(tete);
+ }else{const dm=S.domaine(d.domaine),tete=n('section',undefined,'sp-fiche-tete');tete.append(n('span',dm.icone+' '+d.domaine,'sp-genre'),n('h2',row.titre),KokiPortailCore.riche('p',row.resume));box.append(tete);
   const infos=n('div',undefined,'sp-infos');for(const [k,x] of [['💰 Coût',d.cout],['⏱️ Délai',d.delai]])if(x){const c=n('div');c.append(n('span',k),n('strong',x));infos.append(c);}if(infos.children.length)box.append(infos);
   if(d.pieces.length){const sec=n('section',undefined,'sp-bloc');sec.append(n('h3','📋 Pièces à fournir'),n('p','Cochez au fur et à mesure pour préparer votre dossier.','portail-meta'));
    for(const p of d.pieces){const l=n('label',undefined,'sp-piece');const c=n('input');c.type='checkbox';l.append(c,n('span',p));sec.append(l);}box.append(sec);}

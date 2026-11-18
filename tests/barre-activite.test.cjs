@@ -7,7 +7,7 @@ test('barre du bas : 5 onglets utiles, plus de Carte / Publier / Favoris',()=>{
  assert.match(barre,/data-clic="afficherTransport\(\)"/);assert.match(barre,/data-clic="afficherCommerce\(\)"/);assert.match(barre,/data-clic="KokiActivite\.ouvrir\(\)"/);
  assert.doesNotMatch(barre,/Publier|Favoris|afficherCarte/);
  assert.match(html,/data-clic="afficherCarte\(\)"/,'la carte reste accessible depuis l’accueil');
- assert.match(html,/KokiPortail\.admin\(\)/,'publier reste accessible depuis le menu');
+ assert.doesNotMatch(html,/KokiPortail\.admin\(\)/,'pas de lien d’administration dans l’app publique (accès direct à l’admin)');
 });
 test('onglet actif : Activité couvre favoris, livres et notifications',()=>{
  assert.match(nav,/courante === 'vue-notifications' \|\| \(courante === 'vue-portail' && \/\^\(Activité\|Favoris\|📥 Mes livres\)\/\.test\(t\)\) \? 'activite'/);
@@ -15,7 +15,7 @@ test('onglet actif : Activité couvre favoris, livres et notifications',()=>{
 });
 test('Activité : course en cours, commandes, demandes du compte connecté ; raccourcis hors connexion',()=>{
  assert.match(rt,/const uid=api\.user\?\.id,lire=async k=>\{try\{return \(await api\.history\(k\)\)\.filter\(r=>r\.client_id===uid\);\}catch\{return \[\];\}\};/);
- assert.match(rt,/window\.KokiBusiness=\{show,catalogueRecherche,ouvrirFiche,activite,/);
+ assert.match(rt,/window\.KokiBusiness=\{show,catalogueRecherche,apercuCommerces,ouvrirFiche,activite,/);
  assert.match(act,/if\(!a\.connecte\)/);assert.match(act,/KokiBibliotheque\.mesLivres\(\)/);assert.match(act,/KokiPortail\.favoris\(\)/);assert.match(act,/afficherNotifications\(\)/);
  assert.doesNotMatch(act,/innerHTML/);
  assert.ok(html.indexOf('assets/portail/activite.js')>html.indexOf('assets/portail/app.js"'));

@@ -4,7 +4,7 @@ import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
 import {isProcessedImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver} from './business-state.js';
-import {indexCatalogue} from './catalogue-state.mjs';
+import {indexCatalogue,promotion,disponible,villageDe} from './catalogue-state.mjs';
 import {imageSelection} from './ui.mjs';
 import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE,transitoire} from './client.mjs';
 // Message d'erreur affichable : jamais d'erreur technique brute (« TypeError: Failed to fetch »…).
@@ -83,11 +83,21 @@ const transportSuivi={courseClient,code:id=>api.run('ride_code',{id}),position:i
  noter:(id,rating,tags,comment)=>api.run('rate_ride',{id,rating,tags,...(comment?{comment}:{})}),signaler:(id,motif,details)=>api.run('report_ride',{id,motif,...(details?{details}:{})})};
 // Recherche de l'accueil : boutiques, produits et services validés (même règle de publication que la boutique en ligne).
 let rechercheCache=null;
-async function catalogueRecherche(){
- if(rechercheCache&&Date.now()-rechercheCache.t<120000)return rechercheCache.rows;
- await initialise();if(!api?.enabled||modules.commerce===false)return [];
- const rows=indexCatalogue(await api.catalog()).liste.map(x=>({id:x.id,kind:x.kind,nom:x.nom,description:x.description||'',categorie:x.categorie||'',village:x.village||''}));
- rechercheCache={t:Date.now(),rows};return rows;
+async function catalogueIndex(){
+ if(rechercheCache&&Date.now()-rechercheCache.t<120000)return rechercheCache;
+ await initialise();if(!api?.enabled||modules.commerce===false)return null;
+ const idx=indexCatalogue(await api.catalog());
+ const rows=idx.liste.map(x=>({id:x.id,kind:x.kind,nom:x.nom,description:x.description||'',categorie:x.categorie||'',village:x.village||''}));
+ rechercheCache={t:Date.now(),rows,idx};return rechercheCache;
+}
+async function catalogueRecherche(){return (await catalogueIndex())?.rows||[];}
+// Aperçu de l'accueil : promotions d'abord, puis produits disponibles, services et boutiques publiés.
+async function apercuCommerces(max=3){
+ const c=await catalogueIndex();if(!c)return null;const idx=c.idx;
+ const produits=idx.liste.filter(x=>x.kind==='produits'&&disponible(x)).sort((a,b)=>promotion(b)-promotion(a)||a.ordre-b.ordre);
+ const autres=['services','boutiques','professionnels'].flatMap(k=>idx.liste.filter(x=>x.kind===k&&disponible(x)));
+ return [...produits,...autres].slice(0,max).map(x=>({id:x.id,kind:x.kind,nom:x.nom,prix:Number.isInteger(x.prix)?x.prix:null,ancien_prix:promotion(x)>0?x.ancien_prix:null,promotion:promotion(x),
+  boutique:(x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?idx.vendeur(x)?.nom:'')||'',village:villageDe(x,idx)||''}));
 }
 // Ouvre la fiche d'un résultat dans Commerces & Services, une fois la boutique en ligne affichée.
 async function ouvrirFiche(id){
@@ -103,7 +113,7 @@ async function activite(){
  const [courses,commandes,demandes]=await Promise.all(['courses','commandes','demandes_services'].map(lire));
  return {connecte:true,courses,commandes,demandes};
 }
-window.KokiBusiness={show,catalogueRecherche,ouvrirFiche,activite,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
+window.KokiBusiness={show,catalogueRecherche,apercuCommerces,ouvrirFiche,activite,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
 // Les retours de récupération sont ouverts dans Profil par retourDeLien().
 
@@ -188,7 +198,7 @@ function raccourcis(){
 }
 function entete(tete,u,qui){
  tete.replaceChildren();const a=nc('span',u?String(qui||'K').replace(/^\+?221\s?/,'').trim().charAt(0).toUpperCase()||'K':'👤','pf-avatar');
- const t=nc('div','','pf-tete-texte');t.append(node('strong',u?(u.user_metadata?.full_name||u.user_metadata?.name||qui):'Bienvenue sur Koki Connect'),node('span',u?qui:'Connectez-vous avec Google ou le lien reçu par e-mail pour commander, réserver une course et suivre vos demandes. Les professionnels peuvent aussi utiliser leur mot de passe.'));
+ const t=nc('div','','pf-tete-texte');t.append(node('strong',u?(u.user_metadata?.full_name||u.user_metadata?.name||qui):'Bienvenue sur Koki Connect'),node('span',u?qui:'Connectez-vous avec Google, un lien reçu par e-mail ou votre mot de passe pour commander, réserver une course et suivre vos demandes.'));
  tete.append(a,t);tete.classList.toggle('pf-tete-connecte',!!u);
 }
 async function espaceProfil(host){

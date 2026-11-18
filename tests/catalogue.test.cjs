@@ -3,7 +3,7 @@ const U=n=>`${String(n).repeat(8)}-${String(n).repeat(4)}-4${String(n).repeat(3)
 const PRO=U(1),SHOP=U(2),RIZ=U(3),SUCRE=U(4),SERVICE=U(5),ORPHAN=U(6),PENDING=U(7),SHOP2=U(8),HIDDEN=U(9);
 const OLD_PHOTO='55555555-5555-4555-8555-555555555555/'+U('a')+'.jpg',NEW_PHOTO=U('b')+'/'+U('c')+'.webp';
 function rows(){return [
- {id:PRO,kind:'professionnels',statut:'Actif',nom:'Épicerie Diop',categorie:'Alimentation',type:'Les deux',telephone:'+221771234567',whatsapp:'+221781234567',village:'Coki',horaires:'Lundi–samedi',owner_id:'SECRET-OWNER',moderation:{note:'secret'},modification:{nom:'Nom non validé'},merchant_submission:true,email:'prive@example.test',localisation:{latitude:15.5,longitude:-15.99}},
+ {id:PRO,kind:'professionnels',statut:'Actif',nom:'Épicerie Diop',categorie:'Alimentation',type:'Les deux',telephone:'+221771234567',whatsapp:'+221781234567',village:'Koki',horaires:'Lundi–samedi',owner_id:'SECRET-OWNER',moderation:{note:'secret'},modification:{nom:'Nom non validé'},merchant_submission:true,email:'prive@example.test',localisation:{latitude:15.5,longitude:-15.99}},
  {id:SHOP,kind:'boutiques',statut:'Actif',parent_id:PRO,nom:'Boutique du marché',village:'Ouarak',whatsapp:'+221761234567',photos:[OLD_PHOTO]},
  {id:RIZ,kind:'produits',statut:'Disponible',parent_id:SHOP,nom:'Riz parfumé 5 kg',categorie:'Alimentation',prix:4500,ancien_prix:5000,stock:8,photos:[NEW_PHOTO,'https://evil.test/x.jpg','../../etc/passwd'],image_path:NEW_PHOTO,client_id:'SECRET-CLIENT'},
  {id:SUCRE,kind:'produits',statut:'Épuisé',parent_id:SHOP,nom:'Sucre 1 kg',categorie:'Alimentation',prix:800,ancien_prix:700,stock:0},
@@ -42,7 +42,7 @@ test('filtres : catégorie, village, disponibles, tri par prix, compteurs',async
  assert.deepEqual(names({kind:'produits',disponibles:true}),['Riz parfumé 5 kg']);
  assert.deepEqual(names({kind:'produits',tri:'prix'}),['Sucre 1 kg','Riz parfumé 5 kg']);
  assert.deepEqual(names({kind:'produits',tri:'prix-desc'}),['Riz parfumé 5 kg','Sucre 1 kg']);
- assert.deepEqual(names({kind:'professionnels',village:'Coki'}),['Épicerie Diop']);assert.deepEqual(names({kind:'boutiques',village:'Coki'}),[]);
+ assert.deepEqual(names({kind:'professionnels',village:'Koki'}),['Épicerie Diop']);assert.deepEqual(names({kind:'boutiques',village:'Koki'}),[]);
  assert.deepEqual(S.categories(idx,'produits'),['Alimentation']);assert.deepEqual(S.villages(idx,'produits'),['Ouarak']);
  assert.deepEqual(S.compter(idx,{query:''}),{professionnels:1,boutiques:1,produits:2,services:1});
 });
@@ -67,7 +67,7 @@ test('fiches liées : boutique → produits, commerce → boutiques et services'
 });
 test('interface : retour, onglets, liens externes sûrs, panier et demandes internes conservés',()=>{
  const fs=require('node:fs');const ui=fs.readFileSync('assets/business/catalogue.mjs','utf8'),rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
- for(const label of ['Commerces','Boutiques','Produits','Services'])assert.ok(fs.readFileSync('assets/business/catalogue-state.mjs','utf8').includes(`label:'${label}'`));
+ for(const label of ['Professionnels','Boutiques','Produits','Services'])assert.ok(fs.readFileSync('assets/business/catalogue-state.mjs','utf8').includes(`label:'${label}'`));
  assert.match(ui,/a\.rel='noopener noreferrer'/);assert.match(ui,/history\.pushState/);assert.match(ui,/'← Retour'/);assert.match(require('./_aide.cjs').accueil(),/id="vue-commerce"[^>]*>\s*<button type="button" data-clic="fermerOpportunites\(\)">← Retour à l’accueil/);
  assert.doesNotMatch(ui,/innerHTML/,'aucun HTML injecté depuis les données');
  assert.match(rt,/async function addToCart\(/);assert.match(rt,/async function requestService\(/);assert.match(rt,/api\.order\(/,'commande interne conservée');

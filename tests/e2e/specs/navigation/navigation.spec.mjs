@@ -8,7 +8,7 @@ test.describe('Navigation principale', () => {
     await expect(page.locator('#vue-portail')).toBeHidden();
     const boutons = page.locator('nav[aria-label="Navigation principale"] button[data-nav]');
     await expect(boutons).toHaveCount(5);
-    await expect(boutons).toHaveText([/Accueil/, /Transport/, /Boutique/, /Activité/, /Profil/]);
+    await expect(boutons).toHaveText([/Accueil/, /Transport/, /Commerces/, /Activité/, /Profil/]);
   });
 
   test('passage Accueil → Transport → Boutique → Accueil', async ({ page }) => {
