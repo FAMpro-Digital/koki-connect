@@ -1,0 +1,11 @@
+.notification-invitation{position:fixed;z-index:1500;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom,0px));max-width:440px;margin-left:auto;padding:18px;background:#fff;border:1px solid #d9e7dd;border-left:5px solid #087a3d;border-radius:16px;box-shadow:0 8px 32px #12352226;color:#203b2b;font-family:inherit;max-height:calc(100dvh - 160px);overflow:auto}
+.notification-invitation h2{font-size:18px;line-height:1.35;margin:0 0 8px;font-weight:700}
+.notification-invitation p{font-size:14px;line-height:1.5;margin:0 0 12px}
+.notification-invitation p:empty{display:none}
+.notification-invitation-actions{display:flex;flex-wrap:wrap;gap:8px}
+.notification-invitation button{min-height:44px;padding:10px 14px;border-radius:10px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.notification-invitation-activate{background:#087a3d;color:#fff;border:1px solid #087a3d}
+.notification-invitation-later{background:#fff;color:#375842;border:1px solid #cbdcce}
+.notification-invitation button:focus-visible{outline:3px solid #ed8b23;outline-offset:3px}
+.notification-invitation button:disabled{opacity:.65;cursor:wait}
+@media(max-width:480px){.notification-invitation{left:12px;right:12px;padding:14px;bottom:calc(80px + env(safe-area-inset-bottom,0px))}}

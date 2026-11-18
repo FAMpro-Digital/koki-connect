@@ -1,0 +1,39 @@
+/* Hiérarchie commune au client. Les !important sont limités à l'épaisseur :
+   ils neutralisent les font:inherit et les sélecteurs historiques par rubrique.
+   Police, corps, couleurs et espacements restent définis dans leurs styles. */
+body { font-weight: 500; }
+
+p, small, .portail-meta, .cat-meta, .cat-description, .cat-hint,
+.pro-hint, .pro-note, .tr-texte small, .tr-texte span, .sante-alerte-date,
+.edu-tuile-info, .sp-actu-meta {
+  font-weight: 500 !important;
+}
+
+h1, h2, h3, h4, h5, h6, strong, b, .barre-titre, .cat-card-title,
+.biblio-couv-titre, .biblio-vignette-titre, .tr-titre, .menu-sep,
+button, [role="button"], input[type="submit"], input[type="button"], summary,
+.com-btn, .sp-bouton, .market-contact, .tr-outil, .tr-urgences a,
+.business-panel a, #profil-pro a,
+.cat-price, .cat-price s, .pro-price, .market-price, .biblio-prix,
+.tr-prix, .cat-totals dd, .cat-meta-fort, .cat-message, .pro-message,
+.tr-statut, .act-statut, .pro-badge, .cat-badge, .cat-promo,
+.tr-compte, .rb-contact a, .sp-statut, .sp-match-score,
+.sp-gagne .sp-match-nom, .sp-rang, .sp-pts, [role="alert"] {
+  font-weight: 700 !important;
+}
+
+/* Un bouton qui change de rubrique ou d'onglet est un élément de navigation. */
+nav button, nav a, .menu-liens button, .raccourci, .raccourci strong,
+.pf-raccourci, .pf-raccourci strong, .menu-liens strong,
+.pro-menu button, .pro-menu strong, .biblio-tabs button, .cat-tabs button,
+.market-tabs button, .sp-onglet, [role="tab"] {
+  font-weight: 600 !important;
+}
+
+/* Les quatre onglets restent dans leur grille sur les petits écrans. */
+#vue-commerce .business-panel .cat-tab {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.raccourci strong { overflow-wrap: anywhere; }

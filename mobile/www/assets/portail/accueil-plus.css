@@ -1,0 +1,91 @@
+/* Accueil : tuiles lisibles, titres de sections alignés, Urgences, carte « Reprendre », « À la une », en-tête. Couleurs Koki : orange, vert foncé, blanc. */
+
+/* 1. Tuiles : les mots ne sont plus coupés en deux ; la taille s'adapte à la largeur de l'écran. */
+.raccourci { padding: 16px 3px; }
+.raccourci strong { overflow-wrap: normal !important; word-break: normal; hyphens: manual; font-size: clamp(10px, 2.85vw, 12px); line-height: 1.2; display: block; }
+.raccourci span { font-size: clamp(26px, 7.5vw, 30px); }
+
+/* 3. Titres de sections : titre à gauche, « Voir plus » toujours à droite, même taille. */
+.portail-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
+.portail-title h2 { margin: 0; min-width: 0; }
+.portail-title .portail-more { flex: 0 0 auto; margin: 0 0 0 auto; white-space: nowrap; }
+
+/* 4. Urgences : bouton rouge visible sous la recherche. */
+.accueil-rapide { display: grid; gap: 10px; margin-top: 10px; }
+.accueil-rapide[hidden] { display: none; }
+.urgences-bouton { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; width: 100%; box-sizing: border-box; padding: 10px 14px; border: 0; border-radius: 14px; background: #b91c1c; color: #fff; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 3px 10px #b91c1c33; }
+.urgences-bouton:focus-visible { outline: 3px solid #17201b; outline-offset: 3px; }
+
+/* 5. Carte « Reprendre » : course ou commande en cours. */
+.carte-reprendre { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #fff; border: 2px solid #e06a00; box-shadow: 0 3px 12px #143b1014; }
+.carte-reprendre[hidden] { display: none; }
+.carte-reprendre .reprendre-icone { font-size: 28px; }
+.carte-reprendre .reprendre-texte { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.carte-reprendre .reprendre-texte small { color: #a64b00; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
+.carte-reprendre .reprendre-texte strong { overflow-wrap: anywhere; }
+.carte-reprendre .reprendre-texte span { color: #4b525a; font-size: 14px; overflow-wrap: anywhere; }
+.carte-reprendre button { flex: 0 0 auto; min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: #e06a00; color: #1a0e00; font: inherit; font-weight: 700; cursor: pointer; }
+
+/* 6. « À la une » : bandeau qui défile sous la recherche ; masqué tant qu'il n'y a rien à la une. */
+#accueil-une.une-vide { display: none !important; }
+#portail-une { display: flex; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scrollbar-width: none; }
+#portail-une::-webkit-scrollbar { display: none; }
+#portail-une > * { flex: 0 0 min(88%, 420px); scroll-snap-align: start; }
+#portail-une > :only-child { flex-basis: 100%; }
+.une-points { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.une-points[hidden] { display: none; }
+.une-points span { width: 8px; height: 8px; border-radius: 50%; background: #c9d3cd; }
+.une-points span[aria-current="true"] { background: #087a3d; width: 20px; border-radius: 4px; }
+
+/* 8. En-tête : profil en icône, pastille de notifications. */
+.bouton-pastille { position: relative; }
+.pastille-notifs { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: #e06a00; color: #fff; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; border: 2px solid #fff; }
+.pastille-notifs[hidden] { display: none; }
+
+@media (prefers-reduced-motion: no-preference) { #portail-une { scroll-behavior: smooth; } }
+
+/* ----- Aujourd'hui à Koki : heures de prière et pharmacie de garde ----- */
+.infos-jour { margin-top: 10px; padding: 12px; border-radius: 14px; background: #ffffff; border: 1px solid #d9e6df; color: #17201b; }
+.infos-jour-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 14px; }
+.infos-jour-tete small { color: #5b6b63; font-size: 11px; }
+.infos-jour-prieres { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.infos-jour-priere { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 10px; background: #f1f6f3; font-size: 11px; color: #33423b; min-width: 0; }
+.infos-jour-priere strong { font-size: 14px; color: #0b5a3c; }
+.infos-jour-priere.prochaine { background: #0b5a3c; color: #ffffff; }
+.infos-jour-priere.prochaine strong { color: #ffffff; }
+.infos-jour-garde { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; margin-top: 10px; padding: 8px 12px; border: 1px solid #f0c9a0; border-radius: 12px; background: #fff6ec; color: #7a3d00; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.infos-jour-garde strong { text-align: right; overflow-wrap: anywhere; }
+.infos-jour-garde:focus-visible { outline: 3px solid #17201b; outline-offset: 2px; }
+
+/* ----- Bienvenue (première ouverture) ----- */
+.bienvenue { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6, 40, 27, .72); }
+.bienvenue-boite { width: min(100%, 380px); padding: 26px 22px 20px; border-radius: 22px; background: #ffffff; color: #17201b; text-align: center; box-shadow: 0 18px 48px rgba(0, 0, 0, .28); border-top: 6px solid #f28c28; }
+.bienvenue-icone { font-size: 52px; line-height: 1; margin-bottom: 10px; }
+.bienvenue-boite h2 { margin: 0 0 8px; font-size: 21px; color: #0b5a3c; }
+.bienvenue-boite p { margin: 0; font-size: 15px; line-height: 1.5; min-height: 4.5em; }
+.bienvenue-points { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
+.bienvenue-points span { width: 9px; height: 9px; border-radius: 50%; background: #cfdcd5; }
+.bienvenue-points span.actif { background: #f28c28; width: 22px; border-radius: 6px; }
+.bienvenue-actions { display: flex; gap: 10px; }
+.bienvenue-actions button { flex: 1; min-height: 48px; border-radius: 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.bienvenue-passer { border: 1px solid #cfdcd5; background: #ffffff; color: #33423b; }
+.bienvenue-suite { border: 0; background: #0b5a3c; color: #ffffff; }
+.bienvenue-actions button:focus-visible { outline: 3px solid #f28c28; outline-offset: 2px; }
+
+/* ----- Accès aux vidéos depuis l'accueil ----- */
+.accueil-videos { margin-top: 10px; }
+.accueil-videos-bouton { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 14px; background: #f28c28; color: #17201b; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
+.accueil-videos-bouton:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 3px; }
+
+/* ----- Koki en direct : informations urgentes des trois derniers jours ----- */
+.koki-direct { margin-top: 10px; padding: 12px; border-radius: 14px; background: #ffffff; border: 1px solid #f0c9a0; border-left: 5px solid #f28c28; color: #17201b; }
+.koki-direct-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 14px; color: #0b5a3c; }
+.koki-direct-point { width: 10px; height: 10px; border-radius: 50%; background: #d62828; animation: koki-direct-pouls 1.6s ease-in-out infinite; }
+@keyframes koki-direct-pouls { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .koki-direct-point { animation: none; } }
+.koki-direct-ligne { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 4px; border: 0; border-top: 1px solid #eef3f0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.koki-direct-icone { font-size: 20px; flex: none; }
+.koki-direct-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.koki-direct-texte strong { font-size: 14px; overflow-wrap: anywhere; }
+.koki-direct-texte small { font-size: 12px; color: #5b6b63; }
+.koki-direct-ligne:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 2px; }

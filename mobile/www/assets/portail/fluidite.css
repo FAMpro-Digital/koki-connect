@@ -1,0 +1,153 @@
+/* Sensation d'application : touches réactives, ouvertures et retours animés, défilement fluide.
+   Tout est désactivé quand le téléphone demande moins d'animations. */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overscroll-behavior-x: none; }
+/* Plus de délai au toucher (double-tap) sur les éléments interactifs. */
+button, a, select, input, textarea, label, summary, [role="button"] { touch-action: manipulation; }
+/* Retour visuel immédiat à l'appui. */
+button, a.com-btn, .portail-card, .pro-choix-carte, .tr-vehicule, .tr-chauffeur, .tr-outil, summary {
+  transition: transform .12s cubic-bezier(.2,.8,.2,1), background-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+button:active:not(:disabled), a.com-btn:active, .pro-choix-carte:active, .tr-vehicule:active:not(:disabled), .tr-outil:active, summary:active { transform: scale(.97); }
+.portail-card:active { transform: scale(.985); }
+nav[aria-label="Navigation principale"] button:active { transform: scale(.92); }
+/* Onglet actif de la barre du bas. */
+nav[aria-label="Navigation principale"] button[aria-current="page"] { color: #0B6B3A; font-weight: 800; }
+nav[aria-label="Navigation principale"] button[aria-current="page"] span { transform: translateY(-2px); display: block; transition: transform .2s ease; }
+nav[aria-label="Navigation principale"] button { position: relative; }
+nav[aria-label="Navigation principale"] button[aria-current="page"]::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 22px; height: 3px; margin-left: -11px; border-radius: 2px; background: #f28c28; }
+/* Ouverture d'une page : glisse depuis la droite ; retour : depuis la gauche. */
+@keyframes koki-page-entree { from { opacity: 0; transform: translate3d(28px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes koki-page-retour { from { opacity: 0; transform: translate3d(-22px,0,0); } to { opacity: 1; transform: none; } }
+.section.page-entree { animation: koki-page-entree .28s cubic-bezier(.2,.8,.2,1) both; }
+.section.page-retour { animation: koki-page-retour .24s cubic-bezier(.2,.8,.2,1) both; }
+/* Les listes longues se dessinent au fil du défilement. */
+.portail-grid > .portail-card, .tr-chauffeurs > * { content-visibility: auto; contain-intrinsic-size: auto 220px; }
+img { -webkit-user-drag: none; }
+@media (prefers-reduced-motion: reduce) {
+  .section.page-entree, .section.page-retour { animation: none; }
+  button:active, a.com-btn:active, .portail-card:active, .pro-choix-carte:active, .tr-vehicule:active, .tr-outil:active, summary:active, nav[aria-label="Navigation principale"] button:active { transform: none; }
+}
+
+/* Page ouverte en plein écran : barre fixe (Retour + titre) à la place de la bannière de l'accueil.
+   Couleurs Koki Connect : vert foncé, orange, blanc. */
+.barre-page { position: sticky; top: 0; z-index: 1200; display: flex; align-items: center; gap: 10px; min-height: 58px;
+  padding: env(safe-area-inset-top, 0) 14px 0 8px; background: #0b5a3c; border-bottom: 4px solid #f28c28;
+  box-shadow: 0 3px 12px rgba(11,90,60,.25); }
+.barre-page[hidden] { display: none; }
+.barre-retour { flex: none; width: 42px; height: 42px; border: 0; border-radius: 21px; background: #f28c28; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.barre-retour:active { background: #d9741a; transform: scale(.94); }
+.barre-retour:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.barre-retour svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.barre-titre { margin: 0; font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.page-pleine .entete-koki, body.page-pleine #portail-sync, body.page-pleine .search,
+body.page-pleine .section > button[data-clic="fermerOpportunites()"] { display: none !important; }
+/* Le titre de la page est dans la barre : le titre interne reste lisible par les lecteurs d'écran. */
+body.page-pleine :is(#portail-titre, #titre-opportunites, #titre-commerce, #titre-carte, #titre-menu, #titre-notifications, #titre-rubrique) {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.page-pleine .section:not([hidden]) { padding-top: 12px; }
+
+/* Activité : courses, commandes, livres, favoris, notifications — couleurs Koki Connect. */
+.act-raccourcis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+.act-raccourci { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-height: 104px; padding: 12px !important; border-radius: 16px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; }
+.act-raccourci-icone { font-size: 24px; margin-bottom: auto; }
+.act-raccourci strong { font-size: 14px; }
+.act-section { margin: 12px 0 16px; }
+.act-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.act-tete h3 { margin: 0; font-size: 17px; color: #13201a; }
+.act-ligne { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; width: 100%; margin-bottom: 8px; padding: 10px 12px !important; border-radius: 16px !important; border: 1px solid #e3ebe6 !important; background: #fff !important; color: #13201a !important; text-align: left; }
+.act-chaud { border: 2px solid #f28c28 !important; background: #fff8f0 !important; }
+.act-icone { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #e8f2ec; }
+.act-texte { display: grid; gap: 2px; min-width: 0; }
+.act-texte strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-detail { font-size: 12px; color: #5b6b63; }
+.act-statut { padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #eef3f0; color: #0b5a3c; white-space: nowrap; }
+.act-statut-chaud { background: #f28c28; color: #fff; }
+.act-connexion { display: grid; gap: 6px; padding: 18px 16px; border-radius: 20px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.55) 0 70px, transparent 71px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.act-connexion span { opacity: .92; line-height: 1.4; }
+.act-liens { display: grid; gap: 8px; margin-top: 10px; }
+.act-bouton { min-height: 50px; border-radius: 14px !important; border: 0 !important; background: #f28c28 !important; color: #fff !important; font-weight: 800; margin-top: 6px; }
+.act-bouton-clair { background: #fff !important; border: 1.5px solid #cfe0d5 !important; color: #0b5a3c !important; }
+
+/* Changement d'onglet par glissement : la nouvelle page arrive du côté du geste. */
+@keyframes onglet-depuis-droite { from { transform: translateX(28px); opacity: .4; } }
+@keyframes onglet-depuis-gauche { from { transform: translateX(-28px); opacity: .4; } }
+body[data-glisse="gauche"] .section:not([hidden]) { animation: onglet-depuis-droite .25s ease-out; }
+body[data-glisse="droite"] .section:not([hidden]) { animation: onglet-depuis-gauche .25s ease-out; }
+@media (prefers-reduced-motion: reduce) { body[data-glisse] .section:not([hidden]) { animation: none; } }
+
+/* Profil simplifié : en-tête de compte, connexion en une étape, raccourcis, espace pro replié. */
+.profil-espace .pf-tete { display: flex; align-items: center; gap: 14px; margin: 4px 0 12px; padding: 18px 16px; border-radius: 22px; color: #fff; background: radial-gradient(circle at 100% 0, rgba(242,140,40,.55) 0 70px, transparent 71px), linear-gradient(150deg, #0b5a3c, #087a3d); }
+.pf-avatar { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #fff; color: #0b5a3c; font-size: 26px; font-weight: 800; border: 3px solid #f28c28; }
+.pf-tete-texte { display: grid; gap: 3px; min-width: 0; }
+.pf-tete-texte strong { font-size: 18px; color: #fff; overflow-wrap: anywhere; }
+.pf-tete-texte span { font-size: 13px; color: rgba(255,255,255,.9); line-height: 1.35; }
+.profil-espace .profil-compte { margin: 0 0 12px; border-radius: 20px; }
+.profil-espace .profil-compte > h3 { margin: 0 0 4px; color: #0b5a3c; }
+.profil-espace .pf-compte-connecte { padding: 0; border: 0; background: none; margin: 0; }
+.profil-espace .pf-compte-connecte > p[role="status"]:empty { display: none; }
+.profil-espace .connexion-sms { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.profil-espace .connexion-sms h3 { display: none; }
+.profil-espace .connexion-sms input[type="tel"] { min-height: 52px; font-size: 18px; border-radius: 14px; }
+.profil-espace .connexion-sms button[type="submit"], .profil-espace .connexion-code button[type="submit"] { width: 100%; min-height: 52px; border-radius: 14px; border: 0; background: #f28c28; color: #fff; font-weight: 800; font-size: 16px; }
+.profil-espace .connexion-sms p { margin: 8px 0 0; font-size: 13px; color: #5b6b63; }
+.profil-espace .connexion-code { margin: 12px 0 0; padding: 12px; border-radius: 14px; background: #e8f2ec; border: 0; }
+.profil-espace .connexion-code input { min-height: 52px; font-size: 22px; letter-spacing: .3em; text-align: center; border-radius: 14px; }
+.connexion-email { margin-top: 12px; border-top: 1px solid #e3ebe6; padding-top: 8px; }
+.connexion-email > summary { min-height: 44px; display: flex; align-items: center; color: #087a3d; font-weight: 700; cursor: pointer; }
+.connexion-liens { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+.profil-espace .connexion-liens button { min-height: 40px; padding: 0 !important; border: 0 !important; background: none !important; color: #087a3d !important; font-weight: 700; text-decoration: underline; box-shadow: none; }
+.pf-raccourcis { display: grid; margin: 0 0 12px; border-radius: 18px; background: #fff; border: 1px solid #e3ebe6; overflow: hidden; }
+.pf-raccourci { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 14px !important; border: 0 !important; border-bottom: 1px solid #eef2ef !important; border-radius: 0 !important; background: #fff !important; color: #13201a !important; font-size: 16px; font-weight: 600; text-align: left; }
+.pf-raccourci:last-child { border-bottom: 0 !important; }
+.pf-raccourci-icone { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #e8f2ec; font-size: 18px; }
+.pf-chevron { font-size: 22px; color: #f28c28; font-weight: 800; }
+.pro-replie { margin: 0 0 12px; border-radius: 18px; background: #fff; border: 1px solid #e3ebe6; overflow: hidden; }
+.pro-replie > summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 14px; font-weight: 700; color: #0b5a3c; cursor: pointer; list-style: none; }
+.pro-replie > summary::-webkit-details-marker { display: none; }
+.pro-replie > summary::after { content: '›'; margin-left: auto; font-size: 22px; color: #f28c28; transition: transform .2s; }
+.pro-replie[open] > summary::after { transform: rotate(90deg); }
+.pro-replie-icone { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #fff3e6; }
+.pro-replie .pro-choix { margin: 0; box-shadow: none; padding-top: 0; }
+.pf-fin, .pf-plus { display: grid; gap: 8px; margin: 4px 0 12px; }
+.pf-deconnexion { min-height: 48px; border-radius: 14px !important; border: 1.5px solid #e9c4a3 !important; background: #fff !important; color: #c25e0e !important; font-weight: 800; }
+.pf-lien { justify-self: center; min-height: 40px; padding: 0 8px !important; border: 0 !important; background: none !important; color: #5b6b63 !important; font-size: 13px; text-decoration: underline; }
+.profil-espace p[role="status"]:empty { display: none; }
+
+/* Renseignements d'une rubrique (présentation, responsable, contact), publiés depuis l'administration. */
+.rb-bandeau { margin: 0 0 12px; padding: 12px 14px; border-radius: 16px; background: #fff; border: 1px solid #e3ebe6; border-left: 5px solid #f28c28; color: #13201a; }
+.rb-bandeau p { margin: 0; line-height: 1.45; }
+.rb-bandeau .rb-contact { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 6px; font-size: 13px; color: #5b6b63; }
+.rb-bandeau .rb-contact a { font-weight: 800; color: #087a3d; text-decoration: none; }
+
+/* Zones tactiles d'au moins 44 px (appels, e-mails, actualisation, zoom de la carte). */
+#portail-vue a[href^="tel:"], #portail-vue a[href^="mailto:"], #vue-menu a[href^="tel:"], #vue-menu a[href^="mailto:"] { display: inline-flex; align-items: center; min-height: 44px; }
+#actualiser-meteo { min-width: 44px; min-height: 44px; font-size: 16px !important; }
+#portail-vue > button { min-height: 44px; }
+.leaflet-control-zoom a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 22px !important; }
+.menu-sep { margin: 8px 2px 0; font-size: 13px; font-weight: 700; color: #5b6b63; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Animation au toucher : onde partant du doigt (assets/portail/touches.js), vert Koki sur fond clair, blanche sur fond foncé. */
+.koki-touche { position: fixed; z-index: 2147483000; overflow: hidden; pointer-events: none; contain: strict; }
+.koki-touche > span { position: absolute; border-radius: 50%; transform: scale(0); opacity: 1; animation: koki-onde .55s cubic-bezier(.25,.6,.35,1) forwards; }
+.koki-touche-fin { transition: opacity .4s ease; opacity: 0; }
+@keyframes koki-onde { to { transform: scale(1); } }
+/* Barre du bas : l'icône rebondit légèrement à l'appui. */
+nav[aria-label="Navigation principale"] button:active span { animation: koki-rebond .32s cubic-bezier(.2,.8,.2,1); }
+@keyframes koki-rebond { 0% { transform: scale(1); } 40% { transform: scale(.82); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .koki-touche { display: none; }
+  nav[aria-label="Navigation principale"] button:active span { animation: none; }
+}
+.profil-espace .pf-avatar{overflow:hidden}
+.profil-espace .pf-avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+
+/* « Supprimer mon compte » : discret, en bas du profil, couleur d'alerte au moment de confirmer. */
+.pf-suppression { margin-top: 14px; padding: 10px 12px; border-radius: 14px; border: 1px solid #f0d0d0; background: #fff; }
+.pf-suppression summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: #9b1c1c; font-weight: 600; }
+.pf-suppression p { font-size: 14px; line-height: 1.5; color: #33423b; }
+.pf-suppression input { width: 100%; min-height: 44px; margin: 6px 0 10px; padding: 0 12px; border: 1px solid #cfdcd5; border-radius: 12px; font: inherit; }
+.pf-supprimer { width: 100%; min-height: 48px; border: 0 !important; border-radius: 14px !important; background: #b42318 !important; color: #fff !important; font-weight: 700; }
+/* Connexion client avec mot de passe : repliée sous le lien par e-mail. */
+.pf-mdp { margin-top: 14px; padding: 10px 12px; border-radius: 14px; border: 1px solid #d8e3dc; background: #fff; }
+.pf-mdp summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: #1f5f43; font-weight: 600; }

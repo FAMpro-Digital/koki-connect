@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://qsbmzzbiztfqysstepxm.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://qsbmzzbiztfqysstepxm.supabase.co wss://qsbmzzbiztfqysstepxm.supabase.co https://api.open-meteo.com; media-src 'self' blob: https://qsbmzzbiztfqysstepxm.supabase.co; frame-src https://www.youtube-nocookie.com; font-src 'self' data:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koki Connect — Actualités, transport et commerces à Koki</title>
+  <meta name="description" content="Tout Koki, dans votre poche : actualités locales, transport, boutiques, prestataires, emplois et services utiles à Koki et dans ses environs, au Sénégal.">
+  <link rel="canonical" href="https://www.kokiconnect.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_SN">
+  <meta property="og:site_name" content="Koki Connect">
+  <meta property="og:title" content="Koki Connect — Tout Koki, dans votre poche">
+  <meta property="og:description" content="Actualités, transport, commerces, services et opportunités à Koki et dans ses environs, au Sénégal.">
+  <meta property="og:url" content="https://www.kokiconnect.com/">
+  <meta property="og:image" content="https://www.kokiconnect.com/assets/entete-horizontal.webp">
+  <meta property="og:image:alt" content="Koki Connect — Tout Koki, dans votre poche">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Koki Connect — Tout Koki, dans votre poche">
+  <meta name="twitter:description" content="Actualités, transport, commerces, services et opportunités à Koki et dans ses environs.">
+  <meta name="twitter:image" content="https://www.kokiconnect.com/assets/entete-horizontal.webp">
+  <link rel="stylesheet" href="assets/transport/style.css" media="print" data-differe>
+  <link rel="stylesheet" href="assets/commerce/style.css" media="print" data-differe>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
+  <meta name="theme-color" content="#087a3d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KOKI CONNECT">
+  <link rel="preload" as="image" href="assets/entete-horizontal.webp">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #17201b;
+      padding-bottom: 85px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #087a3d, #0a9b50);
+      color: white;
+      padding: 28px 20px 25px;
+      border-radius: 0 0 28px 28px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    header p {
+      margin-top: 5px;
+      opacity: 0.9;
+    }
+
+    .search {
+      margin: 20px;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 16px 18px;
+      border: none;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .section {
+      padding: 5px 20px 20px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .quick,
+    .services {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 18px 12px;
+      min-height: 105px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+    }
+
+    .card span {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .card strong {
+      font-size: 15px;
+    }
+
+    .highlight {
+      background: #e8f6ed;
+      color: #075f32;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 4px 18px;
+      box-shadow: 0 -3px 15px rgba(0,0,0,0.08);
+    }
+
+    nav div {
+      text-align: center;
+      font-size: 12px;
+    }
+
+    nav span {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .active {
+      color: #087a3d;
+      font-weight: bold;
+    }
+    .opportunites-filtres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .opportunites-filtres button {
+      border: 1px solid #087a3d;
+      border-radius: 20px;
+      padding: 10px 14px;
+      background: white;
+      color: #075f32;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .opportunites-filtres button[aria-pressed="true"] {
+      background: #087a3d;
+      color: white;
+    }
+
+    #opportunites-jeunes .card p {
+      margin-top: 12px;
+      color: #526359;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    #opportunites-jeunes button:focus-visible {
+      outline: 3px solid #17201b;
+      outline-offset: 3px;
+    }
+
+    body { max-width: 1000px; margin: auto; }
+    header { padding: 30px 24px; background: linear-gradient(130deg,#004d36,#099650); }
+    .localite { margin-top: 22px; font-size: 14px; }
+    .quick { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+    .raccourci { border: 0; color: white; font: inherit; cursor: pointer; text-align: center; padding: 18px 6px; border-radius: 16px; min-height: 115px; box-shadow: 0 5px 12px #00000015; }
+    .raccourci span { display: block; font-size: 30px; margin-bottom: 12px; }
+    .raccourci strong { font-size: 12px; }
+    .raccourci:focus-visible, .search input:focus-visible { outline: 3px solid #17201b; outline-offset: 3px; }
+    .banniere { background: linear-gradient(120deg,#004d36,#17874d); color: white; border-radius: 20px; padding: 28px; margin-bottom: 20px; }
+    .banniere h2 { font-size: 26px; max-width: 330px; line-height: 1.2; }
+    .banniere p { margin-top: 12px; line-height: 1.5; }
+    nav { max-width: 1000px; margin: auto; z-index: 2; }
+    nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    .entete-koki { position: relative; height: clamp(300px,60vw,520px); padding: 18px 20px; border-radius: 0 0 24px 24px; background: #c6e8f8 url('assets/entete-horizontal.webp') center center / cover no-repeat; }
+    .entete-commandes { position: relative; z-index: 1; display: flex; justify-content: space-between; }
+    .entete-commandes button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffffffb8; color: #172b26; cursor: pointer; }
+    .entete-commandes svg { width: 24px; height: 24px; }
+    .entete-infos { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 34px 20px 28px; background: linear-gradient(transparent,#003e2fdd); border-radius: 0 0 24px 24px; }
+    .entete-infos strong { font-size: 17px; }
+    .entete-infos p { font-size: 12px; margin-top: 4px; }
+    .meteo-entete { border: 0; color: white; background: transparent; cursor: pointer; text-align: right; font: inherit; }
+    .meteo-entete span { font-size: 22px; }
+    .search { position: relative; margin-top: -16px; z-index: 1; }
+    .visuellement-cache { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    @media (max-width: 600px) {
+      .entete-koki { height: max(300px,76vw); }
+      .entete-infos { padding-left: 18px; padding-right: 18px; }
+    }
+    .menu-liens { display: grid; gap: 10px; margin-bottom: 22px; }
+    .menu-liens button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 16px; border: 1px solid #dce8df; border-radius: 14px; background: white; color: #17201b; text-align: left; font: inherit; cursor: pointer; }
+    .menu-liens button:focus-visible { outline: 3px solid #087a3d; outline-offset: 3px; }
+    #vue-menu .card { margin-bottom: 18px; }
+    #vue-menu .card p { margin-top: 12px; line-height: 1.6; }
+    #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
+  </style>
+  <link rel="stylesheet" href="assets/portail/style.css">
+<link rel="stylesheet" href="assets/business/style.css" media="print" data-differe>
+<link rel="stylesheet" href="assets/portail/fluidite.css">
+  <link rel="stylesheet" href="assets/portail/education.css" media="print" data-differe>
+  <link rel="stylesheet" href="assets/portail/sport.css" media="print" data-differe>
+  <link rel="stylesheet" href="assets/portail/typographie.css">
+  <link rel="stylesheet" href="assets/portail/accueil-plus.css">
+<link rel="stylesheet" href="assets/business/notification-prompt.css">
+<link rel="stylesheet" href="assets/portail/social.css">
+</head>
+
+<body>
+
+  <header class="entete-koki">
+    <h1 class="visuellement-cache">KOKI CONNECT — Tout Koki, dans votre poche.</h1>
+    <div class="entete-commandes">
+      <button type="button" aria-label="Ouvrir le menu" data-clic="afficherMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" aria-label="Profil utilisateur" data-clic="KokiPortail.profil()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></button>
+      <button type="button" id="bouton-notifications" class="bouton-pastille" aria-label="Notifications" data-clic="afficherNotifications()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg><span id="pastille-notifs" class="pastille-notifs" hidden></span></button>
+    </div>
+    <div class="entete-infos">
+      <div><strong>📍 Koki, Louga</strong><p id="date-entete"></p></div>
+      <div class="meteo-entete" role="status" aria-live="polite">
+        <span id="icone-meteo" aria-hidden="true">🌤️</span> <strong id="temperature-meteo">— °C</strong>
+        <p id="condition-meteo">Chargement…</p>
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" style="color:inherit; font-size:10px;">Open-Meteo</a>
+        <button id="actualiser-meteo" type="button" data-clic="chargerMeteo()" style="border:0; background:transparent; color:inherit; cursor:pointer; font-size:11px;" aria-label="Actualiser la météo de Koki">↻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="search">
+    <input type="search" aria-label="Que recherchez-vous à Koki ?" data-saisie="KokiPortail.rechercher(this.value)" placeholder="🔎 Que recherchez-vous à Koki ?">
+    <div id="accueil-rapide" class="accueil-rapide">
+      <button type="button" class="urgences-bouton" data-clic="afficherRubrique(Numéros utiles)"><span aria-hidden="true">🚨</span> Urgences et numéros utiles</button>
+      <div id="koki-direct" class="koki-direct" hidden></div>
+      <div id="infos-jour" class="infos-jour" hidden></div>
+      <div id="accueil-videos" class="accueil-videos" hidden></div>
+      <div id="carte-reprendre" class="carte-reprendre" hidden></div>
+    </div>
+    <div id="portail-recherche" class="portail-grid"></div>
+    <p id="resultat-recherche" role="status" style="margin-top:10px; font-size:14px;"></p>
+  </div>
+
+<section class="section une-vide" id="accueil-une"><div class="portail-title"><h2>🔥 À la une à Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir plus</button></div><div id="portail-une" class="portail-grid"></div></section>
+  <section class="section" id="tableau-de-bord">
+    <h2>Votre quotidien à Koki</h2>
+    <div class="quick">
+<button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" data-clic="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
+<button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" data-clic="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
+<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" data-clic="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
+<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" data-clic="KokiPortail.liste(Opportunités)"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
+<button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" data-clic="KokiPortail.liste(Sports &amp; ASC)"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
+<button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
+<button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" data-clic="KokiPortail.liste(Événements)"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
+<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
+    </div>
+    <div id="service-proche" style="margin-top:18px;"></div>
+  </section>
+<p id="portail-sync" class="portail-sync" role="status">Chargement des contenus publiés…</p>
+<section class="section" id="accueil-actualites"><div class="portail-title"><h2>📰 Actualités de Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir plus</button></div><div id="portail-actualites" class="portail-grid"></div></section>
+<section class="section" id="accueil-annonces"><div class="portail-title"><h2>📢 Annonces</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Annonces)">Voir plus</button></div><div id="portail-annonces" class="portail-grid"></div></section>
+<section class="section" id="accueil-publicites"><div class="portail-title"><h2>📣 Publicités</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Publicités)">Voir plus</button></div><div id="portail-publicites" class="portail-grid"></div></section>
+<section class="section" id="accueil-commerces"><div class="portail-title"><h2>🛍️ Commerces & promotions</h2><button class="portail-more" type="button" data-clic="afficherCommerce()">Voir plus</button></div><div id="portail-commerces" class="portail-grid"></div></section>
+<section class="section" id="accueil-opportunites"><div class="portail-title"><h2>💼 Opportunités</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Opportunités)">Voir plus</button></div><div id="portail-opportunites" class="portail-grid"></div></section>
+<section class="section" id="accueil-sports"><div class="portail-title"><h2>⚽ Sport</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Sports &amp; ASC)">Voir plus</button></div><div id="portail-sports" class="portail-grid"></div></section>
+<section class="section" id="accueil-evenements"><div class="portail-title"><h2>📅 Événements à venir</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Événements)">Voir plus</button></div><div id="portail-evenements" class="portail-grid"></div></section>
+<section class="section" id="accueil-utiles"><h2>ℹ️ Informations utiles de Koki</h2><div id="portail-utiles" class="portail-grid"></div><div class="portail-actions"><button data-clic="afficherRubrique(Numéros utiles)">📞 Numéros utiles et urgences</button><button data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)">🏥 Santé et pharmacies</button><button data-clic="KokiPortail.education()">🎓 Écoles</button><button data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)">🏛️ Services publics</button><button data-clic="afficherOpportunites()">💼 Ressources pour les jeunes</button></div></section>
+<section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p><p>Koki Connect réunit les informations locales, commerces, services et transports de Koki et environs.</p><p><a href="/tests-application.html">Donner mon avis</a> · <a href="/confidentialite.html">Confidentialité</a> · <a href="/conditions.html">Conditions d’utilisation</a></p></section>
+<section class="section" id="vue-portail" hidden><button class="portail-more" data-clic="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-bandeau" class="rb-bandeau" hidden></div><div id="portail-vue"></div></section>
+  <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
+    <p style="margin-bottom:15px;">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
+    <article class="card highlight" aria-labelledby="titre-fampro" style="margin-bottom:20px;">
+      <img src="assets/fampro-digital.webp" width="720" height="360" loading="lazy" decoding="async" alt="Logo Fampro Digital" style="display:block; width:100%; max-width:360px; height:auto; margin-bottom:16px; border-radius:12px;">
+      <h3 id="titre-fampro">Découvrez Fampro Digital</h3>
+      <p>Vous avez une idée ou un projet numérique ? Présentez-le à Fampro Digital pour échanger sur vos objectifs et vos besoins.</p>
+      <p>📩 Contactez Fampro Digital pour en savoir plus.</p>
+      <p>📞 <a href="tel:772875252">77 287 52 52</a><br>
+      ✉️ <a href="mailto:kokiconnect221@gmail.com">kokiconnect221@gmail.com</a></p>
+    </article>
+    <div class="opportunites-filtres" role="group" aria-label="Filtrer les opportunités par rubrique">
+      <button type="button" data-filtre="Toutes" aria-pressed="true" data-clic="filtrerOpportunites(this.dataset.filtre)">Toutes</button>
+      <button type="button" data-filtre="Emplois" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Emplois</button>
+      <button type="button" data-filtre="Stages" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Stages</button>
+      <button type="button" data-filtre="Formations" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Formations</button>
+      <button type="button" data-filtre="Concours" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Concours</button>
+      <button type="button" data-filtre="Bourses" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Bourses</button>
+      <button type="button" data-filtre="Financements" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Financements</button>
+    </div>
+    <p id="statut-opportunites" role="status" style="margin-bottom:15px;">6 rubriques affichées.</p>
+    <div class="services">
+      <div class="card" data-rubrique="Emplois"><span>💼</span><strong>Emplois</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Stages"><span>🤝</span><strong>Stages</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Formations"><span>🎓</span><strong>Formations</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Concours"><span>🏆</span><strong>Concours</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Bourses"><span>📚</span><strong>Bourses</strong><p>Aucune offre publiée pour le moment.</p></div>
+      <div class="card" data-rubrique="Financements"><span>🌱</span><strong>Financements</strong><p>Aucune offre publiée pour le moment.</p></div>
+    </div>
+  </section>
+
+  <section id="vue-commerce" class="section" hidden aria-labelledby="titre-commerce">
+    <button type="button" data-clic="fermerOpportunites()">← Retour à l’accueil</button>
+    <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
+    <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
+    <div class="market-demo" hidden><label><input id="market-demo" type="checkbox" data-change="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
+    <p id="market-message" role="status"></p>
+    <div id="market-demo-interface" hidden>
+    <div class="market-tabs" role="group" aria-label="Démonstration : suivi et espace professionnel">
+      <button type="button" data-market-tab="suivi" aria-pressed="true" data-clic="KokiCommerce.onglet(suivi)">Mes commandes et demandes (démo)</button>
+      <button type="button" data-market-tab="pro" aria-pressed="false" data-clic="KokiCommerce.onglet(pro)">Espace professionnel (démo)</button>
+    </div>
+    <form id="market-demande" class="market-panel" hidden data-envoi="KokiCommerce.envoyerDemande()">
+      <h3 id="market-demande-titre">Demander un devis</h3>
+      <label for="market-besoin">Décrivez votre besoin</label><textarea id="market-besoin" minlength="10" maxlength="2000" required></textarea>
+      <label for="market-service-lieu">Lieu d’intervention</label><select id="market-service-lieu" required></select>
+      <button type="button" data-clic="KokiCommerce.position(service)">📍 Utiliser ma position</button>
+      <label for="market-date">Date souhaitée</label><input id="market-date" type="date" required>
+      <label for="market-besoin-photo">Photo du besoin (facultative, JPEG/PNG/WebP/HEIC, 10 Mo maximum, réduite automatiquement)</label><input id="market-besoin-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
+      <p class="market-small">La photo sera conservée localement avec la demande démo, sans transmission.</p>
+      <button type="submit" class="market-primary">Demander un devis</button>
+    </form>
+    <div id="market-suivi" class="market-panel" hidden><h3>Mes commandes et demandes</h3><div id="market-historique"></div></div>
+    <div id="market-pro" class="market-panel" hidden>
+      <h3>Espace professionnel — démonstration locale</h3>
+      <p class="market-small">Ce profil n’est pas un compte connecté. Vos modifications restent sur cet appareil et ne sont pas publiées aux autres utilisateurs.</p>
+      <form data-envoi="KokiCommerce.sauverProfil()">
+        <label for="market-pro-type">Profil</label><select id="market-pro-type"><option>Commerçant</option><option>Prestataire de services</option><option>Les deux</option></select>
+        <label for="market-pro-nom">Nom de la boutique ou entreprise</label><input id="market-pro-nom" maxlength="100" required>
+        <label for="market-pro-description">Présentation</label><textarea id="market-pro-description" maxlength="1000" required></textarea>
+        <label for="market-pro-zone">Zone d’intervention</label><input id="market-pro-zone" maxlength="150" value="Koki et environs" required>
+        <label for="market-pro-lieu">Localisation</label><select id="market-pro-lieu" required></select>
+        <button type="button" data-clic="KokiCommerce.position(professionnel)">📍 Utiliser ma position GPS</button>
+        <p class="market-small">Placez-vous sur le lieu de votre activité avant de relever sa position.</p>
+        <label for="market-pro-tel">Téléphone international (ex. +221…)</label><input id="market-pro-tel" type="tel" maxlength="20">
+        <label for="market-pro-logo">Photo ou logo (10 Mo maximum, réduite automatiquement)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
+        <button type="submit">Enregistrer mon profil démo</button>
+      </form>
+      <hr style="margin:22px 0;">
+      <h3 id="market-editeur-titre">Ajouter un produit ou service</h3>
+      <form id="market-editeur" data-envoi="KokiCommerce.sauverOffre()">
+        <input id="market-offre-id" type="hidden">
+        <label for="market-offre-type">Type d’offre</label><select id="market-offre-type" data-change="KokiCommerce.categoriesOffre()"><option value="produit">Produit</option><option value="service">Service</option></select>
+        <label for="market-offre-nom">Nom</label><input id="market-offre-nom" maxlength="100" required>
+        <label for="market-offre-categorie">Catégorie</label><select id="market-offre-categorie"></select>
+        <label for="market-offre-description">Description</label><textarea id="market-offre-description" maxlength="1000" required></textarea>
+        <label for="market-offre-prix">Prix en FCFA (laisser vide pour un service sur devis)</label><input id="market-offre-prix" type="number" min="0" max="100000000" step="1">
+        <label for="market-offre-stock">Stock (produits)</label><input id="market-offre-stock" type="number" min="0" max="10000" step="1" value="1">
+        <label for="market-offre-ancien">Ancien prix en FCFA (promotion produits, facultatif)</label><input id="market-offre-ancien" type="number" min="0" max="100000000" step="1">
+        <label><input id="market-offre-dispo" type="checkbox" checked> Disponible</label>
+        <label for="market-offre-photo">Photo du produit ou de la réalisation (10 Mo maximum, réduite automatiquement)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
+        <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" data-clic="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
+      </form>
+      <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
+      <h3 style="margin-top:22px;">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
+      <button type="button" data-clic="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
+    </div>
+    </div>
+  </section>
+
+  <section id="vue-transport" class="section" hidden aria-labelledby="titre-transport">
+    <button type="button" class="tr-retour" data-clic="fermerOpportunites()">← Retour à l’accueil</button>
+    <div class="tr-app">
+      <div class="tr-carte-zone">
+        <div id="transport-carte" aria-label="Carte pour choisir le départ et la destination"></div>
+        <button id="transport-position" class="tr-flottant" type="button" data-clic="KokiTransport.utiliserPosition()" aria-label="Utiliser ma position comme départ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      </div>
+      <div class="tr-feuille">
+        <span class="tr-poignee" aria-hidden="true"></span>
+        <h2 id="titre-transport" tabindex="-1">Où allez-vous ?</h2><div id="bandeau-transport" class="rb-bandeau" hidden></div>
+        <p class="tr-marque"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Chauffeurs vérifiés par Koki Connect · paiement en espèces</p>
+        <p id="transport-message" class="tr-message" role="status"></p>
+        <div id="transport-suivi" class="tr-suivi" hidden></div>
+        <div id="transport-reservation" class="tr-reservation">
+          <div class="tr-trajet">
+            <div class="tr-ligne"><span class="tr-point tr-point-depart" aria-hidden="true"></span><label for="transport-depart">Départ</label><select id="transport-depart" data-change="KokiTransport.changerLieu(depart)"><option value="">Choisir un lieu de départ</option></select></div>
+            <div class="tr-ligne tr-ligne-destination"><span class="tr-point tr-point-destination" aria-hidden="true"></span><label for="transport-destination">Destination</label><select id="transport-destination" data-change="KokiTransport.changerLieu(destination)"><option value="">Choisir une destination</option></select></div>
+            <div class="tr-actions">
+              <button id="transport-point-depart" type="button" aria-pressed="false" data-clic="KokiTransport.choisirPoint(depart)">Placer le départ sur la carte</button>
+              <button id="transport-point-destination" type="button" aria-pressed="false" data-clic="KokiTransport.choisirPoint(destination)">Placer la destination sur la carte</button>
+            </div>
+          </div>
+          <h3 class="tr-titre">Choisissez votre véhicule</h3>
+          <div class="tr-vehicules" role="group" aria-label="Catégorie de véhicule">
+              <button type="button" class="tr-vehicule" data-vehicule="Moto" aria-pressed="true" data-clic="KokiTransport.categorie(Moto)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M5.5 17l4-7h5l4 7M12 10l-2-4H7"/></svg></span><span class="tr-texte"><strong>Moto</strong><span>1 passager · rapide</span></span><span class="tr-prix" data-prix="Moto">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Taxi" aria-pressed="false" data-clic="KokiTransport.categorie(Taxi)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><path d="M10 4h4v3"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Taxi</strong><span>4 places</span></span><span class="tr-prix" data-prix="Taxi">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Voiture" aria-pressed="false" data-clic="KokiTransport.categorie(Voiture)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-6h14l2 6v4H3z"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg></span><span class="tr-texte"><strong>Voiture</strong><span>4 places · confort</span></span><span class="tr-prix" data-prix="Voiture">—</span></button>
+              <button type="button" class="tr-vehicule" data-vehicule="Minicar" aria-pressed="false" data-clic="KokiTransport.categorie(Minicar)"><span class="tr-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 11h18M7 17v2M17 17v2"/></svg></span><span class="tr-texte"><strong>Minicar</strong><span>Groupes et bagages</span></span><span class="tr-prix" data-prix="Minicar">—</span></button>
+          </div>
+          <p id="transport-estimation" class="tr-estimation" role="status">Choisissez le départ et la destination.</p>
+          <div id="transport-chauffeurs" class="tr-chauffeurs"></div>
+          <button id="transport-demander" class="tr-commander" type="button" data-clic="KokiTransport.demander()" disabled>Commander</button>
+          <p class="tr-aide" id="transport-reservation-info">Prix estimé à vol d’oiseau, confirmé par Koki Connect avant la réservation.</p>
+        </div>
+        <div id="transport-course" class="tr-course" hidden>
+          <h3 class="tr-titre">Votre course</h3>
+          <p id="transport-statut" class="tr-statut" role="status"></p>
+          <p id="transport-resume"></p>
+          <ol class="tr-etapes" aria-label="Étapes de la course">
+            <li>En attente</li><li>Acceptée</li><li>Chauffeur en route</li><li>Course en cours</li><li>Terminée</li>
+          </ol>
+          <div class="tr-actions">
+            <button id="transport-suivant" type="button" class="tr-commander" data-clic="KokiTransport.avancer()">Simuler : Acceptée</button>
+            <button type="button" data-clic="KokiTransport.reinitialiserCourse()">Effacer la course démo</button>
+          </div>
+          <p class="tr-aide">Simulation sur cet appareil uniquement. Aucun chauffeur n’est contacté.</p>
+        </div>
+        <div class="transport-demo">
+          <label><input id="transport-demo" type="checkbox" data-change="KokiTransport.changerMode()">Tester le mode démonstration</label>
+          <p id="transport-mode-info" class="tr-aide">Course fictive sur cet appareil, sans chauffeur réel.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vue-carte" class="section" hidden aria-labelledby="titre-carte">
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <h2 id="titre-carte" tabindex="-1">Carte de la commune de Koki</h2>
+    <p style="line-height:1.5; margin-bottom:12px;">Koki et ses villages environnants. Recherchez un lieu ou choisissez une catégorie.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+      <input id="recherche-carte" type="search" aria-label="Rechercher un lieu" placeholder="Village, école, commerce…" data-saisie="filtrerCarte()" style="padding:12px; flex:1; min-width:180px;">
+      <select id="categorie-carte" aria-label="Catégorie de lieu" data-change="filtrerCarte()" style="padding:12px;">
+        <option value="">Tous les lieux</option><option>Villages et quartiers</option><option>Éducation</option><option>Santé</option><option>Services publics</option><option>Commerces</option><option>Lieux religieux</option><option>Sports</option><option>Eau</option>
+      </select>
+      <button type="button" data-clic="recentrerCarte()" style="padding:12px;">Toute la commune</button>
+    </div>
+    <p id="statut-carte" role="status" style="margin-bottom:10px;"></p>
+    <div id="carte-koki" aria-label="Carte interactive de Koki" style="height:440px; border-radius:16px; overflow:hidden; position:relative; z-index:0;"></div>
+    <p style="font-size:12px; line-height:1.5; margin:12px 0;">Source : <a href="https://www.openstreetmap.org/relation/13067352" target="_blank" rel="noopener">OpenStreetMap</a>, relevé du 7 octobre 2026. Limite communale issue de cette base, non certifiée. Inventaire incomplet ; les positions des bâtiments et terrains sont approximatives.</p>
+    <div id="liste-carte" class="menu-liens"></div>
+  </section>
+
+  <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-menu" tabindex="-1">Menu</h2>
+    <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
+      <button type="button" data-clic="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Transport" data-clic="afficherTransport()"><span>🚕 Transport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Commerces &amp; Services" data-clic="afficherCommerce()"><span>🛍️ Commerces &amp; Services</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Éducation" data-clic="KokiPortail.education()"><span>🎓 Éducation</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Emplois &amp; Opportunités" data-clic="afficherOpportunites()"><span>💼 Emplois &amp; Opportunités</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Sport" data-clic="afficherRubrique(Sports / ASC)"><span>⚽ Sport</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Santé" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span>🏥 Santé</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Événements" data-clic="afficherRubrique(Événements)"><span>📅 Événements</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-rubrique="Services publics" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span>🏛️ Services publics</span><span aria-hidden="true">›</span></button>
+      <p class="menu-sep">Informations</p>
+      <button type="button" data-clic="afficherRubrique(Actualités)"><span>📰 Actualités</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherRubrique(Petites annonces)"><span>📢 Petites annonces</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherRubrique(Numéros utiles)"><span>📞 Numéros utiles</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherCarte()"><span>📍 Carte de Koki</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="afficherNotifications()"><span>🔔 Notifications</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="KokiPortail.parametres()"><span>⚙️ Paramètres</span><span aria-hidden="true">›</span></button>
+      <button type="button" data-clic="KokiPortail.admin()"><span>🔐 Espace administration</span><span aria-hidden="true">›</span></button>
+    </div>
+    <article class="card" aria-labelledby="titre-a-propos">
+      <h3 id="titre-a-propos">À propos de KOKI CONNECT</h3>
+      <p>KOKI CONNECT est une application communautaire dédiée à Koki. Elle rassemble les informations locales, les services de proximité et les opportunités pour les habitants.</p>
+      <p><strong>Tout Koki, dans votre poche.</strong></p>
+    </article>
+    <article class="card" aria-labelledby="titre-contact-menu">
+      <h3 id="titre-contact-menu">Contact et assistance</h3><p><a href="/tests-application.html">Participer aux tests et signaler un problème</a></p>
+      <p>Une question, une information à partager ou un problème à signaler ? Contactez KOKI CONNECT.</p>
+      <p>📞 <a href="tel:772875252">77 287 52 52</a><br>✉️ <a href="mailto:kokiconnect221@gmail.com">kokiconnect221@gmail.com</a></p>
+    </article>
+  </section>
+
+  <section id="vue-notifications" class="section" hidden aria-labelledby="titre-notifications">
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
+    <p style="margin-bottom:18px; line-height:1.5;">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
+    <section id="notifications-personnelles" class="card" aria-live="polite"></section>
+    <h3>Publications récentes</h3>
+    <div id="portail-notifications" class="portail-grid"></div>
+      <div class="card" style="text-align:center; padding:32px 20px;" id="notifications-vide" role="status">
+      <span aria-hidden="true">🔔</span>
+      <h3>Aucune notification pour le moment</h3>
+      <p style="margin-top:12px; color:#526359; line-height:1.5;">Vous êtes à jour. Revenez ici pour consulter vos prochaines notifications.</p>
+    </div>
+  </section>
+
+  <section id="vue-rubrique" class="section" hidden aria-labelledby="titre-rubrique">
+    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <h2 id="titre-rubrique" tabindex="-1"></h2>
+    <div class="card"><h3>Bientôt disponible</h3><p>Les informations de cette rubrique sont en préparation.</p><p><a href="/tests-application.html">Proposer une information ou donner mon avis</a></p></div>
+  </section>
+
+  <nav aria-label="Navigation principale">
+<button type="button" data-nav="accueil" data-clic="fermerOpportunites()"><span>🏠</span>Accueil</button>
+<button type="button" data-nav="transport" data-clic="afficherTransport()"><span>🚕</span>Transport</button>
+<button type="button" data-nav="boutique" data-clic="afficherCommerce()"><span>🛍️</span>Boutique</button>
+<button type="button" data-nav="activite" data-clic="KokiActivite.ouvrir()"><span>🧾</span>Activité</button>
+<button type="button" data-nav="profil" data-clic="KokiPortail.profil()"><span>👤</span>Profil</button>
+</nav>
+  <script src="assets/portail/natif.js"></script>
+  <script src="assets/leaflet/chargeur.js"></script>
+  <script defer src="assets/portail/accueil.js"></script>
+  <script defer src="assets/portail/actions.js"></script>
+<script defer src="assets/transport/core.js"></script>
+  <script defer src="assets/transport/app.js"></script>
+  <script defer src="assets/commerce/core.js"></script>
+  <script defer src="assets/commerce/app.js"></script>
+<script defer src="assets/portail/core.js"></script>
+<script defer src="assets/portail/classement.js"></script>
+<script defer src="assets/portail/feed.js"></script>
+<script defer src="assets/portail/video.js"></script>
+<script defer src="assets/portail/rubriques-contract.js"></script>
+<script defer src="assets/portail/lieu-contract.js"></script>
+<script defer src="assets/portail/sante-contract.js"></script>
+<script defer src="assets/portail/education-contract.js"></script>
+<script defer src="assets/portail/numeros-contract.js"></script>
+<script defer src="assets/portail/social.js"></script>
+<script defer src="assets/portail/app.js"></script>
+<script defer src="assets/portail/livre-contract.js"></script>
+<script defer src="assets/portail/livres-hors-ligne.js"></script>
+<script defer src="assets/portail/bibliotheque.js"></script>
+<script defer src="assets/portail/education.js"></script>
+<script defer src="assets/portail/sport-contract.js"></script>
+<script defer src="assets/portail/sport.js"></script>
+<script defer src="assets/portail/offre-contract.js"></script>
+<script defer src="assets/portail/opportunites.js"></script>
+<script defer src="assets/portail/evenement-contract.js"></script>
+<script defer src="assets/portail/evenements.js"></script>
+<script defer src="assets/portail/service-contract.js"></script>
+<script defer src="assets/portail/services-publics.js"></script>
+<script defer src="assets/portail/activite.js"></script>
+<script defer src="assets/portail/sante.js"></script>
+<script defer src="assets/portail/navigation.js"></script>
+<script defer src="assets/portail/touches.js"></script>
+<script defer src="assets/portail/commerce-lien.js"></script>
+<script defer src="assets/portail/prieres.js"></script>
+<script defer src="assets/portail/accueil-jour.js"></script>
+<script defer src="assets/portail/accueil-plus.js"></script>
+<script defer src="assets/portail/styles-differes.js"></script>
+  <script type="module" src="assets/business/runtime.mjs"></script>
+<script defer src="assets/portail/sw-register.js"></script>
+</body>
+</html>
