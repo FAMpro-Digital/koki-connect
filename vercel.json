@@ -82,12 +82,19 @@
       "feature/signaler-fiche": false,
       "feature/page-assistance": false,
       "feature/connexion-mot-de-passe": false,
-      "fix/trafic-medias": false
+      "fix/trafic-medias": false,
+      "etape1/separation-environnements": false
     }
   },
   "rewrites": [
-    { "source": "/p/:id", "destination": "/api/partage?id=:id" },
-    { "source": "/f/:id", "destination": "/api/partage?fiche=:id" }
+    {
+      "source": "/p/:id",
+      "destination": "/api/partage?id=:id"
+    },
+    {
+      "source": "/f/:id",
+      "destination": "/api/partage?fiche=:id"
+    }
   ],
   "headers": [
     {
