@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Koki Connect — Actualités, transport et commerces à Koki</title>
   <meta name="description" content="Tout Koki, dans votre poche : actualités locales, transport, boutiques, prestataires, emplois et services utiles à Koki et dans ses environs, au Sénégal.">
   <link rel="canonical" href="https://www.kokiconnect.com/">
@@ -23,7 +23,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
-  <meta name="theme-color" content="#087a3d">
+  <meta name="theme-color" content="#0b5a3c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="KOKI CONNECT">
   <link rel="preload" as="image" href="assets/entete-horizontal.webp">
@@ -39,7 +39,9 @@
       font-family: Arial, sans-serif;
       background: #f4f7f5;
       color: #17201b;
-      padding-bottom: 85px;
+      padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
     }
 
     header {
@@ -121,7 +123,7 @@
       background: white;
       display: flex;
       justify-content: space-around;
-      padding: 12px 4px 18px;
+      padding: 12px calc(4px + env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) calc(4px + env(safe-area-inset-left, 0px));
       box-shadow: 0 -3px 15px rgba(0,0,0,0.08);
     }
 
