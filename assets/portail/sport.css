@@ -259,3 +259,4 @@
 .sp-etapes { margin: 0; padding-left: 22px; display: grid; gap: 6px; line-height: 1.45; }
 .sp-etapes li::marker { color: #f28c28; font-weight: 800; }
 .sp-conseils { border-left: 4px solid #f28c28; }
+.sp-zone > .sp-bouton:first-child { width: 100%; margin-bottom: 12px; }

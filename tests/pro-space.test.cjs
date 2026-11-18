@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 function fixture({url='https://test.supabase.co',folder='0f0e0d0c-0b0a-4908-8706-050403020100'}={}){
  const calls=[];const db={supabaseUrl:url,auth:{getUser:async()=>({data:{user:{id:'TEST-owner',phone:'221770000000'}}})},
-  rpc:async(name,{command,input})=>{calls.push({command,input:structuredClone(input)});if(command==='media_folder')return {data:{folder}};if(command==='localites')return {data:[{nom:'Coki'},{nom:'Ouarak'}]};return {data:{id:'TEST-id',statut:'En attente',payload:{}}};},
+  rpc:async(name,{command,input})=>{calls.push({command,input:structuredClone(input)});if(command==='media_folder')return {data:{folder}};if(command==='localites')return {data:[{nom:'Koki'},{nom:'Ouarak'}]};return {data:{id:'TEST-id',statut:'En attente',payload:{}}};},
   storage:{from:()=>({createSignedUrl:async path=>({data:{signedUrl:url+'/storage/v1/object/sign/koki-media/'+path+'?token=t'}})})}};
  return {db,calls};
 }
@@ -17,7 +17,7 @@ test('espace professionnel : commandes sécurisées, identifiants fournis par l�
  await api.saveShop({name:'Boutique',village:'Louga — quartier Santhiaba'});assert.equal(calls.at(-1).input.parent_id,undefined,'la boutique est rattachée par le serveur au compte');
  await api.setAvailability(row,'Épuisé');assert.deepEqual(calls.at(-1).input,{id:'TEST-row',revision:3,status:'Épuisé',request_id:'TEST-request'});
  await api.archive(row);assert.equal(calls.at(-1).command,'archive');
- assert.deepEqual(await api.localites(),['Coki','Ouarak']);assert.equal(calls.at(-1).input.request_id,undefined,'lecture sans clé de requête');
+ assert.deepEqual(await api.localites(),['Koki','Ouarak']);assert.equal(calls.at(-1).input.request_id,undefined,'lecture sans clé de requête');
 });
 test('photos : dossier anonyme fourni par le serveur et mis en cache, réponse invalide refusée',async()=>{
  const {api,calls}=await client();assert.equal(await api.mediaFolder(),'0f0e0d0c-0b0a-4908-8706-050403020100');await api.mediaFolder();

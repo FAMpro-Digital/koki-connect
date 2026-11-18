@@ -17,7 +17,7 @@ function donnees(feed){
  const equipes=new Map();for(const row of visibles){const v=S.decodeEquipe(row);if(v&&!v.archive)equipes.set(row.id,{...v,id:row.id,nom:row.titre,row});}
  const matchs=[];for(const row of visibles){const v=S.decodeMatch(row);if(v&&!v.archive&&equipes.has(v.domicile)&&equipes.has(v.exterieur))matchs.push({...v,id:row.id,row,date:row.evenement||row.publication,terrain:row.lieu||''});}
  matchs.sort((a,b)=>a.date.localeCompare(b.date));
- const actus=C.trier(visibles.filter(x=>!S.decodeEquipe(x)&&!S.decodeMatch(x)));
+ const actus=C.trier([...visibles.filter(x=>!S.decodeEquipe(x)&&!S.decodeMatch(x)),...feed.contenus.filter(x=>x.type==='Actualités'&&x.categorie==='Sport'&&C.visible(x))]);
  return {equipes,matchs,actus};
 }
 // Logo : photo publiée, sinon pastille aux couleurs de l'équipe avec ses initiales.
@@ -51,7 +51,8 @@ async function accueil(){
  const tabs=n('div',undefined,'sp-onglets');tabs.setAttribute('role','tablist');const zone=n('div',undefined,'sp-zone');
  const ONGLETS=[['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰']];
  function rendre(){tabs.replaceChildren(...ONGLETS.map(([o,i])=>{const t=b('',()=>{onglet=o;rendre();},'sp-onglet');t.append(n('span',i,'sp-onglet-icone'),n('span',o));t.setAttribute('role','tab');t.setAttribute('aria-selected',String(onglet===o));return t;}));
-  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus}[onglet])(d,rendre));}
+  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus}[onglet])(d,rendre));
+  if(onglet==='Matchs'&&!d.matchs.length&&d.actus.length){const lien=b('📰 Voir les '+d.actus.length+' actualité'+(d.actus.length>1?'s':'')+' sportive'+(d.actus.length>1?'s':''),()=>{onglet='Actus';rendre();},'sp-bouton sp-bouton-clair');zone.prepend(lien);}}
  box.append(hero,tabs,zone);rendre();
 }
 function vueMatchs(d){
@@ -86,7 +87,7 @@ function vueActus(d){
  if(!d.actus.length)return [vide('Aucune actualité sportive publiée pour le moment.')];
  const g=n('div',undefined,'sp-actus');for(const x of d.actus){const a=b('',()=>KokiPortail.detail(x),'sp-actu');
   if(x.image&&KokiPublicFeed.imagePermise(x.image)){const img=n('img');img.src=x.image;img.alt='';img.loading='lazy';a.append(img);}else a.append(n('span','⚽','sp-actu-icone'));
-  const t=n('span',undefined,'sp-actu-texte');t.append(n('span',(x.categorie||'Sport')+' · '+jourCourt(x.publication),'sp-actu-meta'),n('strong',x.titre),n('span',x.resume,'sp-actu-resume'));a.append(t);g.append(a);}
+  const t=n('span',undefined,'sp-actu-texte');t.append(n('span',(x.categorie||'Sport')+' · '+jourCourt(x.publication),'sp-actu-meta'),n('strong',x.titre),KokiPortailCore.riche('span',x.resume,'sp-actu-resume'));a.append(t);g.append(a);}
  return [g];
 }
 

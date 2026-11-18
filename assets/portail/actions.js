@@ -47,7 +47,6 @@ const ACTIONS={
     "afficherRubrique(Actualités)":function(el,event){afficherRubrique('Actualités')},
     "afficherRubrique(Petites annonces)":function(el,event){afficherRubrique('Petites annonces')},
     "afficherCarte()":function(el,event){afficherCarte()},
-    "KokiPortail.admin()":function(el,event){KokiPortail.admin()},
     "KokiActivite.ouvrir()":function(el,event){KokiActivite.ouvrir()},
   },
   saisie:{

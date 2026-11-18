@@ -471,6 +471,8 @@
     const signaler = cree('button', 'Signaler un problème'); signaler.type = 'button'; signaler.className = 'tr-lien-annuler'; signaler.onclick = () => panneauSecurite(securite, course);
     box.append(puces, commentaire, envoyer, plusTard, signaler, securite);
   }
+  // Mode démonstration : réservé aux essais (adresse avec ?demo ou poste de développement), caché au public.
+  try { const d=document.querySelector('#vue-transport .transport-demo'); if (d && (/[?&]demo\b/.test(location.search) || ['localhost','127.0.0.1'].includes(location.hostname))) d.hidden=false; } catch (_) { /* rien */ }
   window.KokiTransport=Object.freeze({connectedTrip:()=>({depart:etat.depart,destination:etat.destination,categorie:etat.categorie}),afficher,changerLieu,utiliserPosition,changerMode,categorie,choisirPoint,demander,avancer,reinitialiserCourse,preparerTrajet});
   window.afficherTransport=afficher;
   // Connexion ou déconnexion dans la rubrique : les prix réels sont recalculés.

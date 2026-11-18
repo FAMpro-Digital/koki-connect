@@ -50,8 +50,16 @@ async function accueil(){
   for(const cat of KokiLivreContract.categories){const xs=livres.filter(x=>x.livre.categorie===cat);if(xs.length)contenu.append(B().rayon((B().icones[cat]||'📘')+' '+cat,xs.slice(0,10),()=>B().ouvrir(cat)));}
  }else contenu.append(n('p','Les premiers livres de la bibliothèque arrivent bientôt.','portail-meta'));
  const s=n('section',undefined,'biblio-rayon');const tete=n('div',undefined,'biblio-rayon-tete');tete.append(n('h3','🏫 Établissements scolaires'));if(liste.length)tete.append(b('Voir tout',etablissements,'biblio-voir'));
- const l=n('div',undefined,'edu-ecoles');l.append(...liste.slice(0,4).map(carteEcole));if(!liste.length)l.append(n('p','Aucun établissement publié pour le moment.','portail-meta'));s.append(tete,l);contenu.append(s);
+ const l=n('div',undefined,'edu-ecoles');l.append(...liste.slice(0,4).map(carteEcole));if(!liste.length)ecolesCarte(l);s.append(tete,l);contenu.append(s);
 }
+
+// Aucune fiche d'établissement publiée : on montre au moins les écoles repérées sur la carte de Koki.
+async function ecolesCarte(l){
+ l.append(n('p','Aucune fiche d’établissement publiée pour le moment.','portail-meta'));
+ try{const r=await fetch('assets/koki-carte.json');if(!r.ok)return;const d=await r.json();const xs=(d.lieux||[]).filter(x=>x.categorie==='Éducation');if(!xs.length)return;
+  l.replaceChildren(n('p','Repérés sur la carte de Koki :','portail-meta'));
+  for(const x of xs){const c=b('',()=>KokiPortail.lieux('Éducation'),'edu-ecole');c.append(n('span','🏫','edu-ecole-icone'),n('strong',x.nom),n('span','Voir sur la carte','portail-meta'));l.append(c);}
+ }catch{/* la carte reste accessible depuis le menu */}}
 
 async function etablissements(){
  const g=++generation,box=KokiPortail.ouvrir(TITRE_ECOLES);box.append(n('p','Chargement des établissements publiés…','portail-meta'));
@@ -75,7 +83,7 @@ function ecole(row){
  const actions=n('div',undefined,'biblio-zone');const tel=telephone(v);
  if(tel){const c=n('a','📞 Appeler l’établissement','biblio-principal edu-bouton');c.href='tel:'+tel;actions.append(c);}
  actions.append(b('🗺️ Voir sur la carte',()=>KokiPortail.lieux('Éducation'),'biblio-secondaire'));
- const infos=n('section',undefined,'biblio-apropos');infos.append(n('h3','À propos'),n('p',row.resume));if(v.description)infos.append(n('p',v.description));
+ const infos=n('section',undefined,'biblio-apropos');infos.append(n('h3','À propos'),KokiPortailCore.riche('p',row.resume));if(v.description)infos.append(n('p',v.description));
  const dl=n('dl',undefined,'biblio-infos');for(const [k,x] of [['Niveau',v.niveau],['Secteur',v.secteur],['Horaires',v.horaires],['Adresse',row.lieu],['Source',row.source]])if(x)dl.append(n('dt',k),n('dd',x));infos.append(dl);
  const a=n('article',undefined,'biblio-fiche');a.append(tete,actions,infos);box.append(a);
 }

@@ -53,7 +53,7 @@ function detail(row){
  if(v?.organisme)tete.append(n('p',v.organisme,'op-fiche-org'));if(e)tete.append(n('span',(e.urgent?'⏳ ':'📅 ')+(e.expiree?'Offre expirée':e.texte),'op-echeance'+(e.urgent||e.expiree?' op-echeance-urgente':'')));box.append(tete);
  if(row.image&&KokiPublicFeed.imagePermise(row.image)){const img=n('img');img.src=row.image;img.alt='';img.loading='lazy';img.className='op-image';box.append(img);}
  const dl=n('dl',undefined,'op-infos');for(const [k,x] of [['Organisme',v?.organisme],['Lieu',row.lieu],['Contrat',v?.contrat],['Rémunération',v?.remuneration],['Date limite',v?.date_limite?new Date(v.date_limite+'T12:00:00Z').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Africa/Dakar'}):''],['Publié le',jourCourt(row.publication)],['Source',row.source]])if(x)dl.append(n('dt',k),n('dd',x));box.append(dl);
- const desc=n('section',undefined,'op-bloc');desc.append(n('h3','L’offre'),n('p',row.resume));const plus=v?v.description:String(row.texte||'').trim();if(plus)desc.append(n('p',plus));box.append(desc);
+ const desc=n('section',undefined,'op-bloc');desc.append(n('h3','L’offre'),KokiPortailCore.riche('p',row.resume));const plus=v?v.description:String(row.texte||'').trim();if(plus)desc.append(KokiPortailCore.riche('p',plus));box.append(desc);
  if(v?.comment_postuler){const p=n('section',undefined,'op-bloc op-postuler');p.append(n('h3','📝 Comment postuler'),n('p',v.comment_postuler));box.append(p);}
  box.append(b('💼 Voir toutes les offres',()=>ouvrir(),'op-bouton op-bouton-clair'));
 }

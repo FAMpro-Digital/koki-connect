@@ -4,7 +4,7 @@
 import './commerce-contract.js';
 import {etatOuverture,distanceKm,positionDe} from './catalogue-extras.mjs';
 const C=globalThis.KokiCommerceContract;
-export const ONGLETS=Object.freeze([{kind:'professionnels',label:'Commerces'},{kind:'boutiques',label:'Boutiques'},{kind:'produits',label:'Produits'},{kind:'services',label:'Services'}]);
+export const ONGLETS=Object.freeze([{kind:'professionnels',label:'Professionnels'},{kind:'boutiques',label:'Boutiques'},{kind:'produits',label:'Produits'},{kind:'services',label:'Services'}]);
 const CHAMPS={
  professionnels:['nom','description','categorie','type','telephone','whatsapp','adresse','village','zone','horaires','localisation'],
  boutiques:['nom','description','categorie','whatsapp','adresse','village','horaires','localisation'],
@@ -94,10 +94,12 @@ export function etiquetteDisponibilite(x){if(x.kind==='produits')return disponib
 export function promotion(x){return Number.isInteger(x.ancien_prix)&&Number.isInteger(x.prix)&&x.ancien_prix>x.prix?Math.round((1-x.prix/x.ancien_prix)*100):0;}
 export function lienCarte(x,idx){const p=x.localisation||idx.boutique(x)?.localisation||idx.vendeur(x)?.localisation;if(!p)return null;return 'https://www.openstreetmap.org/?mlat='+p.latitude+'&mlon='+p.longitude+'#map=18/'+p.latitude+'/'+p.longitude;}
 // Panier : une seule boutique. Message WhatsApp récapitulatif (prix indicatifs, paiement à la réception).
+// Total affiché : un article « prix sur demande » ne compte pas pour 0 FCFA.
+export function libelleTotal(lignes){const ls=Array.isArray(lignes)?lignes:[];const t=totalPanier(ls);if(!ls.some(l=>!Number.isInteger(l.prix)))return C.formaterPrix(t);return t>0?C.formaterPrix(t)+' + prix à confirmer':'Prix à confirmer';}
 export function totalPanier(lignes){return (Array.isArray(lignes)?lignes:[]).reduce((s,l)=>s+(Number.isInteger(l.prix)&&Number.isInteger(l.quantite)?l.prix*l.quantite:0),0);}
 export function lienPanierWhatsApp(lignes,idx,{mode='retrait',adresse=''}={}){
  if(!Array.isArray(lignes)||!lignes.length)return null;const p=idx.get(lignes[0].id);if(!p)return null;const c=contacts(p,idx);if(!c?.numero)return null;
- const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+(C.formaterPrix(l.prix)?' ('+C.formaterPrix(l.prix)+')':'')+(lienProduit(l.id)?'\n  '+lienProduit(l.id):'')),'Total indicatif : '+C.formaterPrix(totalPanier(lignes)),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
+ const texte=['Bonjour '+(c.boutique||c.vendeur)+', je souhaite commander via Koki Connect :',...lignes.map(l=>'- '+l.quantite+' × '+l.nom+(C.formaterPrix(l.prix)?' ('+C.formaterPrix(l.prix)+')':'')+(lienProduit(l.id)?'\n  '+lienProduit(l.id):'')),'Total indicatif : '+libelleTotal(lignes),mode==='livraison'?'Livraison : '+(String(adresse).trim()||'adresse à préciser'):'Retrait en boutique','Paiement à la réception. Merci de confirmer la disponibilité.'].join('\n');
  return C.lienWhatsApp(c.numero,texte);
 }
 // Promotions mises en avant : produits disponibles avec un ancien prix, plus forte remise d'abord.
