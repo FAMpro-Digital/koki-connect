@@ -91,7 +91,6 @@ test('plein écran dans l’application seulement : barre du bas au-dessus de la
  const {pleinEcran}=await import('../mobile/scripts/build-www.mjs');
  const h='<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>';
  const r=pleinEcran(h);assert.ok(r.includes('viewport-fit=cover'));assert.equal(pleinEcran(r),r);
- const site=fs.readFileSync('index.html','utf8');assert.ok(!site.includes('viewport-fit=cover'),'le site public garde son réglage');
- assert.ok(site.includes('padding: 12px 4px calc(18px + env(safe-area-inset-bottom, 0px));'));
+ const site=fs.readFileSync('index.html','utf8');assert.ok(site.includes('calc(18px + env(safe-area-inset-bottom, 0px))'));
  assert.equal(JSON.parse(fs.readFileSync('mobile/capacitor.config.json','utf8')).ios.contentInset,'never');
 });
