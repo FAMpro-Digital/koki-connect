@@ -82,7 +82,7 @@ async function page(slug){
  if(c.buteurs.length){const ol=n('ol',undefined,'kc-buteurs');for(const x of c.buteurs)ol.append(n('li',x.nom+' — '+x.buts+' but'+(x.buts>1?'s':'')));section('⚽ Meilleurs buteurs',ol);}
  if(c.seances.length){const l=n('ul',undefined,'kc-seances');for(const s of c.seances)l.append(n('li',jour(s.debut)+' '+heure(s.debut)+'–'+heure(s.fin)+' · '+s.categorie+(s.lieu?' · '+s.lieu:'')+(s.statut==='annulée'?' · ANNULÉE':'')));section('Entraînements à venir',l);}
  if(c.joueurs.length){const l=n('div',undefined,'kc-personnes');for(const j of c.joueurs){const p=n('div',undefined,'kc-personne');const u=j.photo_path&&urls.get(j.photo_path);
-   const av=n('span',undefined,'sp-logo sp-logo-m');if(u){const i=n('img');i.src=u;i.alt='';av.append(i);}else av.append(n('span',j.numero!==null?String(j.numero):K.initiales(j.nom)));
+   const av=n('span',undefined,'sp-logo sp-logo-m kc-avatar-joueur');if(u){const i=n('img');i.src=u;i.alt='';av.append(i);}else av.append(n('span',j.numero!==null?String(j.numero):K.initiales(j.nom)));
    p.append(av,n('strong',j.nom),n('span',[j.categorie,j.poste].filter(Boolean).join(' · '),'kc-meta'));l.append(p);}
   section('Jeunes talents',n('p','Affichés avec l’autorisation de leurs parents ou représentants légaux.','kc-meta'),l);}
  const media=m=>{if(m.type==='photo'){const u=urls.get(m.storage_path);if(!u)return null;const f=n('figure',undefined,'kc-media');const i=n('img');i.src=u;i.alt=m.legende||'';i.loading='lazy';f.append(i);if(m.legende)f.append(n('figcaption',m.legende));return f;}

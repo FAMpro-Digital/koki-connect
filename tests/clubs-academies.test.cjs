@@ -43,3 +43,12 @@ test('affichage sûr : pas d’innerHTML, liens externes protégés, iframe YouT
  const pub=fs.readFileSync('assets/sport/clubs-public.js','utf8');assert.match(pub,/fr\.src=K\.lienYoutube\(m\.youtube_id\)/);
  assert.doesNotMatch(pub,/annee_naissance|representants|telephone_parent/,'la page publique n’utilise aucun champ privé');});
 test('déploiement : branche non déployable',()=>{assert.equal(JSON.parse(fs.readFileSync('vercel.json','utf8')).git.deploymentEnabled['develop/clubs-academies'],false);});
+test('fiche joueur : photo affichée (lien signé), ajout dès la création, remplacement et retrait',()=>{
+ const s=fs.readFileSync('assets/sport/club-space.js','utf8');
+ assert.match(s,/function avatarJoueur\(p,url,taille='m'\)/);
+ assert.match(s,/api\(\)\.urls\(\[p\.photo_path\]\)/,'la fiche demande un lien signé pour la photo');
+ assert.match(s,/api\(\)\.urls\(xs\.map\(x=>x\.photo_path\)\)/,'la liste affiche les vignettes');
+ assert.match(s,/\['numero','Numéro de maillot','number',\{min:0\}\],CHAMP_PHOTO\]/,'photo proposée dès l’ajout du joueur');
+ assert.match(s,/photo_path:''/,'retrait de la photo possible');
+ assert.match(fs.readFileSync('assets/sport/clubs.css','utf8'),/\.kc-avatar-joueur \{[^}]*background/);
+});

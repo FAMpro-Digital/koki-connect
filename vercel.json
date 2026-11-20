@@ -87,7 +87,8 @@
       "etape1/separation-environnements": false,
       "develop/clubs-academies": false,
       "activation/clubs-academies": false,
-      "fix/clubs-contrat-global": false
+      "fix/clubs-contrat-global": false,
+      "develop/photo-joueur": false
     }
   },
   "rewrites": [
