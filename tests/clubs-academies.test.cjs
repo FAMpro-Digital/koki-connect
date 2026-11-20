@@ -23,8 +23,8 @@ test('erreurs techniques jamais affichées telles quelles',()=>{
  assert.equal(K.messageErreur(Error('new row for relation "players" violates check constraint')),'Informations invalides ou déjà enregistrées. Vérifiez la saisie.');
  assert.equal(K.messageErreur(Error('Catégorie invalide')),'Catégorie invalide');});
 test('dates : saisie locale ↔ ISO',()=>{const iso=K.versIso('2026-12-05T09:30');assert.ok(iso.endsWith('Z'));assert.equal(K.versSaisie(iso),'2026-12-05T09:30');assert.equal(K.versIso(''),null);});
-test('activation : module désactivé en production tant que modules.clubs ≠ true',async()=>{
- const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.notEqual(c.modules?.clubs,true,'configuration de production inchangée : module fermé');
+test('activation : module piloté par modules.clubs (activé le 20/11/2026)',async()=>{
+ const c=JSON.parse(fs.readFileSync('assets/business/config.json','utf8'));assert.equal(c.modules?.clubs,true,'Clubs & Académies activé en production sur autorisation du 20/11/2026');
  const rt=fs.readFileSync('assets/business/runtime.mjs','utf8');
  assert.match(rt,/export function clubsActif\(flags\)\{return flags\?\.enabled===true&&flags\?\.modules\?\.clubs===true;\}/);
  assert.match(rt,/clubs:clubsActif\(flags\)/);assert.match(rt,/window\.KokiClubsAPI=Object\.freeze\(\{/);

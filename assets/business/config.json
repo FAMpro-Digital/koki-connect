@@ -1,1 +1,1 @@
-{"enabled": true, "schemaVersion": 2, "modules": {"commerce": true, "transport": true}}
+{"enabled": true, "schemaVersion": 2, "modules": {"commerce": true, "transport": true, "clubs": true}}

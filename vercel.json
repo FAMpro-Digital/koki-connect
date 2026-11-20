@@ -85,7 +85,8 @@
       "feature/connexion-mot-de-passe": false,
       "fix/trafic-medias": false,
       "etape1/separation-environnements": false,
-      "develop/clubs-academies": false
+      "develop/clubs-academies": false,
+      "activation/clubs-academies": false
     }
   },
   "rewrites": [
