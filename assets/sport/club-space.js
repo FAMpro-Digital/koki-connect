@@ -87,29 +87,44 @@ function tableau(z,c,recharger){
 }
 
 // ───── Joueurs ─────
+// Photo du joueur : fichier privé de l'académie, affiché par lien signé (1 h). Sans photo : numéro ou initiales.
+function avatarJoueur(p,url,taille='m'){const av=n('span',undefined,'sp-logo sp-logo-'+taille+' kc-avatar-joueur');
+ if(url){const i=n('img');i.src=url;i.alt='Photo de '+p.prenom+' '+p.nom;i.loading='lazy';av.append(i);}else av.append(n('span',p.numero!==null&&p.numero!==undefined?String(p.numero):K.initiales(p.prenom+' '+p.nom)));return av;}
+const CHAMP_PHOTO=['photo','Photo du joueur (visage, de face)','file',{aide:'Privée par défaut : visible sur la page publique seulement si le parent a autorisé les photos.'}];
 async function joueurs(z,c,recharger){
  const cats=optCategories(c);if(!cats.length){z.append(n('p',c.role==='responsable'?'Créez d’abord une catégorie (onglet Équipe).':'Aucune catégorie ne vous est confiée.','portail-note'));return;}
  const filtre=n('select');filtre.append(Object.assign(n('option','Toutes mes catégories'),{value:''}));for(const [v,t] of cats)filtre.append(Object.assign(n('option',t),{value:v}));
  const l=n('div',undefined,'kc-lignes');z.append(n('p','Fiches privées : visibles uniquement par le responsable et les entraîneurs de la catégorie.','kc-meta'),filtre,l);
- async function charger(){l.replaceChildren(n('p','Chargement…','kc-meta'));const xs=await agir(z,null,()=>api().api('players_list',{club_id:c.id,categorie_id:filtre.value||null}));if(!xs)return;l.replaceChildren();
+ async function charger(){l.replaceChildren(n('p','Chargement…','kc-meta'));const xs=await agir(z,null,()=>api().api('players_list',{club_id:c.id,categorie_id:filtre.value||null}));if(!xs)return;const urls=await api().urls(xs.map(x=>x.photo_path)).catch(()=>new Map());l.replaceChildren();
   if(!xs.length)l.append(n('p','Aucun joueur.','kc-meta'));
-  for(const p of xs){const r=b('',()=>fiche(z,c,p.id,recharger),'kc-ligne-bouton');const cat=c.categories.find(k=>k.id===p.categorie_id);const cs=p.consentement||{};
-   r.append(n('strong',(p.numero!==null?p.numero+' · ':'')+p.prenom+' '+p.nom),n('span',[cat?.nom,p.poste,p.annee_naissance].filter(Boolean).join(' · '),'kc-meta'),
+  for(const p of xs){const r=b('',()=>fiche(z,c,p.id,recharger),'kc-ligne-bouton kc-ligne-joueur');const cat=c.categories.find(k=>k.id===p.categorie_id);const cs=p.consentement||{};
+   const txt=n('span',undefined,'kc-ligne-texte');r.append(avatarJoueur(p,p.photo_path&&urls.get(p.photo_path),'s'),txt);
+   txt.append(n('strong',(p.numero!==null?p.numero+' · ':'')+p.prenom+' '+p.nom),n('span',[cat?.nom,p.poste,p.annee_naissance].filter(Boolean).join(' · '),'kc-meta'),
     n('span',cs.statut==='actif'&&cs.nom_public!=='aucun'?'🌐 Public ('+K.NOM_PUBLIC[cs.nom_public].split(' (')[0]+')':'🔒 Privé','kc-badge'));l.append(r);}}
  filtre.onchange=charger;charger();
  z.append(details('➕ Ajouter un joueur',formulaire(null,[['categorie_id','Catégorie','select',{options:cats}],['prenom','Prénom','text',{requis:true,max:60}],['nom','Nom','text',{requis:true,max:60}],
-  ['annee_naissance','Année de naissance','number',{min:1990,aide:'L’année suffit : la date complète n’est jamais demandée.'}],['poste','Poste','text',{max:40}],['numero','Numéro de maillot','number',{min:0}]],async(v,bt,f)=>{
-  if(await agir(z,bt,()=>api().api('player_save',{request_id:rid(),club_id:c.id,...v}),'Joueur ajouté (privé par défaut).')){f.reset();charger();}})));
+  ['annee_naissance','Année de naissance','number',{min:1990,aide:'L’année suffit : la date complète n’est jamais demandée.'}],['poste','Poste','text',{max:40}],['numero','Numéro de maillot','number',{min:0}],CHAMP_PHOTO],async(v,bt,f)=>{
+  const {photo,...rest}=v;let photo_path;if(photo){photo_path=await agir(z,bt,()=>api().image(c.id,photo));if(!photo_path)return;}
+  if(await agir(z,bt,()=>api().api('player_save',{request_id:rid(),club_id:c.id,...rest,...(photo_path?{photo_path}:{})}),'Joueur ajouté (privé par défaut).')){f.reset();charger();}
+  else if(photo_path)await api().supprimerImage(photo_path).catch(()=>{});})));
 }
 async function fiche(z,c,id,recharger){
  z.replaceChildren(n('p','Chargement…','kc-meta'));let p=await agir(z,null,()=>api().api('player_get',{id}));if(!p){z.append(b('← Retour',()=>joueurs(z.replaceChildren()||z,c,recharger),'kc-lien'));return;}
- z.replaceChildren(b('← Liste des joueurs',()=>{z.replaceChildren();joueurs(z,c,recharger);},'kc-lien'),n('h3',p.prenom+' '+p.nom,'sp-titre'));
+ const urls=p.photo_path?await api().urls([p.photo_path]).catch(()=>new Map()):new Map();
+ const tete=n('div',undefined,'kc-fiche-tete');const id2=n('div');id2.append(n('h3',p.prenom+' '+p.nom,'sp-titre'),n('p',[c.categories.find(k=>k.id===p.categorie_id)?.nom,p.poste,p.numero!==null?'n° '+p.numero:null,p.annee_naissance].filter(Boolean).join(' · '),'kc-meta'));
+ tete.append(avatarJoueur(p,p.photo_path&&urls.get(p.photo_path),'l'),id2);
+ z.replaceChildren(b('← Liste des joueurs',()=>{z.replaceChildren();joueurs(z,c,recharger);},'kc-lien'),tete);
+ if(!p.photo_path)z.append(n('p','Pas encore de photo : ajoutez-la dans « Modifier la fiche ».','kc-meta'));
+ else z.append(b('Retirer la photo',async e=>{if(!confirm('Retirer la photo de '+p.prenom+' ?'))return;const ancien=p.photo_path;
+  if(await agir(z,e.currentTarget,()=>api().api('player_save',{id:p.id,revision:p.revision,photo_path:''}),'Photo retirée.')){await api().supprimerImage(ancien).catch(()=>{});fiche(z,c,id,recharger);}},'kc-lien'));
  const st=p.statistiques||{};z.append(n('p','Présences : '+p.presences.presents+' / '+p.presences.seances+' · Buts : '+(st.but||0)+' · Passes : '+(st.passe||0),'kc-meta'));
  const cats=optCategories(c);
  z.append(details('✏️ Modifier la fiche',formulaire(null,[['categorie_id','Catégorie','select',{options:cats,valeur:p.categorie_id}],['prenom','Prénom','text',{requis:true,max:60,valeur:p.prenom}],['nom','Nom','text',{requis:true,max:60,valeur:p.nom}],
-  ['annee_naissance','Année de naissance','number',{valeur:p.annee_naissance}],['poste','Poste','text',{max:40,valeur:p.poste}],['numero','Numéro','number',{valeur:p.numero}],['photo','Photo (facultatif)','file']],async(v,bt)=>{
+  ['annee_naissance','Année de naissance','number',{valeur:p.annee_naissance}],['poste','Poste','text',{max:40,valeur:p.poste}],['numero','Numéro','number',{valeur:p.numero}],[...CHAMP_PHOTO.slice(0,3),{aide:p.photo_path?'Choisir une nouvelle photo remplace l’ancienne.':CHAMP_PHOTO[3].aide}]],async(v,bt)=>{
   const {photo,...rest}=v;let photo_path;if(photo){photo_path=await agir(z,bt,()=>api().image(c.id,photo));if(!photo_path)return;}
-  if(await agir(z,bt,()=>api().api('player_save',{id:p.id,revision:p.revision,...rest,...(photo_path?{photo_path}:{})}),'Fiche enregistrée.'))fiche(z,c,id,recharger);})));
+  const ancien=photo_path&&p.photo_path;
+  if(await agir(z,bt,()=>api().api('player_save',{id:p.id,revision:p.revision,...rest,...(photo_path?{photo_path}:{})}),'Fiche enregistrée.')){if(ancien)await api().supprimerImage(ancien).catch(()=>{});fiche(z,c,id,recharger);}
+  else if(photo_path)await api().supprimerImage(photo_path).catch(()=>{});})));
  if(c.role==='responsable'){
   const rep=n('div');for(const g of p.representants){rep.append(n('p','👤 '+g.nom+(g.lien?' ('+g.lien+')':'')+(g.telephone?' · '+g.telephone:''),'kc-ligne'));}
   if(!p.representants.length)rep.append(n('p','Aucun représentant légal enregistré.','kc-meta'));
