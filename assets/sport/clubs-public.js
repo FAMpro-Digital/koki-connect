@@ -44,7 +44,7 @@ async function page(slug){
  if(g!==state.generation)return;
  const chemins=[c.logo_path,...c.encadrement.map(s=>s.photo_path),...c.joueurs.map(j=>j.photo_path),...c.galerie.map(m=>m.storage_path),...c.publications.flatMap(p=>p.medias.map(m=>m.storage_path))];
  const urls=await api().urls(chemins).catch(()=>new Map());if(g!==state.generation)return;
- box.replaceChildren();try{$('portail-titre').textContent='🎓 '+c.nom;}catch(_){}
+ box.replaceChildren(); // titre « 🎓 Académie » conservé : le renommer créerait une 2e étape d'historique
  // En-tête
  const hero=n('section',undefined,'sp-hero kc-hero');const h=n('div',undefined,'kc-hero-ligne');h.append(logo(c,urls,'l'));const ht=n('div');
  ht.append(n('p',[c.type,c.discipline].join(' · ').toUpperCase(),'sp-hero-sur'),n('h3',c.nom,'sp-hero-titre'),n('p',['📍 '+(c.localite||'Koki'),c.adresse].filter(Boolean).join(' · '),'sp-hero-texte'));h.append(ht);hero.append(h);
@@ -66,7 +66,7 @@ async function page(slug){
  if(c.activites)section('Nos activités',n('p',c.activites,'kc-texte'));
  if(c.categories.length){const ul=n('div',undefined,'kc-puces');for(const k of c.categories)ul.append(n('span',k.nom+(k.effectif?' · '+k.effectif+' joueur'+(k.effectif>1?'s':''):''),'kc-puce'));section('Catégories',ul);}
  if(c.encadrement.length){const l=n('div',undefined,'kc-personnes');for(const s of c.encadrement){const p=n('div',undefined,'kc-personne');const u=s.photo_path&&urls.get(s.photo_path);
-   const av=n('span',undefined,'sp-logo sp-logo-m');if(u){const i=n('img');i.src=u;i.alt='';av.append(i);}else av.append(n('span',K.initiales(s.prenom+' '+s.nom)));
+   const av=n('span',undefined,'sp-logo sp-logo-m kc-avatar-joueur');if(u){const i=n('img');i.src=u;i.alt='';av.append(i);}else av.append(n('span',K.initiales(s.prenom+' '+s.nom)));
    p.append(av,n('strong',s.prenom+' '+s.nom),n('span',s.fonction,'kc-meta'));l.append(p);}section('Encadrement',l);}
  // Matchs
  const avenir=c.matchs.filter(m=>['À venir','En direct','Reporté'].includes(m.statut)).reverse(),termines=c.matchs.filter(m=>m.statut==='Terminé');
@@ -92,7 +92,7 @@ async function page(slug){
    if(p.texte)a.append(n('p',p.texte,'kc-texte'));const g2=n('div',undefined,'kc-galerie');p.medias.map(media).filter(Boolean).forEach(x=>g2.append(x));if(g2.childElementCount)a.append(g2);
    a.append(b('Signaler',()=>signaler('post',p.id),'kc-lien'));s.append(a);}}
  const gal=c.galerie.map(media).filter(Boolean);if(gal.length){const g2=n('div',undefined,'kc-galerie');gal.forEach(x=>g2.append(x));section('Galerie',g2);}
- const pied=n('p',undefined,'kc-pied');pied.append(b('Signaler cette page',()=>signaler('club',c.id),'kc-lien'),b('← Toutes les académies',()=>window.KokiSport?.accueil(),'kc-lien'));box.append(pied);
+ const pied=n('p',undefined,'kc-pied');pied.append(b('Signaler cette page',()=>signaler('club',c.id),'kc-lien'),b('← Toutes les académies',()=>{if(window.KokiNavigation?.profondeur()>0)history.back();else window.KokiSport?.accueil();},'kc-lien'));box.append(pied);
 }
 
 async function signaler(type,id){

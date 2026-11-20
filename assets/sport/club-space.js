@@ -58,12 +58,15 @@ async function ouvrir(){
  box.append(n('p','Toute nouvelle académie est vérifiée par FAMpro Digital avant d’être visible. Les informations des jeunes joueurs restent privées.','kc-meta'));
 }
 
+// Retour à la liste : une étape d'historique en arrière quand on vient d'elle, sinon on l'ouvre.
+function retourListe(){if(window.KokiNavigation?.profondeur()>0)history.back();else ouvrir();}
 // ═════ Espace d'une académie ═════
 const ONGLETS={responsable:['Tableau','Joueurs','Entraînements','Matchs','Publications','Équipe','Académie'],entraineur:['Tableau','Joueurs','Entraînements','Matchs'],communication:['Tableau','Publications','Académie']};
 async function club(id,onglet='Tableau'){
  const g=++generation;const box=KokiPortail.ouvrir('🎓 Mon académie');box.append(n('p','Chargement…','portail-meta'));
  let c;try{c=await api().api('club_get',{club_id:id});}catch(e){box.replaceChildren();statut(box,K.messageErreur(e),'erreur');box.append(b('← Mes académies',ouvrir));return;}
- if(g!==generation)return;box.replaceChildren();try{$('portail-titre').textContent='🎓 '+c.nom;}catch(_){}
+ // Le titre reste « 🎓 Mon académie » : le renommer créerait une 2e étape d'historique (Retour à presser deux fois).
+ if(g!==generation)return;box.replaceChildren();
  const h=n('section',undefined,'kc-bandeau');h.append(n('strong',c.nom),n('span',K.ROLES[c.role]+' · '+c.statut,'kc-meta'),n('p',K.STATUT_EXPLIQUE[c.statut]+(c.motif?' Motif : '+c.motif:''),'kc-meta'));
  h.dataset.statut=c.statut;box.append(h);
  const tabs=n('div',undefined,'sp-onglets kc-onglets');tabs.setAttribute('role','tablist');const zone=n('div',undefined,'kc-zone');
@@ -71,7 +74,7 @@ async function club(id,onglet='Tableau'){
  for(const o of liste){const t=b(o,()=>{onglet=o;rendre();},'sp-onglet');t.setAttribute('role','tab');tabs.append(t);}
  function rendre(){for(const t of tabs.children)t.setAttribute('aria-selected',String(t.textContent===onglet));zone.replaceChildren();
   ({Tableau:tableau,Joueurs:joueurs,'Entraînements':seances,Matchs:matchs,Publications:publications,'Équipe':equipe,'Académie':academie}[onglet])(zone,c,recharger);}
- box.append(tabs,zone,b('← Mes académies',ouvrir,'kc-lien'));rendre();
+ box.append(tabs,zone,b('← Mes académies',retourListe,'kc-lien'));rendre();
 }
 const categoriesPermises=c=>c.categories.filter(k=>k.statut==='active'&&(c.role==='responsable'||c.categories_entraineur.includes(k.id)));
 const optCategories=c=>categoriesPermises(c).map(k=>[k.id,k.nom]);

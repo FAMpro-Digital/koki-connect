@@ -59,3 +59,10 @@ test('affichage public d’un joueur : décidé par le responsable, sans date ni
  assert.match(s,/api\(\)\.api\('consent_save',\{player_id:p\.id,revision:cs\.revision,nom_public:v\.nom_public,photo:v\.photo,video:v\.video,stats:v\.stats\}\)/);
  assert.match(s,/Ne plus afficher ce joueur/);
 });
+test('retour : une seule étape d’historique par écran (titre jamais renommé après chargement)',()=>{
+ for(const f of ['assets/sport/club-space.js','assets/sport/clubs-public.js']){const s=fs.readFileSync(f,'utf8');
+  assert.doesNotMatch(s,/\$\('portail-titre'\)\.textContent\s*=/,f+' ne doit pas renommer le titre (2e étape d’historique)');}
+ const cs=fs.readFileSync('assets/sport/club-space.js','utf8');
+ assert.match(cs,/function retourListe\(\)\{if\(window\.KokiNavigation\?\.profondeur\(\)>0\)history\.back\(\);else ouvrir\(\);\}/);
+ assert.match(fs.readFileSync('assets/sport/clubs-public.js','utf8'),/sp-logo sp-logo-m kc-avatar-joueur'\);if\(u\)\{const i=n\('img'\);i\.src=u;i\.alt='';av\.append\(i\);\}else av\.append\(n\('span',K\.initiales\(s\.prenom/,'initiales des encadrants visibles');
+});
