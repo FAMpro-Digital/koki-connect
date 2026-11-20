@@ -49,9 +49,10 @@ async function accueil(){
  const hero=n('section',undefined,'sp-hero');hero.append(n('p','KOKI CONNECT · SPORT','sp-hero-sur'),n('h3',direct.length?'En direct à Koki':prochain?'Prochain match':dernier?'Dernier résultat':'Sports à Koki','sp-hero-titre'));
  const vedette=direct[0]||prochain||dernier;if(vedette)hero.append(carteMatch(vedette,d));else hero.append(n('p','Les matchs des navétanes et les résultats des ASC s’afficheront ici.','sp-hero-texte'));
  const tabs=n('div',undefined,'sp-onglets');tabs.setAttribute('role','tablist');const zone=n('div',undefined,'sp-zone');
- const ONGLETS=[['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰']];
+ // Onglet « Académies » (module Clubs & Académies) : présent seulement si le module est activé (config.json › modules.clubs).
+ const ONGLETS=[['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰'],...(window.KokiClubs?.visible?[['Académies','🎓']]:[])];if(ONGLETS.length>4)tabs.classList.add('sp-onglets-5');
  function rendre(){tabs.replaceChildren(...ONGLETS.map(([o,i])=>{const t=b('',()=>{onglet=o;rendre();},'sp-onglet');t.append(n('span',i,'sp-onglet-icone'),n('span',o));t.setAttribute('role','tab');t.setAttribute('aria-selected',String(onglet===o));return t;}));
-  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus}[onglet])(d,rendre));
+  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus,'Académies':()=>[KokiClubs.vue()]}[onglet]||vueMatchs)(d,rendre));
   if(onglet==='Matchs'&&!d.matchs.length&&d.actus.length){const lien=b('📰 Voir les '+d.actus.length+' actualité'+(d.actus.length>1?'s':'')+' sportive'+(d.actus.length>1?'s':''),()=>{onglet='Actus';rendre();},'sp-bouton sp-bouton-clair');zone.prepend(lien);}}
  box.append(hero,tabs,zone);rendre();
 }

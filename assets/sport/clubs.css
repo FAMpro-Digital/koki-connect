@@ -1,0 +1,69 @@
+/* Clubs & Académies — mêmes couleurs que Sports & ASC (vert foncé, vert, orange, blanc). */
+.sp-onglets.sp-onglets-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.kc-entete { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.kc-carte { display: flex !important; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 12px !important; border: 1px solid var(--sp-bord, #e3ebe6) !important; border-radius: 16px !important; background: #fff !important; color: var(--sp-texte, #13201a) !important; }
+.kc-carte-texte { display: grid; gap: 2px; min-width: 0; }
+.kc-meta { color: var(--sp-gris, #5b6b63); font-size: 13px; }
+.kc-meta-clair { color: rgba(255,255,255,.9); }
+.kc-resume { font-size: 14px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.kc-hero-ligne { display: flex; gap: 12px; align-items: center; position: relative; z-index: 1; }
+.kc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; position: relative; z-index: 1; }
+.kc-actions a, .kc-actions button { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+.kc-section { margin: 4px 0 8px; }
+.kc-texte { white-space: pre-line; line-height: 1.5; margin: 0 2px; }
+.kc-puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.kc-puce { padding: 6px 10px; border-radius: 999px; background: #e9f3ed; color: var(--sp-vert-fonce, #0b5a3c); font-weight: 600; font-size: 14px; }
+.kc-personnes { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.kc-personne { display: grid; justify-items: center; text-align: center; gap: 4px; padding: 10px; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 14px; background: #fff; }
+.kc-match { position: relative; padding: 12px; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 14px; background: #fff; }
+.kc-score { margin: 4px 0; font-weight: 800; font-size: 17px; }
+.kc-issue { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.kc-issue-victoire { background: #dff3e6; color: #0b5a3c; } .kc-issue-nul { background: #eef1ef; color: #44514a; } .kc-issue-défaite { background: #fde8e4; color: #9b2c1c; }
+.kc-tableau { overflow-x: auto; }
+.kc-classement { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; }
+.kc-classement th, .kc-classement td { padding: 8px 6px; border-bottom: 1px solid var(--sp-bord, #e3ebe6); text-align: center; }
+.kc-classement td:nth-child(2), .kc-classement th:nth-child(2) { text-align: left; }
+.kc-classement .kc-moi { background: #fff4e8; font-weight: 700; }
+.kc-galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin: 8px 0; }
+.kc-media { margin: 0; } .kc-media img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; display: block; }
+.kc-media figcaption { font-size: 12px; color: var(--sp-gris, #5b6b63); margin-top: 4px; }
+.kc-video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; }
+.kc-post { padding: 12px; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 14px; background: #fff; margin-bottom: 10px; }
+.kc-post h4 { margin: 4px 0; }
+.kc-lien { background: none !important; border: 0 !important; color: var(--sp-vert, #087a3d) !important; text-decoration: underline; padding: 6px 2px !important; min-height: 44px; }
+.kc-pied { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-top: 16px; }
+.kc-seances, .kc-buteurs { margin: 0; padding-left: 20px; line-height: 1.7; }
+/* Espace de gestion */
+.kc-bandeau { display: grid; gap: 2px; padding: 12px 14px; margin-bottom: 10px; border-radius: 16px; background: #e9f3ed; border-left: 5px solid var(--sp-vert, #087a3d); }
+.kc-bandeau[data-statut="À valider"] { background: #fff4e8; border-left-color: var(--sp-orange, #f28c28); }
+.kc-bandeau[data-statut="Suspendu"], .kc-bandeau[data-statut="Refusé"] { background: #fde8e4; border-left-color: #c0392b; }
+.kc-onglets { display: flex !important; overflow-x: auto; scrollbar-width: none; }
+.kc-onglets .sp-onglet { flex: 0 0 auto; min-width: 92px; }
+.kc-statut { padding: 10px 12px; border-radius: 12px; background: #e9f3ed; font-weight: 600; }
+.kc-statut[data-type="erreur"] { background: #fde8e4; color: #9b2c1c; }
+.kc-statut[data-type="ok"] { background: #dff3e6; color: #0b5a3c; }
+.kc-form { display: grid; gap: 10px; padding: 12px; margin: 8px 0; border-radius: 14px; background: #f6faf7; }
+.kc-form h4 { margin: 0; }
+.kc-champ { display: grid; gap: 4px; }
+.kc-champ input:not([type="checkbox"]), .kc-champ select, .kc-champ textarea { width: 100%; min-height: 44px; font-size: 16px; box-sizing: border-box; }
+.kc-champ input[type="checkbox"] { width: 22px; height: 22px; vertical-align: middle; }
+.kc-checks { display: grid; gap: 6px; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 10px; padding: 8px; max-height: 260px; overflow-y: auto; }
+.kc-checks label { min-height: 32px; display: flex; align-items: center; gap: 6px; }
+.kc-aide { color: var(--sp-gris, #5b6b63); }
+.kc-details { margin: 8px 0; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 14px; background: #fff; }
+.kc-details > summary { padding: 12px 14px; font-weight: 700; cursor: pointer; min-height: 44px; box-sizing: border-box; }
+.kc-details > :not(summary) { margin: 0 12px 12px; }
+.kc-lignes { display: grid; gap: 8px; margin-top: 8px; }
+.kc-ligne { margin: 4px 0; padding: 8px 10px; border-radius: 10px; background: #f6faf7; }
+.kc-ligne-bouton { display: grid !important; gap: 2px; width: 100%; text-align: left; padding: 10px 12px !important; border-radius: 12px !important; background: #fff !important; color: inherit !important; border: 1px solid var(--sp-bord, #e3ebe6) !important; }
+.kc-badge { justify-self: start; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #eef1ef; }
+.kc-carte-ligne { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--sp-bord, #e3ebe6); border-radius: 14px; background: #fff; }
+.kc-compteurs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.kc-compteur { display: grid; justify-items: center; padding: 12px 6px; border-radius: 14px; background: #fff; border: 1px solid var(--sp-bord, #e3ebe6); text-align: center; }
+.kc-compteur strong { font-size: 22px; color: var(--sp-vert-fonce, #0b5a3c); }
+.kc-code { padding: 12px; border-radius: 14px; background: #fff4e8; display: grid; gap: 8px; }
+.kc-code-valeur { font-size: 26px; letter-spacing: .12em; font-family: ui-monospace, monospace; }
+.kc-danger { background: #c0392b !important; color: #fff !important; }
+.kc-pre { white-space: pre-wrap; font-size: 14px; background: #f6faf7; padding: 8px; border-radius: 10px; }
+.sp-onglets.sp-onglets-5 .sp-onglet { font-size: 12px; letter-spacing: -.01em; }
+.kc-actions .sp-bouton { min-width: 96px; justify-content: center; }
