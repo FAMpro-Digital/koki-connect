@@ -86,7 +86,8 @@
       "fix/trafic-medias": false,
       "etape1/separation-environnements": false,
       "develop/clubs-academies": false,
-      "activation/clubs-academies": false
+      "activation/clubs-academies": false,
+      "fix/clubs-contrat-global": false
     }
   },
   "rewrites": [

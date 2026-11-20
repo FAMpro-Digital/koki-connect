@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto');
 const K=require('../assets/sport/clubs-contract.js');
 // Même empreinte dans koki-connect-admin (src/clubs-contract.js) : le contrat doit rester IDENTIQUE.
-const EMPREINTE='a8cdeb6834763e715b6939b050ce5d5a11f158d086cd75a2b61ad3cbac04b043';
+const EMPREINTE='42cd5d9bc29c7999d6ea1a0647393d96fcb01d38f63857dbf6646f5a912366b6';
 test('contrat Clubs : identique dans l’administration',()=>{assert.equal(crypto.createHash('sha256').update(fs.readFileSync('assets/sport/clubs-contract.js')).digest('hex'),EMPREINTE);});
 test('codes d’invitation : saisie tolérante, alphabet sans ambiguïté',()=>{
  assert.equal(K.normaliserCode(' abcde-fgh23 '),'ABCDEFGH23');assert.ok(K.codeValide('abcde-fgh23'));
