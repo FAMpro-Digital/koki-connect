@@ -6,6 +6,7 @@ Conception complète et décisions D1–D9 : [clubs-academies-audit-conception.m
 > **Base de données : appliquée en production le 20/11/2026** (accord écrit du propriétaire). Les 4 migrations figurent
 > dans `supabase/historique/reference/ordre.txt` ; la référence est `reference/empreinte-production-2026-11-20.txt`
 > (vérifiée identique à la production). Journal : `supabase/production/README.md`.
+> **Module public activé le 20/11/2026** : `assets/business/config.json` → `modules.clubs: true` (onglet « Académies » visible dans Sport). Retour arrière : retirer la clé `clubs`.
 > **Site public : module invisible** tant que `assets/business/config.json` n'a pas `"clubs": true`.
 
 ## Fichiers
