@@ -1,6 +1,6 @@
 // Clubs & Académies — pages publiques (onglet « Académies » de la rubrique Sport, page d'une académie).
 // Lecture : RPC koki_sport_public (visiteurs). Le serveur ne renvoie que les académies actives et, pour les joueurs,
-// uniquement ce que le représentant légal a autorisé. Suivre / signaler : compte connecté (RPC koki_sport).
+// uniquement ce que le responsable de l’académie a choisi d’afficher. Suivre / signaler : compte connecté (RPC koki_sport).
 // Module masqué tant que config.json › modules.clubs ne vaut pas true.
 (function(){'use strict';
 const K=window.KokiClubsContract,$=id=>document.getElementById(id);
@@ -84,7 +84,7 @@ async function page(slug){
  if(c.joueurs.length){const l=n('div',undefined,'kc-personnes');for(const j of c.joueurs){const p=n('div',undefined,'kc-personne');const u=j.photo_path&&urls.get(j.photo_path);
    const av=n('span',undefined,'sp-logo sp-logo-m kc-avatar-joueur');if(u){const i=n('img');i.src=u;i.alt='';av.append(i);}else av.append(n('span',j.numero!==null?String(j.numero):K.initiales(j.nom)));
    p.append(av,n('strong',j.nom),n('span',[j.categorie,j.poste].filter(Boolean).join(' · '),'kc-meta'));l.append(p);}
-  section('Jeunes talents',n('p','Affichés avec l’autorisation de leurs parents ou représentants légaux.','kc-meta'),l);}
+  section('Jeunes talents',l);}
  const media=m=>{if(m.type==='photo'){const u=urls.get(m.storage_path);if(!u)return null;const f=n('figure',undefined,'kc-media');const i=n('img');i.src=u;i.alt=m.legende||'';i.loading='lazy';f.append(i);if(m.legende)f.append(n('figcaption',m.legende));return f;}
   const f=n('figure',undefined,'kc-media kc-video');const lancer=b('▶ Voir la vidéo',()=>{const fr=document.createElement('iframe');fr.src=K.lienYoutube(m.youtube_id);fr.title=m.legende||'Vidéo';fr.allow='encrypted-media; picture-in-picture';fr.allowFullscreen=true;fr.loading='lazy';lancer.replaceWith(fr);},'sp-bouton');f.append(lancer);if(m.legende)f.append(n('figcaption',m.legende));return f;};
  if(c.publications.length){const s=section('Actualités');for(const p of c.publications){const a=n('article',undefined,'kc-post');

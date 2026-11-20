@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto');
 const K=require('../assets/sport/clubs-contract.js');
 // Même empreinte dans koki-connect-admin (src/clubs-contract.js) : le contrat doit rester IDENTIQUE.
-const EMPREINTE='42cd5d9bc29c7999d6ea1a0647393d96fcb01d38f63857dbf6646f5a912366b6';
+const EMPREINTE='c7657584eb93674574ebcd36f2a887f0ef4aaad755121c47956471089adbc410';
 test('contrat Clubs : identique dans l’administration',()=>{assert.equal(crypto.createHash('sha256').update(fs.readFileSync('assets/sport/clubs-contract.js')).digest('hex'),EMPREINTE);});
 test('codes d’invitation : saisie tolérante, alphabet sans ambiguïté',()=>{
  assert.equal(K.normaliserCode(' abcde-fgh23 '),'ABCDEFGH23');assert.ok(K.codeValide('abcde-fgh23'));
@@ -51,4 +51,11 @@ test('fiche joueur : photo affichée (lien signé), ajout dès la création, rem
  assert.match(s,/\['numero','Numéro de maillot','number',\{min:0\}\],CHAMP_PHOTO\]/,'photo proposée dès l’ajout du joueur');
  assert.match(s,/photo_path:''/,'retrait de la photo possible');
  assert.match(fs.readFileSync('assets/sport/clubs.css','utf8'),/\.kc-avatar-joueur \{[^}]*background/);
+});
+test('affichage public d’un joueur : décidé par le responsable, sans date ni forme d’accord à saisir',()=>{
+ const s=fs.readFileSync('assets/sport/club-space.js','utf8');
+ assert.match(s,/details\('👁️ Affichage public/);
+ assert.doesNotMatch(s,/recueilli_le|Autorisations parentales|Forme de l’accord/,'plus de circuit d’autorisation parentale');
+ assert.match(s,/api\(\)\.api\('consent_save',\{player_id:p\.id,revision:cs\.revision,nom_public:v\.nom_public,photo:v\.photo,video:v\.video,stats:v\.stats\}\)/);
+ assert.match(s,/Ne plus afficher ce joueur/);
 });

@@ -90,7 +90,7 @@ function tableau(z,c,recharger){
 // Photo du joueur : fichier privé de l'académie, affiché par lien signé (1 h). Sans photo : numéro ou initiales.
 function avatarJoueur(p,url,taille='m'){const av=n('span',undefined,'sp-logo sp-logo-'+taille+' kc-avatar-joueur');
  if(url){const i=n('img');i.src=url;i.alt='Photo de '+p.prenom+' '+p.nom;i.loading='lazy';av.append(i);}else av.append(n('span',p.numero!==null&&p.numero!==undefined?String(p.numero):K.initiales(p.prenom+' '+p.nom)));return av;}
-const CHAMP_PHOTO=['photo','Photo du joueur (visage, de face)','file',{aide:'Privée par défaut : visible sur la page publique seulement si le parent a autorisé les photos.'}];
+const CHAMP_PHOTO=['photo','Photo du joueur (visage, de face)','file',{aide:'Visible sur la page publique seulement si vous activez « Afficher sa photo » (rubrique Affichage public).'}];
 async function joueurs(z,c,recharger){
  const cats=optCategories(c);if(!cats.length){z.append(n('p',c.role==='responsable'?'Créez d’abord une catégorie (onglet Équipe).':'Aucune catégorie ne vous est confiée.','portail-note'));return;}
  const filtre=n('select');filtre.append(Object.assign(n('option','Toutes mes catégories'),{value:''}));for(const [v,t] of cats)filtre.append(Object.assign(n('option',t),{value:v}));
@@ -127,20 +127,20 @@ async function fiche(z,c,id,recharger){
   else if(photo_path)await api().supprimerImage(photo_path).catch(()=>{});})));
  if(c.role==='responsable'){
   const rep=n('div');for(const g of p.representants){rep.append(n('p','👤 '+g.nom+(g.lien?' ('+g.lien+')':'')+(g.telephone?' · '+g.telephone:''),'kc-ligne'));}
-  if(!p.representants.length)rep.append(n('p','Aucun représentant légal enregistré.','kc-meta'));
-  rep.append(formulaire('Ajouter un représentant légal',[['nom','Nom complet','text',{requis:true,max:120}],['lien','Lien (mère, père, tuteur…)','text',{max:40}],['telephone','Téléphone','tel',{max:24}]],async(v,bt)=>{
-   if(!K.telephoneValide(v.telephone)){statut(z,'Téléphone invalide.','erreur');return;}if(await agir(z,bt,()=>api().api('guardian_save',{player_id:p.id,...v}),'Représentant enregistré.'))fiche(z,c,id,recharger);}));
-  z.append(details('👪 Parents / représentants légaux',rep));
-  const cs=p.consentement;const co=n('div');
-  co.append(n('p','Rien n’est public sans l’accord écrit (de préférence) d’un parent ou représentant légal. Le retrait est immédiat et masque aussi les anciennes photos.','kc-meta'));
-  co.append(formulaire(null,[['nom_public','Nom affiché publiquement','select',{options:Object.entries(K.NOM_PUBLIC),valeur:cs.nom_public}],['photo','Photos autorisées','checkbox',{valeur:cs.photo}],
-   ['video','Vidéos autorisées','checkbox',{valeur:cs.video}],['stats','Statistiques (buts, passes) autorisées','checkbox',{valeur:cs.stats}],
-   ['recueilli_le','Date de l’accord','date',{valeur:cs.recueilli_le}],['mode','Forme de l’accord','select',{options:[['','—'],...Object.entries(K.MODES_CONSENTEMENT)],valeur:cs.mode||''}]],async(v,bt)=>{
-   const tout=v.nom_public!=='aucun'||v.photo||v.video||v.stats;if(tout&&(!v.recueilli_le||!v.mode)){statut(z,'Indiquez la date et la forme de l’accord.','erreur');return;}
-   if(await agir(z,bt,()=>api().api('consent_save',{player_id:p.id,revision:cs.revision,...v,recueilli_le:v.recueilli_le||null,mode:v.mode||null}),'Autorisations enregistrées.'))fiche(z,c,id,recharger);},'Enregistrer les autorisations'));
-  if(cs.statut==='actif'&&(cs.nom_public!=='aucun'||cs.photo||cs.video||cs.stats))co.append(b('Retirer toutes les autorisations',async e=>{if(!confirm('Retirer toutes les autorisations ? Le joueur et ses photos disparaîtront immédiatement des pages publiques.'))return;
-   if(await agir(z,e.target,()=>api().api('consent_revoke',{player_id:p.id,revision:cs.revision}),'Autorisations retirées.'))fiche(z,c,id,recharger);},'sp-bouton kc-danger'));
-  z.append(details('🛡️ Autorisations parentales ('+(cs.statut==='actif'&&cs.nom_public!=='aucun'?'publiques':'privé')+')',co,true));
+  if(!p.representants.length)rep.append(n('p','Aucun contact enregistré (facultatif).','kc-meta'));
+  rep.append(formulaire('Ajouter un parent / contact',[['nom','Nom complet','text',{requis:true,max:120}],['lien','Lien (mère, père, tuteur…)','text',{max:40}],['telephone','Téléphone','tel',{max:24}]],async(v,bt)=>{
+   if(!K.telephoneValide(v.telephone)){statut(z,'Téléphone invalide.','erreur');return;}if(await agir(z,bt,()=>api().api('guardian_save',{player_id:p.id,...v}),'Contact enregistré.'))fiche(z,c,id,recharger);}));
+  z.append(details('👪 Parents / contacts (facultatif)',rep));
+  // Affichage public : décidé par le responsable de l'académie (migration 20261201000400).
+  const cs=p.consentement;const co=n('div');const visible=cs.statut==='actif'&&(cs.nom_public!=='aucun'||cs.photo||cs.video||cs.stats);
+  co.append(n('p','Vous décidez si ce joueur apparaît sur la page publique de l’académie. « Ne plus afficher » le retire immédiatement, photos comprises.','kc-meta'));
+  co.append(formulaire(null,[['nom_public','Afficher ce joueur','select',{options:[['aucun','Non, ne pas afficher'],['prenom_initiale','Oui, prénom + initiale (ex. Awa D.)'],['complet','Oui, prénom et nom']],valeur:cs.nom_public}],
+   ['photo','Afficher sa photo','checkbox',{valeur:cs.photo}],['video','Afficher ses vidéos','checkbox',{valeur:cs.video}],['stats','Afficher ses statistiques (buts, passes)','checkbox',{valeur:cs.stats}]],async(v,bt)=>{
+   if(v.nom_public==='aucun'&&(v.photo||v.video||v.stats)){statut(z,'Choisissez d’abord comment afficher le nom du joueur.','erreur');return;}
+   if(await agir(z,bt,()=>api().api('consent_save',{player_id:p.id,revision:cs.revision,nom_public:v.nom_public,photo:v.photo,video:v.video,stats:v.stats}),v.nom_public==='aucun'?'Joueur masqué.':'Affichage enregistré.'))fiche(z,c,id,recharger);},'Enregistrer'));
+  if(visible)co.append(b('Ne plus afficher ce joueur',async e=>{if(!confirm('Ne plus afficher '+p.prenom+' ? Il disparaîtra immédiatement des pages publiques, photos comprises.'))return;
+   if(await agir(z,e.target,()=>api().api('consent_revoke',{player_id:p.id,revision:cs.revision}),'Joueur masqué.'))fiche(z,c,id,recharger);},'sp-bouton kc-danger'));
+  z.append(details('👁️ Affichage public ('+(visible&&cs.nom_public!=='aucun'?'affiché':'non affiché')+')',co,true));
  }
  z.append(b(p.statut==='actif'?'Archiver (a quitté l’académie)':'Réintégrer',async e=>{if(p.statut==='actif'&&!confirm('Archiver ce joueur ? Sa fiche ne sera plus visible.'))return;
   if(await agir(z,e.target,()=>api().api('player_archive',{id:p.id,revision:p.revision,restaurer:p.statut!=='actif'}),'Fiche mise à jour.'))fiche(z,c,id,recharger);},'sp-bouton sp-bouton-clair'));
@@ -227,17 +227,17 @@ async function publications(z,c,recharger){
 async function medias(host,c,p,tag,z){
  const xs=await agir(z,null,()=>api().api('media_list',{club_id:c.id,post_id:p.id}))||[];const urls=await api().urls(xs.map(x=>x.storage_path)).catch(()=>new Map());
  const g=n('div',undefined,'kc-galerie');for(const x of xs){const f=n('figure',undefined,'kc-media');if(x.type==='photo'&&urls.get(x.storage_path)){const i=n('img');i.src=urls.get(x.storage_path);i.alt=x.legende;f.append(i);}else f.append(n('p','▶ YouTube'));
-  f.append(n('figcaption',(x.public?'🌐 Visible':'🔒 Privé — autorisation parentale manquante ou publication non publiée')+(x.legende?' · '+x.legende:'')),
+  f.append(n('figcaption',(x.public?'🌐 Visible':'🔒 Privé — affichage du joueur non activé ou publication non publiée')+(x.legende?' · '+x.legende:'')),
    b('Supprimer',async e=>{if(!confirm('Supprimer ce média ?'))return;const r=await agir(z,e.target,()=>api().api('media_delete',{id:x.id}));if(r){if(r.storage_path)await api().supprimerImage(r.storage_path).catch(()=>{});f.remove();}},'kc-lien'));g.append(f);}
  host.append(g);
  const opts=tag.map(t=>[t.id,t.nom+' ('+t.categorie+')'+(t.photo?' 📷✓':' 📷✗')+(t.video?' 🎥✓':' 🎥✗')]);
- const aide='Si des joueurs sont reconnaissables, désignez-les tous : le média ne sera public que si chacun a l’autorisation (📷 photo, 🎥 vidéo). Sinon il restera privé.';
+ const aide='Si des joueurs sont reconnaissables, désignez-les tous : le média ne sera public que si l’affichage est activé pour chacun (📷 photo, 🎥 vidéo). Sinon il restera privé.';
  host.append(formulaire('Ajouter une photo',[['photo','Photo','file',{requis:true}],['legende','Légende','text',{max:300}],
   ['contient_mineurs','Des joueurs sont reconnaissables sur cette photo','checkbox',{valeur:true}],['joueurs','Joueurs reconnaissables','checks',{options:opts}]],async(v,bt,f)=>{
   if(!v.photo){statut(z,'Choisissez une photo.','erreur');return;}if(v.contient_mineurs&&!v.joueurs.length){statut(z,'Désignez les joueurs reconnaissables, ou décochez la case si personne n’est reconnaissable.','erreur');return;}
   const path=await agir(z,bt,()=>api().image(c.id,v.photo));if(!path)return;
   const r=await agir(z,bt,()=>api().api('media_add',{club_id:c.id,post_id:p.id,type:'photo',storage_path:path,legende:v.legende,contient_mineurs:v.contient_mineurs,joueurs:v.contient_mineurs?v.joueurs:[]}));
-  if(!r){await api().supprimerImage(path).catch(()=>{});return;}statut(z,r.public?'Photo ajoutée.':'Photo ajoutée, mais privée : '+(p.statut!=='publié'?'publiez la publication.':'autorisation manquante.'),'ok');host.replaceChildren();medias(host,c,p,tag,z);},'Envoyer la photo'));
+  if(!r){await api().supprimerImage(path).catch(()=>{});return;}statut(z,r.public?'Photo ajoutée.':'Photo ajoutée, mais privée : '+(p.statut!=='publié'?'publiez la publication.':'affichage du joueur non activé.'),'ok');host.replaceChildren();medias(host,c,p,tag,z);},'Envoyer la photo'));
  host.lastChild.append(n('small',aide,'kc-aide'));
  host.append(formulaire('Ajouter une vidéo YouTube',[['url','Lien YouTube','url',{requis:true}],['legende','Légende','text',{max:300}],['contient_mineurs','Des joueurs sont reconnaissables','checkbox',{valeur:true}],['joueurs','Joueurs reconnaissables','checks',{options:opts}]],async(v,bt)=>{
   const y=K.youtubeId(v.url);if(!y){statut(z,'Lien YouTube non reconnu.','erreur');return;}if(v.contient_mineurs&&!v.joueurs.length){statut(z,'Désignez les joueurs reconnaissables.','erreur');return;}
