@@ -2,7 +2,7 @@ import {privacyPanel} from './privacy.mjs';
 import {mountNotificationPrompt} from './notification-prompt.mjs';
 import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
-import {isProcessedImage} from './image-processing.mjs';
+import {isProcessedImage,processImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver} from './business-state.js';
 import {indexCatalogue,promotion,disponible,villageDe} from './catalogue-state.mjs';
 import {imageSelection} from './ui.mjs';
@@ -26,6 +26,8 @@ const copieSecours={lire:()=>{try{return JSON.parse(localStorage.getItem('koki-s
 function sessionEnregistree(){try{return JSON.parse(localStorage.getItem('koki-public-auth')||'null')?.user||null;}catch{return null;}}
 // Activation par rubrique : config.json « modules » (absent = suit « enabled »). Transport peut rester fermé quand Commerce est ouvert.
 export function moduleActif(flags,module){return flags?.enabled===true&&flags?.modules?.[module]!==false;}
+// Clubs & Académies : désactivé par défaut, ouvert seulement si config.json › modules.clubs vaut true.
+export function clubsActif(flags){return flags?.enabled===true&&flags?.modules?.clubs===true;}
 const inactif=createBusinessClient(null,{enabled:false});
 const apiDe=module=>modules[module]===false?inactif:api;
 async function sdk(){if(window.supabase)return window.supabase;if(!sdkLoading)sdkLoading=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/business/vendor/supabase-2.117.3.js';s.onload=()=>resolve(window.supabase);s.onerror=()=>{sdkLoading=null;s.remove();reject(Error('Connexion indisponible. Réessayez.'));};document.head.append(s);});return sdkLoading;}
@@ -35,7 +37,7 @@ function localCartStorage(){try{return localStorage;}catch{return null;}}
 function observe(rows,status){const changes=observer.observe(rows);if(changes.length){status.textContent=changes.map(x=>x.kind+' : '+x.status).join(' · ');window.dispatchEvent(new CustomEvent('koki-business-status',{detail:changes}));}}
 // Même règle que assets/portail/feed.js : Supabase LOCAL seulement pour une page servie depuis cet ordinateur.
 export function backendAutorise(c,hostname){if(!c||typeof c.publishableKey!=='string'||!c.publishableKey.startsWith('sb_publishable_'))return false;if(/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(c.url))return c.local!==true;return c.local===true&&(hostname==='127.0.0.1'||hostname==='localhost')&&/^http:\/\/(127\.0\.0\.1|localhost):54321$/.test(c.url);}
-async function initialise(){if(configuration)return configuration;configuration=Promise.all([lireConfig('assets/business/config.json','koki-cache-config','Configuration indisponible.'),lireConfig('assets/portail/backend.json','koki-cache-backend','Serveur indisponible.')]).then(async([flags,c])=>{if(!backendAutorise(c,globalThis.location?.hostname))throw Error('Configuration publique invalide.');modules={commerce:moduleActif(flags,'commerce'),transport:moduleActif(flags,'transport')};db=flags.enabled===true?(await sdk()).createClient(c.url,c.publishableKey,{auth:{storageKey:'koki-public-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;db?.auth.onAuthStateChange?.((event,session)=>{if(['SIGNED_IN','SIGNED_OUT'].includes(event))setTimeout(()=>window.dispatchEvent(new Event('koki-auth-changed')),0);if(event==='SIGNED_IN')setTimeout(()=>{document.getElementById('koki-notification-prompt')?.remove();inviterNotifications();},500);if(event==='SIGNED_OUT')document.getElementById('koki-notification-prompt')?.remove();});api=createBusinessClient(db,{enabled:flags.enabled===true,storage:retryStorage(),sessionLocale:sessionEnregistree,secours:copieSecours,beforeLogout:()=>disablePush(db)});return api;}).catch(e=>{configuration=null;throw e;});return configuration;}
+async function initialise(){if(configuration)return configuration;configuration=Promise.all([lireConfig('assets/business/config.json','koki-cache-config','Configuration indisponible.'),lireConfig('assets/portail/backend.json','koki-cache-backend','Serveur indisponible.')]).then(async([flags,c])=>{if(!backendAutorise(c,globalThis.location?.hostname))throw Error('Configuration publique invalide.');modules={commerce:moduleActif(flags,'commerce'),transport:moduleActif(flags,'transport'),clubs:clubsActif(flags)};db=flags.enabled===true?(await sdk()).createClient(c.url,c.publishableKey,{auth:{storageKey:'koki-public-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;db?.auth.onAuthStateChange?.((event,session)=>{if(['SIGNED_IN','SIGNED_OUT'].includes(event))setTimeout(()=>window.dispatchEvent(new Event('koki-auth-changed')),0);if(event==='SIGNED_IN')setTimeout(()=>{document.getElementById('koki-notification-prompt')?.remove();inviterNotifications();},500);if(event==='SIGNED_OUT')document.getElementById('koki-notification-prompt')?.remove();});api=createBusinessClient(db,{enabled:flags.enabled===true,storage:retryStorage(),sessionLocale:sessionEnregistree,secours:copieSecours,beforeLogout:()=>disablePush(db)});return api;}).catch(e=>{configuration=null;throw e;});return configuration;}
 // Dossier photo anonyme fourni par le serveur : le chemin publié ne contient pas l'identifiant du compte.
 async function upload(result){const file=result?.file||result;if(!isProcessedImage(file))throw Error('Compressez la photo avant son téléversement.');await api.identity();const folder=await api.mediaFolder();const ext=file.type==='image/webp'?'webp':file.type==='image/png'?'png':'jpg';const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('koki-media').upload(path,file,{contentType:file.type,upsert:false});if(error)throw Error('Téléversement impossible. Votre image précédente est conservée.');return path;}
 function container(module){const section=document.getElementById('vue-'+(module==='transport'?'transport':'commerce'));let box=document.getElementById('business-'+module);if(!box){box=node('section');box.id='business-'+module;box.className='business-panel';const ancre=module==='transport'?section.querySelector('.tr-app')||section.querySelector('.transport-demo'):section.querySelector('.market-demo');ancre.after(box);}return box;}
@@ -268,3 +270,23 @@ window.KokiSocialAPI=async args=>{
 // Jamais pour un visiteur ni un compte anonyme ; actif=false efface les données du serveur.
 window.KokiInteretsSync=async(interets,actif=true)=>{await initialise();if(!db)return false;const {data}=await db.auth.getSession();const u=data?.session?.user;if(!u||u.is_anonymous)return false;const {error}=await db.rpc('koki_interests_sync',{p_types:actif?interets?.types||{}:{},p_categories:actif?interets?.categories||{}:{},p_actif:actif});if(error)throw Error('Synchronisation indisponible');return true;};
 window.KokiSocialSummary=async ids=>{await initialise();if(!db)return [];const {data,error}=await db.rpc('koki_social_summaries',{p_ids:ids});if(error)throw Error('Compteurs indisponibles');return data;};
+// Clubs & Académies : pont vers les RPC koki_sport (connectés) et koki_sport_public (visiteurs).
+// Les droits sont vérifiés par le serveur ; ce pont ne fait que transmettre et traduire les erreurs.
+function sportErreur(error){if(transitoire(error))return Error(MESSAGE_HORS_LIGNE);const m=String(error?.message||'');
+ if(error?.code==='42501')return Error(/Compte permanent/.test(m)?'Connectez-vous pour continuer.':'Accès refusé.');
+ if(/violates|constraint|duplicate|invalid input|syntax/i.test(m))return Error('Informations invalides ou déjà enregistrées. Vérifiez la saisie.');
+ return Error(m||'Une erreur est survenue. Réessayez.');}
+window.KokiClubsAPI=Object.freeze({
+ async actif(){try{await initialise();}catch{return false;}return !!db&&modules.clubs===true;},
+ async session(){if(!await this.actif())return null;const {data}=await db.auth.getSession();const u=data?.session?.user;return u&&!u.is_anonymous?{id:u.id}:null;},
+ async api(command,input={}){if(!await this.actif())throw Error('Espace Clubs & Académies indisponible.');const {data,error}=await db.rpc('koki_sport',{command,input});if(error)throw sportErreur(error);return data;},
+ async lecture(command,input={}){if(!await this.actif())throw Error('Espace Clubs & Académies indisponible.');const {data,error}=await db.rpc('koki_sport_public',{command,input});if(error)throw sportErreur(error);return data;},
+ // Photo : compressée et réencodée sur le téléphone (métadonnées EXIF, dont la position GPS, supprimées), rangée dans le dossier de l'académie.
+ async image(clubId,file,progress){if(!await this.actif())throw Error('Espace Clubs & Académies indisponible.');if(!/^[0-9a-f-]{36}$/.test(clubId))throw Error('Académie invalide.');
+  const r=await processImage(file,progress);const f=r.file;const ext=f.type==='image/webp'?'webp':f.type==='image/png'?'png':'jpg';const path=clubId+'/'+crypto.randomUUID()+'.'+ext;
+  const {error}=await db.storage.from('koki-sport').upload(path,f,{contentType:f.type,upsert:false});if(error)throw Error(transitoire(error)?MESSAGE_HORS_LIGNE:'Envoi de la photo refusé.');return path;},
+ async supprimerImage(path){if(!path||!await this.actif())return;await db.storage.from('koki-sport').remove([path]);},
+ // Liens temporaires (1 h) : le serveur ne signe que ce que la personne a le droit de voir.
+ async urls(paths){const ps=[...new Set((paths||[]).filter(p=>/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/.test(p||'')))];if(!ps.length||!await this.actif())return new Map();
+  const {data}=await db.storage.from('koki-sport').createSignedUrls(ps,3600);return new Map((data||[]).filter(x=>x&&x.signedUrl&&!x.error).map(x=>[x.path,x.signedUrl]));},
+});
