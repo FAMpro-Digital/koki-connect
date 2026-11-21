@@ -12,6 +12,7 @@ const ACTIONS={
     "chargerMeteo()":function(el,event){chargerMeteo()},
     "afficherTransport()":function(el,event){afficherTransport()},
     "afficherCommerce()":function(el,event){afficherCommerce()},
+    "afficherRestaurants()":function(el,event){afficherRestaurants()},
     "KokiPortail.education()":function(el,event){KokiPortail.education()},
     "KokiPortail.liste(Opportunités)":function(el,event){KokiPortail.liste('Opportunités')},
     "KokiPortail.liste(Sports & ASC)":function(el,event){KokiPortail.liste('Sports & ASC')},

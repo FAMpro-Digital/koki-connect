@@ -2,7 +2,7 @@ import {requireClientAccount} from './client-access.mjs';
 // Catalogue public Commerces & Services — boutique en ligne adaptative (téléphone d'abord, panier latéral sur grand écran).
 // Recherche, onglets, puces de catégories, promotions, cartes « Ajouter au panier », fiches détaillées avec galerie,
 // Appeler / WhatsApp / Commander sur WhatsApp, panier (une boutique) avec retrait ou livraison, paiement à la réception.
-import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,libelleTotal,lienPanierWhatsApp,similaires} from './catalogue-state.mjs';
+import {ONGLETS,indexCatalogue,filtrer,compter,categories,villages,villageDe,contacts,lienCommande,lienDevis,etiquetteDisponibilite,disponible,promotion,lienCarte,promotions,libelleTotal,lienPanierWhatsApp,similaires,estRestaurant,menu} from './catalogue-state.mjs';
 import {etatOuverture,distanceKm,libelleDistance,positionDe,lireFavoris,basculerFavori,messagePartage,lienPartageWhatsApp,lienFiche,sauverCatalogue,lireCatalogue,libelleDate}from './catalogue-extras.mjs';
 import {lirePosition}from './position-gps.mjs';
 import {transitoire,MOTIFS_SIGNALEMENT}from './client.mjs';
@@ -11,6 +11,10 @@ const C=globalThis.KokiCommerceContract;
 const PAGE=24;
 // Ordre d'affichage des onglets : la vente en ligne d'abord.
 const ORDRE=['produits','services','boutiques','professionnels'];
+// Vue « Restaurants & Traiteurs » : les établissements d'abord, libellés adaptés (même catalogue, même serveur).
+const ORDRE_RESTO=['boutiques','produits','services','professionnels'];
+const LIBELLES_RESTO={boutiques:'Restos',produits:'Plats',services:'Traiteurs',professionnels:'Professionnels'};
+const SANS_WHATSAPP='Ce professionnel n’a pas encore indiqué de numéro WhatsApp valide : la commande en ligne est indisponible pour le moment.';
 const node=(tag,text,className)=>{const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(className)e.className=className;return e;};
 let uid=0;const nid=p=>'cat-'+p+'-'+(++uid);
 function button(label,fn,kind='secondary'){const b=node('button',label,'cat-btn cat-btn-'+kind);b.type='button';b.onclick=fn;return b;}
@@ -38,8 +42,8 @@ function prixBloc(x){
 function badge(x){const t=etiquetteDisponibilite(x);if(!t)return null;return node('span',t,'cat-badge '+(disponible(x)?'cat-ok':'cat-off'));}
 
 // panier (facultatif) : {lignes(), ajouter(x,q), changer(id,q), commander(mode,adresse), position?(), note}
-export async function catalogue(host,{api,requireAccount=()=>requireClientAccount(api),addToCart,requestService,raccourcis=[],panier=null,vide='Aucun commerce ou service validé pour le moment.',stockage=(()=>{try{return localStorage;}catch{return null;}})()}){
- let idx=indexCatalogue([]);const f={kind:'produits',query:'',categorie:'',village:'',disponibles:false,tri:'recent',promo:false,ouvert:false,favoris:null,position:null};let dessinerListe=null,limite=PAGE,horsDepuis=0,mesFavoris=lireFavoris(stockage),maPosition=null;
+export async function catalogue(host,{api,requireAccount=()=>requireClientAccount(api),addToCart,requestService,raccourcis=[],panier=null,restauration=false,vide='Aucun commerce ou service validé pour le moment.',stockage=(()=>{try{return localStorage;}catch{return null;}})()}){
+ let idx=indexCatalogue([]);const f={kind:'produits',query:'',categorie:'',village:'',disponibles:false,tri:'recent',promo:false,ouvert:false,favoris:null,position:null,restauration:!!restauration};if(f.restauration)f.kind='boutiques';let dessinerListe=null,limite=PAGE,horsDepuis=0,mesFavoris=lireFavoris(stockage),maPosition=null;
  const stack=[{view:'liste'}];const images=new Map();
  let mode='retrait',adresse='';const ajouterPanier=panier?(x,q)=>panier.ajouter(x,q):addToCart;
  const message=node('p',null,'cat-message');message.setAttribute('role','status');
@@ -110,6 +114,8 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   zone.replaceChildren();
   if(x.kind==='produits'){
    if(!disponible(x)){zone.append(node('span','Épuisé','cat-pill'));return;}
+   // Restauration : commande sur WhatsApp uniquement, sans compte ni panier (cahier des charges v1).
+   if(estRestaurant(x,idx)){const w=lienCommande(x,idx,1);if(w){const a=direct('Commander sur WhatsApp',w,'whatsapp',x,'commander');a.setAttribute('aria-label','Commander « '+x.nom+' » sur WhatsApp');zone.append(a);}else zone.append(node('span','WhatsApp non renseigné','cat-pill'));return;}
    // « Commander » (WhatsApp) toujours avant « Ajouter au panier ».
    if(ajouterPanier){const w=lienCommande(x,idx,Math.max(1,quantite(x.id)));if(w){const c=contact('Commander',w,'whatsapp',[x,'commander']);c.setAttribute('aria-label','Commander « '+x.nom+' » sur WhatsApp');zone.append(c);}}
    if(ajouterPanier&&quantite(x.id)>0&&panier){zone.append(compteur(x));return;}
@@ -125,7 +131,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const media=node('span',null,'cat-media');media.append(vignette(x.photos[0],'',x));
   if(promotion(x))media.append(node('span','−'+promotion(x)+' %','cat-promo'));
   b.append(media);const body=node('span',null,'cat-card-body');
-  const km=distanceDe(x);const meta=[x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?x.categorie:x.kind==='boutiques'?idx.vendeur(x)?.nom:x.categorie,villageDe(x,idx),km!==null?'à '+libelleDistance(km):''].filter(Boolean).join(' · ');if(meta)body.append(node('span',meta,'cat-meta'));
+  const km=distanceDe(x);const meta=[x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?x.categorie:x.kind==='boutiques'?(f.restauration&&x.categorie?x.categorie:idx.vendeur(x)?.nom):x.categorie,villageDe(x,idx),km!==null?'à '+libelleDistance(km):''].filter(Boolean).join(' · ');if(meta)body.append(node('span',meta,'cat-meta'));
   if(x.kind==='services'&&idx.vendeur(x))body.append(node('span',idx.vendeur(x).nom,'cat-meta cat-meta-fort'));
   body.append(node('span',x.nom,'cat-card-title'));const p=prixBloc(x);if(p)body.append(p);
   if(x.kind==='services'){const bd=badge(x);if(bd)body.append(bd);}
@@ -171,7 +177,11 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const cartBtn=node('button',null,'cat-cartbtn');cartBtn.type='button';cartBtn.append(icone(ICONES.produits,22));const pastille=node('span',null,'cat-cartbtn-n');cartBtn.append(pastille);
   const allerPanier=()=>{const a=host.querySelector('.cat-cart');a?.scrollIntoView({block:'start',behavior:'smooth'});a?.querySelector('h3')?.focus?.({preventScroll:true});};
   cartBtn.onclick=allerPanier;
-  bar.append(recherche);if(panier)bar.append(cartBtn);shell.append(bar);
+  const avecPanier=!!panier&&!f.restauration;
+  bar.append(recherche);if(avecPanier)bar.append(cartBtn);shell.append(bar);
+  // Accès « Restaurants & Traiteurs » : filtre du catalogue, réversible en un geste.
+  const resto=button(f.restauration?'🍽️ Restaurants & Traiteurs ✓':'🍽️ Restaurants & Traiteurs',()=>basculerRestauration(!f.restauration),'chip');resto.classList.add('cat-resto-toggle');resto.setAttribute('aria-pressed',String(f.restauration));shell.append(resto);
+  if(f.restauration)shell.append(node('p','Commandez directement sur WhatsApp, sans créer de compte. Le professionnel confirme lui-même la disponibilité, le prix et les modalités. Aucun paiement ne se fait dans Koki Connect.','cat-hint cat-resto-note'));
   if(raccourcis.length){const rapides=node('div',null,'cat-shortcuts');for(const r of raccourcis)rapides.append(button(r.label,r.action,'link'));shell.append(rapides);}
   shell.append(message);
   if(horsDepuis)shell.append(node('p','Hors connexion : catalogue enregistré le '+libelleDate(horsDepuis)+'. Les prix et le stock ont peut-être changé.','cat-offline'));
@@ -183,19 +193,19 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const layout=node('div',null,'cat-layout');shell.append(layout);
   const main=node('div',null,'cat-main');layout.append(main);
   const compte=node('p',null,'cat-count');compte.setAttribute('aria-live','polite');const grille=node('div',null,'cat-grid');grille.setAttribute('role','tabpanel');const plus=node('div');main.append(compte,grille,plus);
-  const aside=node('aside',null,'cat-cart');aside.id=nid('panier');aside.setAttribute('aria-label','Panier');if(panier)layout.append(aside);
-  const barre=node('button',null,'cat-cartbar');barre.type='button';barre.onclick=allerPanier;if(panier)main.append(barre);
+  const aside=node('aside',null,'cat-cart');aside.id=nid('panier');aside.setAttribute('aria-label','Panier');if(avecPanier)layout.append(aside);
+  const barre=node('button',null,'cat-cartbar');barre.type='button';barre.onclick=allerPanier;if(avecPanier)main.append(barre);
   majPanier=()=>{const ls=lignes(),n=ls.reduce((s,l)=>s+l.quantite,0);pastille.textContent=n?String(n):'';pastille.hidden=!n;cartBtn.setAttribute('aria-label','Panier : '+n+' article'+(n>1?'s':''));
    barre.hidden=!n;barre.replaceChildren(node('span',n+' article'+(n>1?'s':'')+' · '+libelleTotal(ls)),node('span','Panier →','cat-cartbar-go'));barre.setAttribute('aria-label','Voir le panier : '+n+' article'+(n>1?'s':'')+', '+libelleTotal(ls));
-   for(const card of host.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);if(panier)recapitulatif(aside);};
+   for(const card of host.querySelectorAll('.cat-card'))if(card._zone)actionsCarte(card._x,card._zone);if(avecPanier)recapitulatif(aside);};
   function dessiner(){
    f.favoris=f.mesFavoris?mesFavoris:null;
    const n=compter(idx,{...f,promo:false,ouvert:false});tabs.replaceChildren();
-   for(const kind of ORDRE){const o=ONGLETS.find(x=>x.kind===kind);const b=node('button',null,'cat-tab');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(kind===f.kind));b.append(node('span',o.label),node('span',String(n[kind]),'cat-tab-n'));b.setAttribute('aria-label',o.label+' ('+n[kind]+')');b.onclick=()=>{if(f.kind===kind)return;f.kind=kind;f.categorie='';f.village='';limite=PAGE;dessiner();};tabs.append(b);}
+   for(const kind of f.restauration?ORDRE_RESTO:ORDRE){const o=ONGLETS.find(x=>x.kind===kind);const label=f.restauration?LIBELLES_RESTO[kind]:o.label;const b=node('button',null,'cat-tab');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(kind===f.kind));b.append(node('span',label),node('span',String(n[kind]),'cat-tab-n'));b.setAttribute('aria-label',label+' ('+n[kind]+')');b.onclick=()=>{if(f.kind===kind)return;f.kind=kind;f.categorie='';f.village='';limite=PAGE;dessiner();};tabs.append(b);}
    // Promotions : seulement sur l'onglet Produits, sans recherche ni filtre.
    promo.replaceChildren();const promos=f.kind==='produits'&&!f.query&&!f.categorie&&!f.village?promotions(idx):[];promo.hidden=!promos.length;
    if(promos.length){promo.append(node('h3','Promotions','cat-section-title'));const rail=node('div',null,'cat-rail-promos');for(const x of promos)rail.append(carte(x,'cat-card-mini'));promo.append(rail);}
-   const cats=categories(idx,f.kind),vils=villages(idx,f.kind);if(f.categorie&&!cats.includes(f.categorie))f.categorie='';if(f.village&&!vils.includes(f.village))f.village='';
+   const cats=categories(idx,f.kind,f.restauration),vils=villages(idx,f.kind,f.restauration);if(f.categorie&&!cats.includes(f.categorie))f.categorie='';if(f.village&&!vils.includes(f.village))f.village='';
    puces.replaceChildren();puces.setAttribute('aria-label',f.kind==='services'?'Métiers':'Catégories');puces.hidden=!cats.length;
    for(const c of ['',...cats]){const b=button(c||'Tout',()=>{f.categorie=c;limite=PAGE;dessiner();},'chip');b.setAttribute('aria-pressed',String(f.categorie===c));puces.append(b);}
    filtres.replaceChildren();
@@ -216,7 +226,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    const res=filtrer(idx,{...f,position:maPosition});const nom={produits:['produit','produits'],services:['prestataire','prestataires'],boutiques:['boutique','boutiques'],professionnels:['commerce','commerces']}[f.kind];
    compte.textContent=res.length+' '+nom[res.length>1?1:0];
    grille.replaceChildren();plus.replaceChildren();grille.dataset.kind=f.kind;
-   if(!res.length)grille.append(node('p',idx.liste.length?'Aucun résultat. Essayez un autre mot ou retirez un filtre.':vide,'cat-empty'));
+   if(!res.length)grille.append(node('p',f.restauration&&!f.query&&!f.categorie&&!f.village&&!f.disponibles&&!f.ouvert&&!f.mesFavoris?'Aucun restaurant ou traiteur validé pour le moment. Professionnels de la restauration : créez votre fiche dans « Profil ».':idx.liste.length?'Aucun résultat. Essayez un autre mot ou retirez un filtre.':vide,'cat-empty'));
    for(const x of res.slice(0,limite))grille.append(carte(x));
    if(res.length>limite)plus.append(button('Voir plus ('+(res.length-limite)+')',()=>{limite+=PAGE;dessiner();}));
    majPanier();
@@ -243,8 +253,11 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   const box=node('div',null,'cat-contact');const c=contacts(x,idx);if(!c){box.append(node('p','Coordonnées indisponibles.'));if(apresCommande)box.append(apresCommande);return box;}
   box.append(node('p',x.kind==='professionnels'?'Contacter '+c.vendeur:'Proposé par '+c.vendeur+(x.kind==='produits'&&c.boutique?' · '+c.boutique:''),'cat-seller'));
   const actions=node('div',null,'cat-actions');
-  const principal=x.kind==='produits'?lienCommande(x,idx,qte):x.kind==='services'?lienDevis(x,idx):null;
-  if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp',[x,x.kind==='produits'?'commander':'devis']));
+  const principal=x.kind==='produits'?lienCommande(x,idx,qte):x.kind==='services'?lienDevis(x,idx):null;const resto=estRestaurant(x,idx);
+  // Restauration : WhatsApp direct, sans compte (aucune commande n'est enregistrée dans Koki Connect). Autres commerces : compte exigé.
+  if(principal&&resto)actions.append(direct(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp',x,x.kind==='produits'?'commander':'devis'));
+  else if(principal)actions.append(contact(x.kind==='produits'?'Commander sur WhatsApp':'Demander un devis sur WhatsApp',principal,'whatsapp',[x,x.kind==='produits'?'commander':'devis']));
+  else if(resto&&(x.kind==='services'||(x.kind==='produits'&&disponible(x))))box.append(node('p',SANS_WHATSAPP,'cat-hint cat-sans-whatsapp'));
   if(apresCommande)actions.append(apresCommande);// « Ajouter au panier » juste après « Commander »
   if(c.appel)actions.append(direct('Appeler le '+c.telephone,c.appel,'call',x,'appel'));
   if(c.whatsapp)actions.append(direct(principal?'Écrire sur WhatsApp':'WhatsApp '+c.numeroWhatsApp,c.whatsapp,principal?'whatsapp-light':'whatsapp',x,'whatsapp'));
@@ -294,17 +307,19 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
    const maj=()=>{out.textContent=String(qte);dessinerContact();};w.append(l,moins,out,plus);corps.append(w);
   }
   let boutonPanier=null;
-  if(x.kind==='produits'&&disponible(x)&&ajouterPanier){const b=button('Ajouter au panier',async()=>{b.disabled=true;try{await ajouter(x,qte);}finally{b.disabled=false;}},'cart');boutonPanier=b;}
+  const resto=estRestaurant(x,idx);
+  if(x.kind==='produits'&&disponible(x)&&ajouterPanier&&!resto){const b=button('Ajouter au panier',async()=>{b.disabled=true;try{await ajouter(x,qte);}finally{b.disabled=false;}},'cart');boutonPanier=b;}
   dessinerContact();corps.append(contact);
-  if(x.kind==='services'&&requestService){const zone=node('div');const b=button('Demander ce service dans l’application',async()=>{try{await requestService(x,zone);}catch(e){say(e.message);}},'cart');corps.append(b,zone);}
+  if(x.kind==='services'&&requestService&&!resto){const zone=node('div');const b=button('Demander ce service dans l’application',async()=>{try{await requestService(x,zone);}catch(e){say(e.message);}},'cart');corps.append(b,zone);}
   // Navigation vers les fiches liées.
   const lies=node('section',null,'cat-related');
   const v=idx.vendeur(x),bo=idx.boutique(x);
   if(x.kind==='produits'&&bo)lies.append(button('Voir la boutique « '+bo.nom+' »',()=>go('fiche',{id:bo.id})));
   if(x.kind!=='professionnels'&&v)lies.append(button('Voir le commerce « '+v.nom+' »',()=>go('fiche',{id:v.id})));
   const groupe=(titre,rows)=>{if(!rows.length)return;lies.append(node('h4',titre));const g=node('div',null,'cat-grid');for(const r of rows)g.append(carte(r));lies.append(g);};
-  if(x.kind==='boutiques')groupe('Produits de la boutique',idx.enfants(x.id,'produits'));
-  if(x.kind==='professionnels'){groupe('Boutiques',idx.enfants(x.id,'boutiques'));groupe('Services',idx.enfants(x.id,'services'));}
+  if(x.kind==='boutiques'&&resto){const m=menu(idx,x.id);if(m.length){lies.append(node('h4','Menu','cat-menu-titre'));for(const g of m)groupe(g.categorie,g.produits);}}
+  else if(x.kind==='boutiques')groupe('Produits de la boutique',idx.enfants(x.id,'produits'));
+  if(x.kind==='professionnels'){groupe('Boutiques',idx.enfants(x.id,'boutiques'));groupe(resto?'Prestations':'Services',idx.enfants(x.id,'services'));}
   if(x.kind==='produits')groupe('Produits similaires',similaires(idx,x));if(x.kind==='services')groupe('Services similaires',similaires(idx,x));
   if(lies.children.length)art.append(lies);
   art.append(sectionAvis(x));
@@ -317,6 +332,7 @@ export async function catalogue(host,{api,requireAccount=()=>requireClientAccoun
   try{rows=await api.catalog();if(Array.isArray(rows))sauverCatalogue(stockage,rows);}
   catch(e){const c=e?.horsLigne||transitoire(e)?lireCatalogue(stockage):null;if(!c)throw e;rows=c.rows;horsDepuis=c.date;}
   idx=indexCatalogue(rows);if(stack.at(-1).view==='fiche'&&!idx.get(stack.at(-1).params.id))stack.length=1;render();}
+ function basculerRestauration(on){Object.assign(f,{restauration:!!on,kind:on?'boutiques':'produits',query:'',categorie:'',village:'',disponibles:false,promo:false,ouvert:false,mesFavoris:false});limite=PAGE;stack.length=1;say('');render();}
  await charger();
- return {recharger:charger,ouvrir:id=>{if(idx?.get(id))go('fiche',{id});},get index(){return idx;}};
+ return {recharger:charger,ouvrir:id=>{if(idx?.get(id))go('fiche',{id});},restauration:on=>{basculerRestauration(on!==false);host.scrollIntoView({block:'start'});},get index(){return idx;}};
 }

@@ -102,9 +102,21 @@ function accueil(){try{window.KokiAccueilJour?.maj(visibles());}catch{}boutonVid
 const FCFA=v=>new Intl.NumberFormat('fr-FR').format(v).replace(/\u202f|\u00a0/g,' ')+' FCFA';
 let apercuLance=false;
 function apercuCommerces(){const box=$('portail-commerces');if(!box||apercuLance)return;
- const lancer=()=>{if(apercuLance)return;apercuLance=true;remplirCommerces(box);};
+ const lancer=()=>{if(apercuLance)return;apercuLance=true;remplirCommerces(box);remplirRestaurants();};
  if(!('IntersectionObserver' in window)){lancer();return;}
  const o=new IntersectionObserver(e=>{if(e.some(x=>x.isIntersecting)){o.disconnect();lancer();}},{rootMargin:'400px'});o.observe(box);}
+// Restaurants & Traiteurs : cartes (photo, nom, catégorie, localité, ouvert / fermé), commande sur WhatsApp depuis la fiche.
+function afficherRestaurants(){if(window.KokiBusiness?.ouvrirRestauration)return KokiBusiness.ouvrirRestauration();return afficherCommerce();}
+async function remplirRestaurants(){const box=$('portail-restaurants');if(!box)return;
+ box.replaceChildren(n('p','Chargement des restaurants…'));
+ let xs=null;try{xs=await window.KokiBusiness?.apercuRestauration?.(4);}catch{xs=null;}
+ box.replaceChildren();
+ if(xs===null||xs===undefined){box.append(n('p','Restaurants, traiteurs, pâtisseries et boulangeries de Koki : consultez les menus et commandez sur WhatsApp.'),b('Voir les restaurants',afficherRestaurants));return;}
+ if(!xs.length){box.append(n('p','Les premiers restaurants et traiteurs de Koki arrivent bientôt.'));return;}
+ for(const x of xs){const e=n('article');e.className='portail-card portail-resto';
+  const lieu=[x.categorie,x.village].filter(Boolean).join(' · ');if(lieu)e.append(n('p',lieu));e.append(n('h3',x.nom));
+  if(x.ouvert!==null){const s=n('p',x.ouvert?'● Ouvert':'● Fermé');s.className=x.ouvert?'portail-ouvert':'portail-ferme';e.append(s);}
+  e.append(b('Voir le menu',()=>window.KokiBusiness?.ouvrirFiche?KokiBusiness.ouvrirFiche(x.id):afficherRestaurants()));box.append(e);}}
 async function remplirCommerces(box){
  box.replaceChildren(n('p','Chargement des commerces…'));
  let xs=null;try{xs=await window.KokiBusiness?.apercuCommerces?.(3);}catch{xs=null;}
@@ -167,5 +179,6 @@ let educationGeneration=0;
 function educationDetail(row){if(window.KokiEducation){KokiEducation.ecole(row);return;}const school=KokiEducationContract.decode(row);if(!school)return;const box=ouvrir(row.titre),article=n('article');article.className='portail-card';photo(row,article);article.append(n('h2',row.titre),n('p',school.niveau+' · '+school.secteur),n('p',row.resume),n('p','Adresse : '+row.lieu),n('p',school.description||''));if(school.horaires)article.append(n('p','Horaires : '+school.horaires));if(school.telephone&&/^\+?[0-9 ()-]{6,24}$/.test(school.telephone)){const call=n('a','Appeler l’établissement');call.href='tel:'+school.telephone.replace(/[^+0-9]/g,'');article.append(call);}if(row.source)article.append(n('p','Source : '+row.source));box.append(article,b('Retour aux établissements',education));}
 async function education(){if(window.KokiEducation){KokiEducation.accueil();return;}const g=++educationGeneration,box=ouvrir('Éducation · Établissements scolaires');box.append(n('p','Chargement des établissements publiés…'));try{const feed=await KokiPublicFeed.charger();if(g!==educationGeneration||$('portail-titre').textContent!=='Éducation · Établissements scolaires')return;box.replaceChildren();const schools=feed.contenus.filter(x=>KokiEducationContract.decode(x)&&!KokiEducationContract.decode(x).archive&&C.visible(x));const search=n('input');search.type='search';search.placeholder='Rechercher une école ou un village…';search.setAttribute('aria-label','Rechercher un établissement scolaire');const level=n('select');level.setAttribute('aria-label','Niveau scolaire');for(const v of ['Tous les niveaux',...KokiEducationContract.levels])level.append(n('option',v));const grid=n('div');grid.className='portail-grid';function render(){grid.replaceChildren();const q=C.normaliser(search.value.trim());const rows=schools.filter(x=>{const school=KokiEducationContract.decode(x);return (!q||C.normaliser(x.titre+' '+x.lieu+' '+x.resume).includes(q))&&(level.value==='Tous les niveaux'||level.value===school.niveau);});for(const row of rows){const school=KokiEducationContract.decode(row),article=n('article');article.className='portail-card';photo(row,article);article.append(n('h3',row.titre),n('p',school.niveau+' · '+school.secteur),n('p',row.lieu),n('p',row.resume),b('Voir la fiche',()=>educationDetail(row)));grid.append(article);}if(!rows.length)grid.append(n('p','Aucun établissement publié pour cette recherche.'));}search.oninput=render;level.onchange=render;box.append(b('📚 Bibliothèque : livres gratuits et payants',()=>window.KokiBibliotheque&&KokiBibliotheque.ouvrir()),search,level,b('Actualiser les établissements',education),b('Voir la carte Éducation',()=>lieux('Éducation')),grid,n('p','KOKI CONNECT — Éducation | Une solution FAMpro Digital'));render();}catch{if(g!==educationGeneration||$('portail-titre').textContent!=='Éducation · Établissements scolaires')return;box.replaceChildren(n('p','Le catalogue est indisponible. Vérifiez votre connexion.'),b('Réessayer',education));}}
 
-window.KokiPortail={ouvrir,detail,videos,parametres,education,numerosUtiles,liste,rubrique,lieux,rechercher,profil,favoris,publier,admin,actualiser};
+window.KokiPortail={ouvrir,detail,videos,parametres,education,numerosUtiles,liste,rubrique,lieux,rechercher,profil,favoris,publier,admin,actualiser}
+window.afficherRestaurants=afficherRestaurants;;
 })();
