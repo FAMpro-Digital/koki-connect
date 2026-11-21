@@ -328,7 +328,8 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   else if(shops.length>1)shop=input(f,{label:'Boutique',required:true,value:shopId||shops[0].id,options:shops.map(b=>({value:b.id,label:b.payload.nom}))});
   else f.append(node('p','Boutique : '+shops[0]?.payload.nom,'pro-hint'));
   const name=input(f,{label:'Nom du produit',value:p.nom||'',required:true,attrs:{maxlength:'180'}});
-  const category=input(f,{label:'Catégorie',value:p.categorie||'',list:C.categoriesCommerce,attrs:{maxlength:'100'}});
+  const boutiqueResto=[state.profile?.payload?.categorie,...shops.map(b=>b.payload?.categorie)].some(C.estRestauration);
+  const category=input(f,{label:boutiqueResto?'Catégorie du menu':'Catégorie',value:p.categorie||'',list:boutiqueResto?[...C.categoriesMenu,...C.categoriesCommerce]:C.categoriesCommerce,hint:boutiqueResto?'Exemple : Petit-déjeuner, Grillades, Boissons. Les plats sont rangés par catégorie sur votre page.':undefined,attrs:{maxlength:'100'}});
   const price=input(f,{label:'Prix (FCFA)',type:'number',value:p.prix??'',hint:'Facultatif. Laissez vide pour afficher « Prix sur demande ».'});
   const old=input(f,{label:'Ancien prix (FCFA)',type:'number',value:p.ancien_prix??'',hint:'Pour afficher une promotion : doit être supérieur au prix.'});
   const stock=input(f,{label:'Stock disponible',type:'number',value:p.stock??'',hint:'Facultatif. Laissez vide si vous ne comptez pas le stock. À 0, le produit s’affiche « Épuisé ».'});
@@ -357,7 +358,8 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   const row=state.services.find(x=>x.id===id)||null,p=row?.payload||{};
   const body=frame(row?'Modifier le service':'Nouveau service');const f=node('form',null,'pro-form');f.noValidate=true;body.append(f);
   const name=input(f,{label:'Nom du service',value:p.nom||'',required:true,hint:'Exemple : Réparation de fuite d’eau.',attrs:{maxlength:'180'}});
-  const category=input(f,{label:'Métier',value:p.categorie||state.profile.payload.categorie||'',list:C.metiers,attrs:{maxlength:'100'}});
+  const traiteur=C.estRestauration(state.profile.payload.categorie);
+  const category=input(f,{label:traiteur?'Type de prestation':'Métier',value:p.categorie||(traiteur?'':state.profile.payload.categorie)||'',list:traiteur?[...C.typesPrestations,'Prestations événementielles']:C.metiers,hint:traiteur?'Exemple : Mariages, Baptêmes, Séminaires. Indiquez vos conditions particulières (acompte, délai, nombre de personnes) dans la description.':undefined,attrs:{maxlength:'100'}});
   const tarif=choice(f,{legend:'Tarif',name:'tarif',value:p.tarif||(p.prix==null?'devis':'fixe'),values:[{value:'fixe',label:'Prix fixe'},{value:'devis',label:'Sur devis'}]});
   const priceBox=node('div');f.append(priceBox);let price=null;const drawPrice=()=>{priceBox.replaceChildren();price=tarif.value==='fixe'?input(priceBox,{label:'Prix (FCFA)',type:'number',value:p.prix??'',required:true}):null;};tarif.onchange=drawPrice;drawPrice();
   const zone=input(f,{label:'Zone d’intervention',value:p.zone||state.profile.payload.zone||'',attrs:{maxlength:'180'}});

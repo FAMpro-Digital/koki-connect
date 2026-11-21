@@ -230,3 +230,9 @@
 #vue-commerce .business-panel .cat-signal{display:grid;gap:8px;margin:0 0 12px;padding:12px;border:1px solid #d8dce1;border-radius:12px;background:#fff}
 #vue-commerce .business-panel .cat-signal[hidden]{display:none}
 #vue-commerce .business-panel .cat-signal textarea,#vue-commerce .business-panel .cat-signal select{width:100%}
+/* Restaurants & Traiteurs : accès au filtre, note de commande WhatsApp, menu par catégorie. */
+.cat-resto-toggle{margin:4px 0 10px;font-weight:700;border-color:#c76a00;color:#a85800}
+.cat-resto-toggle[aria-pressed=true]{background:#1f5c3a;border-color:#1f5c3a;color:#fff}
+.cat-resto-note{margin:0 0 12px}
+.cat-menu-titre{font-size:1.2rem;margin:18px 0 4px}
+.cat-sans-whatsapp{color:#a85800}

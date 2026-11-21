@@ -26,7 +26,7 @@ test('chaque action référencée dans la page existe dans le registre', () => {
       total++;
     }
   }
-  assert.equal(total, 89); // + bouton Urgences, − lien Administration retiré du menu public
+  assert.equal(total, 90); // + bouton Urgences, − lien Administration retiré du menu public, + « Voir plus » Restaurants & Traiteurs
 });
 
 test('le registre exécute la même instruction qu\'avant (this, event, repli)', () => {

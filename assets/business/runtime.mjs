@@ -4,7 +4,8 @@ import {renderNotifications,disablePush,enablePush} from './notifications.mjs';
 import {requireClientAccount} from './client-access.mjs';
 import {isProcessedImage,processImage} from './image-processing.mjs';
 import {createCartStore,createStatusObserver} from './business-state.js';
-import {indexCatalogue,promotion,disponible,villageDe} from './catalogue-state.mjs';
+import {indexCatalogue,promotion,disponible,villageDe,etablissementsRestauration} from './catalogue-state.mjs';
+import {etatOuverture} from './catalogue-extras.mjs';
 import {imageSelection} from './ui.mjs';
 import {createBusinessClient,HORS_LIGNE,MESSAGE_HORS_LIGNE,transitoire} from './client.mjs';
 // Message d'erreur affichable : jamais d'erreur technique brute (« TypeError: Failed to fetch »…).
@@ -101,6 +102,20 @@ async function apercuCommerces(max=3){
  return [...produits,...autres].slice(0,max).map(x=>({id:x.id,kind:x.kind,nom:x.nom,prix:Number.isInteger(x.prix)?x.prix:null,ancien_prix:promotion(x)>0?x.ancien_prix:null,promotion:promotion(x),
   boutique:(x.kind==='produits'?idx.boutique(x)?.nom:x.kind==='services'?idx.vendeur(x)?.nom:'')||'',village:villageDe(x,idx)||''}));
 }
+// Accueil « Restaurants & Traiteurs » : établissements publiés (boutique de restauration ou traiteur sans boutique).
+// Photo : la première de la fiche (convention v1 : 1re photo = logo, 2e = couverture).
+async function apercuRestauration(max=4){
+ const c=await catalogueIndex();if(!c)return null;const idx=c.idx;
+ const ouvert=x=>{const o=etatOuverture(x,idx);return o===true?0:o===null?1:2;};
+ return etablissementsRestauration(idx).sort((a,b)=>ouvert(a)-ouvert(b)||a.ordre-b.ordre).slice(0,max).map(x=>{const o=etatOuverture(x,idx);
+  return {id:x.id,kind:x.kind,nom:x.nom,categorie:x.categorie||idx.vendeur(x)?.categorie||'',village:villageDe(x,idx)||'',ouvert:o,photo:x.photos[0]||null};});
+}
+// Ouvre Commerces & Services directement sur la vue « Restaurants & Traiteurs ».
+async function ouvrirRestauration(){
+ try{await window.afficherCommerce?.();}catch{}
+ for(let i=0;i<80&&!catalogueHandle?.index;i++)await new Promise(r=>setTimeout(r,100));
+ catalogueHandle?.restauration?.(true);
+}
 // Ouvre la fiche d'un résultat dans Commerces & Services, une fois la boutique en ligne affichée.
 async function ouvrirFiche(id){
  try{await window.afficherCommerce?.();}catch{}
@@ -115,7 +130,7 @@ async function activite(){
  const [courses,commandes,demandes]=await Promise.all(['courses','commandes','demandes_services'].map(lire));
  return {connecte:true,courses,commandes,demandes};
 }
-window.KokiBusiness={show,catalogueRecherche,apercuCommerces,ouvrirFiche,activite,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
+window.KokiBusiness={show,catalogueRecherche,apercuCommerces,ouvrirFiche,activite,apercuRestauration,ouvrirRestauration,rafraichir:()=>catalogueHandle?.recharger(),transportConnecte,transportSuivi,estimer:estimerCourse,chauffeursProches:(c,d)=>api.nearby(c,d),reserver:reserverCourse,ouvrirConnexion,get busy(){return !!api?.busy;},get enabled(){return !!api?.enabled&&modules.transport!==false;},actif:module=>!!api?.enabled&&modules[module]!==false};
 
 // Les retours de récupération sont ouverts dans Profil par retourDeLien().
 
