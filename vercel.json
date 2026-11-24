@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "feature/module-football": false,
       "fix/livres-autorisation-confidentialite": false,
       "fix/incoherences": false,
       "fix/affichage-mobile": false,
