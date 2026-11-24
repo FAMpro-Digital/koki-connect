@@ -75,16 +75,22 @@ test('sources publiques : aucun secret',()=>{
  for(const s of F('sources'))assert.deepEqual(Object.keys(s).sort(),['derniere_actualisation','etat','fournisseur']);
 });
 
-test('intégration temps réel : message Realtime appliqué sur l’état serveur, puis carte Accueil',async()=>{
+test('intégration temps réel : signal Realtime, état relu sur le serveur, puis carte Accueil',async()=>{
  const canaux=[];const client={channel(nom){const c={ec:{},on(t,f,cb){this.ec[f.event]=cb;return this;},subscribe(cb){this.cb=cb;return this;},unsubscribe(){}};canaux.push(c);return c;}};
- const d=D.creer({client,rpc:async()=>accueil,planifier:()=>0,annuler:()=>{}});
- await d.demarrer(accueil);canaux[0].cb('SUBSCRIBED');
  const m=accueil.direct.find(x=>x.source==='manuel');
- canaux[0].ec.match({payload:{id:m.id,revision:m.revision+1,statut:'En direct',minute:91,score_domicile:2,score_exterieur:0}});
- const carte=V.carteAccueil({direct:d.matchs()});
- const vu=carte.matchs.find(x=>x.id===m.id);
+ const serveur={...m,revision:m.revision+1,statut:'En direct',minute:91,score_domicile:2,score_exterieur:0};
+ const minuteries=[];
+ const rpc=async(cmd,input)=>cmd==='etat_matchs'?input.ids.map(id=>id===m.id?serveur:accueil.direct.find(x=>x.id===id)):accueil;
+ const d=D.creer({client,rpc,planifier:(fn)=>{minuteries.push(fn);return minuteries.length;},annuler:()=>{}});
+ await d.demarrer(accueil);canaux[0].cb('SUBSCRIBED');
+ // Le message porte un score différent de celui du serveur : seul l'état serveur est affiché.
+ canaux[0].ec.match({payload:{id:m.id,revision:m.revision+1,statut:'En direct',minute:91,score_domicile:5,score_exterieur:0}});
+ for(const fn of minuteries.splice(0))if(fn.toString().includes('traiterSignaux'))await fn();
+ await new Promise(r=>setImmediate(r));
+ const vu=V.carteAccueil({direct:d.matchs()}).matchs.find(x=>x.id===m.id);
  assert.equal(V.score(vu).principal,'2 – 0');assert.equal(V.statut(vu),'91’');assert.equal(vu.domicile.nom,m.domicile.nom);
  canaux[0].ec.match({payload:{id:m.id,revision:m.revision,statut:'En direct',minute:80,score_domicile:1,score_exterieur:0}});
+ assert.equal(minuteries.filter(fn=>fn.toString().includes('traiterSignaux')).length,0,'message ancien : aucune lecture');
  assert.equal(V.score(V.carteAccueil({direct:d.matchs()}).matchs.find(x=>x.id===m.id)).principal,'2 – 0','message ancien sans effet');
  d.arreter();
 });

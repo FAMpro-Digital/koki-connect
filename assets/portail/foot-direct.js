@@ -5,7 +5,10 @@
 //    par Broadcast) : reconnexion avec attente progressive 1, 2, 4… 30 s ;
 //  * tant que le canal est coupé, les scores sont rechargés toutes les 30 s (secours) ; une fois
 //    reconnecté, un contrôle de sécurité toutes les 2 min pendant les matchs en jeu ;
-//  * aucune donnée personnelle : les messages ne portent qu'identifiant, révision, statut, minute, scores.
+//  * aucune donnée personnelle : les messages ne portent qu'identifiant, révision, statut, minute, scores ;
+//  * le canal Broadcast est public : n'importe quel détenteur de la clé publique peut y émettre. Un message
+//    n'est donc qu'un SIGNAL « ce match a changé » : son contenu (score, statut, révision) n'est jamais
+//    affiché ; l'état affiché vient toujours du serveur (RPC etat_matchs), avec un débit d'appels plafonné.
 // Ce module ne touche pas au DOM : la page fournit `client` (supabase-js), `rpc` et `onChange`.
 (function(root){'use strict';
 const CANAL='koki-foot';
@@ -13,8 +16,9 @@ const EN_JEU=['En direct','Mi-temps','Prolongations','Tirs au but','Interrompu']
 const CHAMPS=['revision','statut','minute','score_domicile','score_exterieur','pro_domicile','pro_exterieur','tab_domicile','tab_exterieur','date_match'];
 const ATTENTES=[1000,2000,4000,8000,16000,30000];
 const SECOURS=30000,CONTROLE=120000;
+const REGROUPEMENT=300,INTERVALLE_MIN=2000,MAX_IDS=100;
 
-function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},planifier=setTimeout,annuler=clearTimeout}){
+function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},planifier=setTimeout,annuler=clearTimeout,maintenant=()=>Date.now()}){
  if(!client||typeof client.channel!=='function')throw Error('Client Realtime requis');
  if(typeof rpc!=='function')throw Error('Lecture serveur requise');
  const matchs=new Map();
@@ -29,15 +33,35 @@ function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},plan
   if(connu&&connu.revision>=m.revision)return false;
   matchs.set(m.id,connu?{...connu,...m}:m);return true;
  }
- // Message « match » du serveur.
+ // Message « match » : simple signal. Filtre peu coûteux (révision déjà connue => ignoré), puis lecture
+ // de l'état réel auprès du serveur. Un faux message ne peut ni afficher un faux score, ni bloquer les
+ // vraies mises à jour (la révision locale ne provient que du serveur).
+ const enAttente=new Set();let inconnu=false,minuterieSignal=null,dernierSignal=-Infinity;
  function recevoirMatch(charge){
   if(!charge||typeof charge.id!=='string'||!Number.isInteger(charge.revision))return;
   const connu=matchs.get(charge.id);
   if(connu&&connu.revision>=charge.revision)return; // message ancien ou en double : ignoré
-  if(charge.visible===false){if(matchs.delete(charge.id))onChange(liste());return;}
-  if(!connu){programmerRecharge();return;} // match nouveau pour cet écran : détails (équipes…) à charger
-  const maj={};for(const k of CHAMPS)if(k in charge)maj[k]=charge[k];
-  matchs.set(charge.id,{...connu,...maj});onChange(liste());
+  if(!connu&&charge.visible===false)return; // dépublication d'un match non affiché : rien à faire
+  if(connu){if(enAttente.size<MAX_IDS)enAttente.add(charge.id);}else inconnu=true; // nouveau : équipes et compétition à charger
+  programmerSignal();
+ }
+ function programmerSignal(){
+  if(minuterieSignal)return;
+  const attente=Math.max(REGROUPEMENT,dernierSignal+INTERVALLE_MIN-maintenant());
+  minuterieSignal=planifier(()=>{minuterieSignal=null;traiterSignaux();},attente);
+ }
+ async function traiterSignaux(){
+  if(!actif)return;dernierSignal=maintenant();
+  const ids=[...enAttente];enAttente.clear();const complet=inconnu;inconnu=false;
+  if(complet)return recharger(); // le rechargement complet couvre aussi les matchs en attente
+  if(!ids.length)return;
+  const g=generation;
+  try{const etats=await rpc('etat_matchs',{ids});if(g!==generation||!actif)return;
+   const presents=new Set((etats||[]).map(m=>m.id));let change=false;
+   for(const id of ids)if(!presents.has(id)&&matchs.delete(id))change=true; // dépublié (confirmé par le serveur)
+   for(const m of etats||[])if(fusionner(m))change=true;
+   if(change)onChange(liste());
+  }catch{/* serveur indisponible : le secours périodique reprendra */}
  }
  function recevoirEvenement(charge){if(charge&&typeof charge.match_id==='string')onEvenement(charge.match_id,charge.revision);}
 
@@ -58,8 +82,6 @@ function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},plan
   }catch{return false;}finally{recharge=null;}})();
   return recharge;
  }
- let attenteRecharge=null;
- function programmerRecharge(){if(attenteRecharge)return;attenteRecharge=planifier(()=>{attenteRecharge=null;recharger();},300);}
 
  function secours(){
   annuler(minuterieSecours);if(!actif)return;
@@ -97,13 +119,13 @@ function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},plan
    if(!initial)await recharger();onChange(liste());abonner();},
   // Retour sur l'écran (onglet de nouveau visible, réseau revenu) : état rechargé.
   reveil(){if(actif)return recharger();},
-  arreter(){actif=false;generation++;annuler(minuterieReco);annuler(minuterieSecours);annuler(attenteRecharge);attenteRecharge=null;if(canal){try{canal.unsubscribe();}catch{}}canal=null;changerEtat('arrete');},
+  arreter(){actif=false;generation++;annuler(minuterieReco);annuler(minuterieSecours);annuler(minuterieSignal);minuterieSignal=null;enAttente.clear();inconnu=false;if(canal){try{canal.unsubscribe();}catch{}}canal=null;changerEtat('arrete');},
   etat:()=>etat,
   matchs:liste,
   // Exposés pour les tests.
   _recevoirMatch:recevoirMatch,
  };
 }
-const api=Object.freeze({creer,CANAL,EN_JEU,ATTENTES});
+const api=Object.freeze({creer,CANAL,EN_JEU,ATTENTES,INTERVALLE_MIN});
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.KokiFootDirect=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

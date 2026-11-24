@@ -9,15 +9,17 @@ function fauxClient(){
  return {canaux,channel(nom,opts){const c={nom,opts,ecouteurs:{},statutCb:null,ferme:false,
   on(type,filtre,cb){this.ecouteurs[filtre.event]=cb;return this;},subscribe(cb){this.statutCb=cb;return this;},unsubscribe(){this.ferme=true;}};canaux.push(c);return c;}};
 }
-function horloge(){const q=[];let n=0;return {q,planifier(fn,ms){const id=++n;q.push({id,fn,ms});return id;},annuler(id){const i=q.findIndex(x=>x.id===id);if(i>=0)q.splice(i,1);},
- async avancer(){const x=q.shift();if(x)await x.fn();return x;}};}
+function horloge(){const q=[];let n=0;const o={t:0};return {q,o,maintenant:()=>o.t,planifier(fn,ms){const id=++n;q.push({id,fn,ms});return id;},annuler(id){const i=q.findIndex(x=>x.id===id);if(i>=0)q.splice(i,1);},
+ async avancer(){const x=q.shift();if(x){o.t+=x.ms;await x.fn();}return x;}};}
 const m=(id,revision,extra={})=>({id,revision,statut:'En direct',minute:10,score_domicile:0,score_exterieur:0,domicile:{nom:'A'},exterieur:{nom:'B'},...extra});
 const attendre=()=>new Promise(r=>setImmediate(r));
+// Exécute la minuterie de regroupement des signaux Realtime (et elle seule).
+async function signaux(h){const t=h.q.find(x=>x.fn.toString().includes('traiterSignaux'));if(!t)return null;h.annuler(t.id);h.o.t+=t.ms;await t.fn();await attendre();return t;}
 
 function monter(serveur){
  const client=fauxClient(),h=horloge(),vus=[],etats=[],appels=[];
  const rpc=async(cmd,input)=>{appels.push([cmd,input]);return serveur[cmd](input);};
- const d=D.creer({client,rpc,onChange:x=>vus.push(x),onEtat:e=>etats.push(e),planifier:h.planifier,annuler:h.annuler});
+ const d=D.creer({client,rpc,onChange:x=>vus.push(x),onEtat:e=>etats.push(e),planifier:h.planifier,annuler:h.annuler,maintenant:h.maintenant});
  return {d,client,h,vus,etats,appels};
 }
 
@@ -27,30 +29,72 @@ test('canal public unique koki-foot, sans écho de ses propres messages',async()
  assert.equal(client.canaux.length,1);assert.equal(client.canaux[0].nom,'koki-foot');assert.equal(client.canaux[0].opts.config.broadcast.self,false);
 });
 
-test('révisions : un message ancien ou en double est ignoré',async()=>{
- const {d,client,vus}=monter({accueil:()=>({direct:[m('a',5)]})});
+test('révisions : le score affiché vient du serveur ; messages anciens ou en double ignorés sans appel',async()=>{
+ let srv=m('a',5);const {d,client,h,vus,appels}=monter({accueil:()=>({direct:[m('a',5)]}),etat_matchs:()=>[srv]});
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
+ srv=m('a',6,{minute:20,score_domicile:1});
  c.ecouteurs.match({payload:{id:'a',revision:6,statut:'En direct',minute:20,score_domicile:1,score_exterieur:0}});
- assert.equal(d.matchs()[0].score_domicile,1);
- c.ecouteurs.match({payload:{id:'a',revision:4,statut:'En direct',minute:5,score_domicile:0,score_exterieur:0}}); // ancien
- c.ecouteurs.match({payload:{id:'a',revision:6,statut:'En direct',minute:20,score_domicile:9,score_exterieur:9}}); // doublon
+ assert.equal(d.matchs()[0].score_domicile,0,'rien n’est affiché avant la confirmation du serveur');
+ await signaux(h);
  assert.equal(d.matchs()[0].score_domicile,1);assert.equal(d.matchs()[0].revision,6);
- const n=vus.length;c.ecouteurs.match({payload:{id:'a',revision:8,statut:'Terminé',minute:null,score_domicile:2,score_exterieur:0}});
- assert.equal(vus.length,n+1);assert.equal(d.matchs()[0].statut,'Terminé');
+ const n=appels.length;
+ c.ecouteurs.match({payload:{id:'a',revision:4,score_domicile:0}}); // ancien
+ c.ecouteurs.match({payload:{id:'a',revision:6,score_domicile:9}}); // doublon
+ assert.equal(await signaux(h),null,'aucune lecture serveur programmée');assert.equal(appels.length,n);
+ srv=m('a',8,{statut:'Terminé',minute:null,score_domicile:2});const nv=vus.length;
+ c.ecouteurs.match({payload:{id:'a',revision:8}});await signaux(h);
+ assert.equal(vus.length,nv+1);assert.equal(d.matchs()[0].statut,'Terminé');assert.equal(d.matchs()[0].score_domicile,2);
  assert.equal(d.matchs()[0].domicile.nom,'A','les détails (équipes) restent ceux du serveur');
 });
 
-test('message ancien arrivé après un rechargement plus récent : ignoré',async()=>{
- let rev=10;const {d,client}=monter({accueil:()=>({direct:[m('a',rev,{score_domicile:3})]})});
+test('sécurité : un client non autorisé ne peut pas imposer un faux score (canal public)',async()=>{
+ const {d,client,h,appels}=monter({accueil:()=>({direct:[m('a',5)]}),etat_matchs:()=>[m('a',5)]});
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
- c.ecouteurs.match({payload:{id:'a',revision:9,score_domicile:2,score_exterieur:0,statut:'En direct'}});
- assert.equal(d.matchs()[0].score_domicile,3);
+ c.ecouteurs.match({payload:{id:'a',revision:999999,statut:'Terminé',score_domicile:7,score_exterieur:0}});
+ await signaux(h);
+ assert.deepEqual(appels.at(-1),['etat_matchs',{ids:['a']}],'état réel demandé au serveur');
+ assert.equal(d.matchs()[0].score_domicile,0);assert.equal(d.matchs()[0].revision,5,'révision locale non empoisonnée');
 });
 
-test('dépublication : le match disparaît de l’écran',async()=>{
- const {d,client}=monter({accueil:()=>({direct:[m('a',1),m('b',1)]})});
+test('message ancien arrivé après un rechargement plus récent : ignoré sans appel',async()=>{
+ const {d,client,h}=monter({accueil:()=>({direct:[m('a',10,{score_domicile:3})]})});
+ await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
+ c.ecouteurs.match({payload:{id:'a',revision:9,score_domicile:2,score_exterieur:0,statut:'En direct'}});
+ assert.equal(await signaux(h),null);assert.equal(d.matchs()[0].score_domicile,3);
+});
+
+test('sécurité : la vraie mise à jour suivante n’est pas bloquée par une fausse révision',async()=>{
+ let srv=m('a',5);const {d,client,h}=monter({accueil:()=>({direct:[m('a',5)]}),etat_matchs:()=>[srv]});
+ await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
+ c.ecouteurs.match({payload:{id:'a',revision:999999,score_domicile:7}});await signaux(h);
+ srv=m('a',6,{score_domicile:1});c.ecouteurs.match({payload:{id:'a',revision:6}});await signaux(h);
+ assert.equal(d.matchs()[0].score_domicile,1);assert.equal(d.matchs()[0].revision,6);
+});
+
+test('sécurité : fausse dépublication sans effet si le serveur confirme le match',async()=>{
+ const {d,client,h}=monter({accueil:()=>({direct:[m('a',1),m('b',1)]}),etat_matchs:({ids})=>ids.map(id=>m(id,1))});
  await d.demarrer();client.canaux[0].statutCb('SUBSCRIBED');
- client.canaux[0].ecouteurs.match({payload:{id:'a',revision:2,visible:false}});
+ client.canaux[0].ecouteurs.match({payload:{id:'a',revision:2,visible:false}});await signaux(h);
+ assert.deepEqual(d.matchs().map(x=>x.id),['a','b']);
+});
+
+test('sécurité : une avalanche de faux messages produit des lectures regroupées et espacées (≥ 2 s)',async()=>{
+ const {d,client,h,appels}=monter({accueil:()=>({direct:[m('a',1),m('b',1)]}),etat_matchs:({ids})=>ids.map(id=>m(id,1))});
+ await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');const n=appels.length;
+ const delais=[];
+ for(let tour=0;tour<3;tour++){
+  for(let i=0;i<500;i++)c.ecouteurs.match({payload:{id:i%2?'a':'b',revision:1000+i}});
+  assert.equal(h.q.filter(x=>x.fn.toString().includes('traiterSignaux')).length,1,'une seule lecture programmée');
+  delais.push((await signaux(h)).ms);
+ }
+ assert.equal(appels.length-n,3,'3 lectures pour 1 500 messages');
+ assert.ok(delais.slice(1).every(ms=>ms>=D.INTERVALLE_MIN),'intervalle minimal respecté : '+delais);
+});
+
+test('dépublication : le match disparaît de l’écran (confirmée par le serveur)',async()=>{
+ const {d,client,h}=monter({accueil:()=>({direct:[m('a',1),m('b',1)]}),etat_matchs:({ids})=>ids.filter(id=>id!=='a').map(id=>m(id,1))});
+ await d.demarrer();client.canaux[0].statutCb('SUBSCRIBED');
+ client.canaux[0].ecouteurs.match({payload:{id:'a',revision:2,visible:false}});await signaux(h);
  assert.deepEqual(d.matchs().map(x=>x.id),['b']);
 });
 
@@ -59,7 +103,7 @@ test('match inconnu annoncé : rechargement unique (regroupé) pour obtenir équ
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
  c.ecouteurs.match({payload:{id:'z',revision:3,statut:'En direct'}});c.ecouteurs.match({payload:{id:'z',revision:3,statut:'En direct'}});
  const r=h.q.filter(x=>x.ms===300);assert.equal(r.length,1,'un seul rechargement programmé');
- h.annuler(r[0].id);await r[0].fn();await attendre();
+ await signaux(h);await attendre();
  assert.equal(appelsAccueil,2);assert.ok(d.matchs().some(x=>x.id==='z'));
 });
 
@@ -111,14 +155,14 @@ test('arrêt : canal fermé, minuteries annulées, messages tardifs ignorés',as
  const {d,client,h}=monter({accueil:()=>({direct:[m('a',1)]})});
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');d.arreter();
  assert.ok(c.ferme);assert.equal(h.q.length,0);assert.equal(d.etat(),'arrete');
- c.ecouteurs.match({payload:{id:'a',revision:9,score_domicile:5,score_exterieur:0}});assert.equal(d.matchs()[0].revision,1);
+ c.ecouteurs.match({payload:{id:'a',revision:9,score_domicile:5,score_exterieur:0}});assert.equal(d.matchs()[0].revision,1);assert.equal(h.q.length,0,'aucune lecture programmée après l’arrêt');
 });
 
 test('messages malformés ignorés',async()=>{
- const {d,client}=monter({accueil:()=>({direct:[m('a',1)]})});
+ const {d,client,h}=monter({accueil:()=>({direct:[m('a',1)]})});
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
  for(const p of [null,{},{id:'a'},{id:'a',revision:'9'},{id:5,revision:9}])c.ecouteurs.match({payload:p});
- assert.equal(d.matchs()[0].revision,1);
+ assert.equal(d.matchs()[0].revision,1);assert.equal(await signaux(h),null);
 });
 
 test('CSP : connexion wss au projet Supabase autorisée, aucune autre origine ajoutée',()=>{
