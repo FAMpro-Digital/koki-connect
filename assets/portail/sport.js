@@ -3,7 +3,7 @@
 (function(){'use strict';
 const S=KokiSportContract,C=KokiPortailCore,$=id=>document.getElementById(id);
 const TITRE='⚽ Sport';
-let generation=0,onglet='Matchs',choixCompetition='',choixPoule='';
+let generation=0,onglet='Matchs',ongletChoisi=false,choixCompetition='',choixPoule='';
 function n(tag,text,cls){const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(cls)e.className=cls;return e;}
 function b(text,fn,cls){const e=n('button',text,cls);e.type='button';e.onclick=fn;return e;}
 const actif=t=>$('portail-titre').textContent===t;
@@ -50,9 +50,11 @@ async function accueil(){
  const vedette=direct[0]||prochain||dernier;if(vedette)hero.append(carteMatch(vedette,d));else hero.append(n('p','Les matchs des navétanes et les résultats des ASC s’afficheront ici.','sp-hero-texte'));
  const tabs=n('div',undefined,'sp-onglets');tabs.setAttribute('role','tablist');const zone=n('div',undefined,'sp-zone');
  // Onglet « Académies » (module Clubs & Académies) : présent seulement si le module est activé (config.json › modules.clubs).
- const ONGLETS=[['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰'],...(window.KokiClubs?.visible?[['Académies','🎓']]:[])];if(ONGLETS.length>4)tabs.classList.add('sp-onglets-5');
- function rendre(){tabs.replaceChildren(...ONGLETS.map(([o,i])=>{const t=b('',()=>{onglet=o;rendre();},'sp-onglet');t.append(n('span',i,'sp-onglet-icone'),n('span',o));t.setAttribute('role','tab');t.setAttribute('aria-selected',String(onglet===o));return t;}));
-  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus,'Académies':()=>[KokiClubs.vue()]}[onglet]||vueMatchs)(d,rendre));
+ // Onglet « Football » (module Football) : présent seulement si le module est activé (config.json › modules.football), en premier.
+ const ONGLETS=[...(window.KokiFoot?.visible?[['Football','⚽']]:[]),['Matchs','📅'],['Classement','🏆'],['Équipes','👕'],['Actus','📰'],...(window.KokiClubs?.visible?[['Académies','🎓']]:[])];if(ONGLETS.length>4)tabs.classList.add('sp-onglets-5');if(ONGLETS.length>5)tabs.classList.add('sp-onglets-defile');
+ if(window.KokiFoot?.visible&&!ongletChoisi)onglet='Football';
+ function rendre(){tabs.replaceChildren(...ONGLETS.map(([o,i])=>{const t=b('',()=>{onglet=o;ongletChoisi=true;rendre();},'sp-onglet');t.append(n('span',i,'sp-onglet-icone'),n('span',o));t.setAttribute('role','tab');t.setAttribute('aria-selected',String(onglet===o));return t;}));
+  zone.replaceChildren(...({Matchs:vueMatchs,Classement:vueClassement,'Équipes':vueEquipes,Actus:vueActus,'Académies':()=>[KokiClubs.vue()],Football:()=>[KokiFoot.vue()]}[onglet]||vueMatchs)(d,rendre));
   if(onglet==='Matchs'&&!d.matchs.length&&d.actus.length){const lien=b('📰 Voir les '+d.actus.length+' actualité'+(d.actus.length>1?'s':'')+' sportive'+(d.actus.length>1?'s':''),()=>{onglet='Actus';rendre();},'sp-bouton sp-bouton-clair');zone.prepend(lien);}}
  box.append(hero,tabs,zone);rendre();
 }

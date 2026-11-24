@@ -89,7 +89,12 @@ test('intégration temps réel : message Realtime appliqué sur l’état serveu
  d.arreter();
 });
 
-test('préparation : modules non branchés sur les pages (Sport, Accueil)',()=>{
+test('intégration désactivée par défaut : drapeau modules.football absent, module inerte sans lui',()=>{
  const html=fs.readFileSync('index.html','utf8');
- assert.doesNotMatch(html,/foot-vue\.js|foot-direct\.js/);
+ assert.match(html,/foot-vue\.js[\s\S]*foot-direct\.js[\s\S]*foot\.js/,'scripts chargés dans l’ordre');
+ assert.notEqual(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).modules?.football,true,'module désactivé dans la configuration publiée');
+ const src=fs.readFileSync('assets/portail/foot.js','utf8');
+ assert.match(src,/flags\?\.modules\?\.football!==true\)return;/,'démarrage interrompu sans le drapeau');
+ assert.doesNotMatch(src,/innerHTML|insertAdjacentHTML|outerHTML/,'aucun HTML injecté');
+ assert.match(fs.readFileSync('assets/portail/sport.js','utf8'),/window\.KokiFoot\?\.visible\?\[\['Football'/,'onglet Football seulement si le module est visible');
 });
