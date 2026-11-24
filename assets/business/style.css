@@ -236,3 +236,10 @@
 .cat-resto-note{margin:0 0 12px}
 .cat-menu-titre{font-size:1.2rem;margin:18px 0 4px}
 .cat-sans-whatsapp{color:#a85800}
+/* Suggestions sous les champs Catégorie / Métier : visibles sur tous les téléphones (remplacent l'affichage du datalist). */
+#vue-commerce .business-panel .pro-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px}
+#vue-commerce .business-panel .pro-suggestion{min-height:40px;padding:8px 12px;border:1px solid #c76a00;border-radius:999px;background:#fff7ef;color:#7a3f00;font:inherit;font-size:.95rem;font-weight:600;cursor:pointer}
+#vue-commerce .business-panel .pro-suggestion:hover,#vue-commerce .business-panel .pro-suggestion:focus-visible{background:#1f5c3a;border-color:#1f5c3a;color:#fff}
+#profil-pro .pro-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px}
+#profil-pro .pro-suggestion{min-height:40px;padding:8px 12px;border:1px solid #c76a00;border-radius:999px;background:#fff7ef;color:#7a3f00;font:inherit;font-size:.95rem;font-weight:600;cursor:pointer}
+#profil-pro .pro-suggestion:hover,#profil-pro .pro-suggestion:focus-visible{background:#1f5c3a;border-color:#1f5c3a;color:#fff}

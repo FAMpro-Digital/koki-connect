@@ -22,8 +22,21 @@ function input(host,{label,type='text',value='',required=false,hint,options,list
  if(type==='number'){el.inputMode='numeric';el.min='0';el.step='1';}
  if(list){const dl=node('datalist');dl.id=nextId('l');for(const v of list){const o=node('option');o.value=v;dl.append(o);}el.setAttribute('list',dl.id);wrap.append(dl);}
  wrap.append(el);
+ // Suggestions visibles : la liste native (datalist) est absente de nombreux téléphones (WebView Android) ou cachée (iPhone).
+ // Des boutons sous le champ, filtrés pendant la saisie ; un toucher remplit le champ. La saisie libre reste possible.
+ if(list&&list.length)suggestions(wrap,el,list);
  if(hint){const h=node('p',hint,'pro-hint');h.id=id+'-aide';el.setAttribute('aria-describedby',h.id);wrap.append(h);}
  host.append(wrap);return el;
+}
+const sansAccent=t=>String(t??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+export function filtrerSuggestions(list,saisie,max){const q=sansAccent(saisie);max??=q?8:14;const uniques=[...new Set(list)];
+ if(q&&uniques.some(v=>sansAccent(v)===q))return [];
+ return (q?uniques.filter(v=>sansAccent(v).includes(q)):uniques).slice(0,max);}
+function suggestions(wrap,el,list){
+ const zone=node('div',null,'pro-suggestions');zone.setAttribute('role','group');zone.setAttribute('aria-label','Suggestions');
+ const maj=()=>{const xs=filtrerSuggestions(list,el.value);zone.replaceChildren(...xs.map(v=>{const b=node('button',v,'pro-suggestion');b.type='button';
+  b.onclick=()=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));el.focus({preventScroll:true});};return b;}));zone.hidden=!xs.length;};
+ el.addEventListener('input',maj);maj();wrap.append(zone);
 }
 function choice(host,{legend,name,values,value}){
  const fs=node('fieldset',null,'pro-choice');fs.append(node('legend',legend));const n=nextId(name);
