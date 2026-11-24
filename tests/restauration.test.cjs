@@ -95,3 +95,15 @@ test('interface : WhatsApp direct sans compte ni panier pour la restauration ; a
  assert.match(app,/window\.afficherRestaurants=afficherRestaurants;/);
  assert.doesNotMatch(cat+app,/paiement (effectué|confirmé)|commande confirmée/i);
 });
+
+test('suggestions visibles sous les champs catégorie (sans dépendre du datalist du téléphone)',async()=>{
+ const {filtrerSuggestions}=await import('../assets/business/pro-space.mjs');
+ const liste=[...C.categoriesCommerce,...C.metiers];
+ const vide=filtrerSuggestions(liste,'');assert.equal(vide.length,14);
+ for(const c of C.categoriesRestauration)assert.ok(vide.includes(c),c+' visible sans rien taper');
+ assert.deepEqual(filtrerSuggestions(liste,'patis'),['Pâtisseries'],'sans accent ni casse');
+ assert.deepEqual(filtrerSuggestions(liste,'traiteurs'),[],'valeur déjà choisie : plus de suggestions');
+ assert.ok(filtrerSuggestions(C.categoriesMenu,'dej').includes('Petit-déjeuner'));
+ const src=fs.readFileSync(__dirname+'/../assets/business/pro-space.mjs','utf8');
+ assert.match(src,/if\(list&&list\.length\)suggestions\(wrap,el,list\);/);
+});
