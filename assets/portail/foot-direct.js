@@ -18,7 +18,7 @@ const ATTENTES=[1000,2000,4000,8000,16000,30000];
 const SECOURS=30000,CONTROLE=120000;
 const REGROUPEMENT=300,INTERVALLE_MIN=2000,MAX_IDS=100;
 
-function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},planifier=setTimeout,annuler=clearTimeout,maintenant=()=>Date.now()}){
+function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},planifier=setTimeout,annuler=clearTimeout,maintenant=()=>Date.now(),prive=false}){
  if(!client||typeof client.channel!=='function')throw Error('Client Realtime requis');
  if(typeof rpc!=='function')throw Error('Lecture serveur requise');
  const matchs=new Map();
@@ -95,7 +95,8 @@ function creer({client,rpc,onChange=()=>{},onEvenement=()=>{},onEtat=()=>{},plan
   const g=++generation;
   if(canal){try{canal.unsubscribe();}catch{}}
   changerEtat(tentatives?'reconnexion':'connexion');
-  canal=client.channel(CANAL,{config:{broadcast:{self:false}}})
+  // prive:true : canal privé (proposition 20261201000700, écoute seule autorisée par RLS) ; désactivé par défaut.
+  canal=client.channel(CANAL,{config:prive?{broadcast:{self:false},private:true}:{broadcast:{self:false}}})
    .on('broadcast',{event:'match'},({payload})=>{if(g===generation)recevoirMatch(payload);})
    .on('broadcast',{event:'evenement'},({payload})=>{if(g===generation)recevoirEvenement(payload);});
   canal.subscribe(statut=>{

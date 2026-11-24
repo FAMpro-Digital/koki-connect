@@ -29,6 +29,14 @@ test('canal public unique koki-foot, sans écho de ses propres messages',async()
  assert.equal(client.canaux.length,1);assert.equal(client.canaux[0].nom,'koki-foot');assert.equal(client.canaux[0].opts.config.broadcast.self,false);
 });
 
+test('canal privé : désactivé par défaut, activable par option (proposition 0700)',async()=>{
+ const client=fauxClient(),h=horloge();
+ const d=D.creer({client,rpc:async()=>({direct:[]}),planifier:h.planifier,annuler:h.annuler,maintenant:h.maintenant,prive:true});
+ await d.demarrer();assert.equal(client.canaux[0].opts.config.private,true);
+ const {client:c2}=monter({accueil:()=>({direct:[]})});const d2=D.creer({client:c2,rpc:async()=>({direct:[]})});await d2.demarrer();
+ assert.equal(c2.canaux[0].opts.config.private,undefined);d.arreter();d2.arreter();
+});
+
 test('révisions : le score affiché vient du serveur ; messages anciens ou en double ignorés sans appel',async()=>{
  let srv=m('a',5);const {d,client,h,vus,appels}=monter({accueil:()=>({direct:[m('a',5)]}),etat_matchs:()=>[srv]});
  await d.demarrer();const c=client.canaux[0];c.statutCb('SUBSCRIBED');
