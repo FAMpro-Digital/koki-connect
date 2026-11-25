@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "feat/bouton-ajouter-produit-en-haut": false,
       "feature/module-football": false,
       "fix/livres-autorisation-confidentialite": false,
       "fix/incoherences": false,
