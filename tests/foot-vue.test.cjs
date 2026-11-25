@@ -95,10 +95,10 @@ test('intégration temps réel : signal Realtime, état relu sur le serveur, pui
  d.arreter();
 });
 
-test('intégration désactivée par défaut : drapeau modules.football absent, module inerte sans lui',()=>{
+test('intégration : module activé en production le 25/11/2026 sur autorisation, inerte sans le drapeau',()=>{
  const html=fs.readFileSync('index.html','utf8');
  assert.match(html,/foot-vue\.js[\s\S]*foot-direct\.js[\s\S]*foot\.js/,'scripts chargés dans l’ordre');
- assert.notEqual(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).modules?.football,true,'module désactivé dans la configuration publiée');
+ assert.equal(JSON.parse(fs.readFileSync('assets/business/config.json','utf8')).modules?.football,true,'module activé dans la configuration publiée (25/11/2026)');
  const src=fs.readFileSync('assets/portail/foot.js','utf8');
  assert.match(src,/flags\?\.modules\?\.football!==true\)return;/,'démarrage interrompu sans le drapeau');
  assert.doesNotMatch(src,/innerHTML|insertAdjacentHTML|outerHTML/,'aucun HTML injecté');
