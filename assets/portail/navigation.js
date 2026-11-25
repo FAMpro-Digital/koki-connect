@@ -19,7 +19,7 @@
   let courante = visible(), restauration = false, ignorerPop = 0, scrollCourant = window.scrollY;
 
   function visible() { return PAGES.find(id => { const e = $(id); return e && !e.hidden; }) || null; }
-  function sections() { return [...document.querySelectorAll('body > .section')]; }
+  function sections() { return [...document.querySelectorAll('#contenu > .section')]; }
   function animer(elements, classe) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     for (const e of elements) {

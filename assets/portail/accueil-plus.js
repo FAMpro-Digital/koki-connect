@@ -46,7 +46,15 @@
   setInterval(function () { if (accueilVisible()) majReprendre(); }, 90000);
 
   // ----- À la une : bandeau qui défile -----
-  var une = el('portail-une'), points = null, pause = 0;
+  // Bouton Pause / Lecture visible (WCAG 2.2.2) : le choix est gardé sur l'appareil.
+  var une = el('portail-une'), points = null, pause = 0, controle = null, arrete = false;
+  try { arrete = localStorage.getItem('koki-une-pause') === '1'; } catch (e) { arrete = false; }
+  function majControle() {
+    if (!controle) return;
+    controle.hidden = !une || une.children.length < 2 || calme.matches;
+    controle.textContent = arrete ? '▶ Relancer le défilement' : '⏸ Mettre en pause le défilement';
+  }
+  if (calme.addEventListener) calme.addEventListener('change', majControle);
   function pas() { var c = une && une.children[1]; var a = une && une.children[0]; return c && a ? c.offsetLeft - a.offsetLeft : (a ? a.offsetWidth + 12 : 0); }
   function indexCourant() { var p = pas(); return p ? Math.round(une.scrollLeft / p) : 0; }
   function majPoints() {
@@ -54,6 +62,16 @@
     var nb = une.children.length;
     if (!points) { points = n('div', null, 'une-points'); points.setAttribute('aria-hidden', 'true'); une.insertAdjacentElement('afterend', points); }
     points.hidden = nb < 2;
+    if (!controle) {
+      controle = n('button', null, 'une-pause'); controle.type = 'button';
+      controle.addEventListener('click', function () {
+        arrete = !arrete;
+        try { localStorage.setItem('koki-une-pause', arrete ? '1' : '0'); } catch (e) { /* stockage indisponible */ }
+        majControle();
+      });
+      points.insertAdjacentElement('afterend', controle);
+    }
+    majControle();
     if (points.children.length !== nb) { points.replaceChildren(); for (var i = 0; i < nb; i++) points.append(n('span')); }
     var cur = indexCourant();
     for (var j = 0; j < points.children.length; j++) { if (j === cur) points.children[j].setAttribute('aria-current', 'true'); else points.children[j].removeAttribute('aria-current'); }
@@ -61,11 +79,11 @@
   if (une) {
     var attente = false;
     une.addEventListener('scroll', function () { if (attente) return; attente = true; requestAnimationFrame(function () { attente = false; majPoints(); }); }, { passive: true });
-    ['pointerdown', 'touchstart', 'focusin', 'wheel'].forEach(function (nom) { une.addEventListener(nom, function () { pause = Date.now() + 20000; }, { passive: true }); });
+    ['pointerdown', 'pointerenter', 'touchstart', 'focusin', 'wheel'].forEach(function (nom) { une.addEventListener(nom, function () { pause = Date.now() + 20000; }, { passive: true }); });
     document.addEventListener('koki-une', function () { majPoints(); });
     setInterval(function () {
       var nb = une.children.length;
-      if (nb < 2 || calme.matches || document.hidden || Date.now() < pause || !une.offsetParent) return;
+      if (nb < 2 || arrete || calme.matches || document.hidden || Date.now() < pause || !une.offsetParent) return;
       var suivant = (indexCourant() + 1) % nb;
       une.scrollTo({ left: suivant * pas(), behavior: 'smooth' });
     }, 5500);

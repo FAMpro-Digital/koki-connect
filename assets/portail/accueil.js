@@ -92,7 +92,7 @@ function afficherOpportunites() {
   if (window.KokiOpportunites) { KokiOpportunites.ouvrir('Toutes'); return; }
   filtrerOpportunites('Toutes');
   document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
+  document.querySelectorAll('#contenu > .section').forEach(section => {
     section.hidden = section.id !== 'opportunites-jeunes';
   });
   document.getElementById('titre-opportunites').focus();
@@ -100,7 +100,7 @@ function afficherOpportunites() {
 }
 function fermerOpportunites() {
   document.querySelector('.search').hidden = false;
-  document.querySelectorAll('body > .section').forEach(section => {
+  document.querySelectorAll('#contenu > .section').forEach(section => {
     section.hidden = ['opportunites-jeunes', 'vue-rubrique', 'vue-notifications', 'vue-menu', 'vue-carte', 'vue-transport', 'vue-commerce', 'vue-portail'].includes(section.id);
   });
   // Retour du focus (clavier, lecteur d'écran) : d'abord le raccourci « Emplois & Opportunités » de l'accueil, à défaut le bouton
@@ -115,7 +115,7 @@ function fermerOpportunites() {
 }
 function afficherMenu() {
   document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
+  document.querySelectorAll('#contenu > .section').forEach(section => {
     section.hidden = section.id !== 'vue-menu';
   });
   document.getElementById('titre-menu').focus();
@@ -127,7 +127,7 @@ function afficherNotifications() {
   const pastille = document.getElementById('pastille-notifs'); if (pastille) pastille.hidden = true;
   const boutonNotifications = document.getElementById('bouton-notifications'); if (boutonNotifications) boutonNotifications.setAttribute('aria-label', 'Notifications');
   document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
+  document.querySelectorAll('#contenu > .section').forEach(section => {
     section.hidden = section.id !== 'vue-notifications';
   });
   document.getElementById('titre-notifications').focus();
@@ -136,7 +136,7 @@ function afficherNotifications() {
 function afficherRubrique(titre) {
   if(window.KokiPortail && KokiPortail.rubrique(titre))return;
   document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => {
+  document.querySelectorAll('#contenu > .section').forEach(section => {
     section.hidden = section.id !== 'vue-rubrique';
   });
   const heading = document.getElementById('titre-rubrique');
@@ -217,7 +217,7 @@ let marqueursKoki = null;
 let limiteKoki = null;
 async function afficherCarte() {
   document.querySelector('.search').hidden = true;
-  document.querySelectorAll('body > .section').forEach(section => { section.hidden = section.id !== 'vue-carte'; });
+  document.querySelectorAll('#contenu > .section').forEach(section => { section.hidden = section.id !== 'vue-carte'; });
   document.getElementById('titre-carte').focus();
   window.scrollTo(0,0);
   const statut = document.getElementById('statut-carte');

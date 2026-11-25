@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "amelioration/modernisation-web": false,
       "feat/bouton-ajouter-produit-en-haut": false,
       "feature/module-football": false,
       "fix/livres-autorisation-confidentialite": false,
@@ -116,6 +117,10 @@
         {
           "key": "X-Frame-Options",
           "value": "DENY"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
         },
         {
           "key": "X-Content-Type-Options",
