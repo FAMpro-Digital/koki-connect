@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "securite/hsts-sous-domaines": false,
       "amelioration/csp-styles-outils": false,
       "amelioration/modernisation-web": false,
       "feat/bouton-ajouter-produit-en-haut": false,
@@ -137,7 +138,7 @@
         },
         {
           "key": "Strict-Transport-Security",
-          "value": "max-age=31536000"
+          "value": "max-age=63072000; includeSubDomains"
         },
         {
           "key": "Cache-Control",

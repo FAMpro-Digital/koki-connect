@@ -22,7 +22,7 @@ test.describe('Isolation et en-têtes de sécurité', () => {
     const h = reponse.headers();
     expect(h['x-frame-options']).toBe('DENY');
     expect(h['x-content-type-options']).toBe('nosniff');
-    expect(h['strict-transport-security']).toBeTruthy();
+    expect(h['strict-transport-security']).toBe('max-age=63072000; includeSubDomains'); // DNS 100 % Vercel : tous les sous-domaines sont en HTTPS
     expect(h['content-security-policy']).toContain("object-src 'none'");
   });
 
