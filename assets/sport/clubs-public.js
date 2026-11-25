@@ -3,7 +3,7 @@
 // uniquement ce que le responsable de l’académie a choisi d’afficher. Suivre / signaler : compte connecté (RPC koki_sport).
 // Module masqué tant que config.json › modules.clubs ne vaut pas true.
 (function(){'use strict';
-const K=window.KokiClubsContract,$=id=>document.getElementById(id);
+const K=window.KokiClubsContract;
 const state={visible:false,generation:0};
 function n(tag,text,cls){const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(cls)e.className=cls;return e;}
 function b(text,fn,cls){const e=n('button',text,cls||'sp-bouton');e.type='button';e.onclick=fn;return e;}

@@ -17,7 +17,6 @@ async function settings(){if(!config){const c=await request('assets/portail/back
 function imagePermise(value){try{const u=new URL(value);return config&&u.origin===config.url&&u.pathname.startsWith('/storage/v1/object/sign/koki-media/');}catch(_){return false;}}
 async function signerUne(c,headers,row){try{const signed=await request(c.url+'/storage/v1/object/sign/koki-media/'+row.image_path,{method:'POST',headers,body:JSON.stringify({expiresIn:DUREE_LIEN})});const url=c.url+'/storage/v1'+signed.signedURL;row.image=imagePermise(url)?url:null;memoriserImage(row);}catch(_){row.image=null;}}
 async function signerImages(c,headers,queue){
-const chemins=new Set(queue.map(x=>x.image_path));
 for(const [path,entry] of imagesSignees)if(entry.expire<=Date.now())imagesSignees.delete(path);
 queue=queue.filter(row=>{const entry=imagesSignees.get(row.image_path);if(!entry)return true;row.image=entry.url;return false;});
 if(!queue.length)return;

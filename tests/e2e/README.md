@@ -11,15 +11,20 @@ Aucun test de charge : un seul navigateur par test.
 
 ## Lancer
 
+Une seule version de Playwright sert partout : celle du `package.json` de la racine (la même que la CI).
+`tests/e2e/package.json` est figé sur la même version pour le workflow de performance.
+
 ```bash
-cd tests/e2e
-npm install
-npm run install:navigateur   # télécharge Chromium (une fois)
-npm test                     # bureau + mobile (Pixel 7)
-npm run test:mobile          # un seul profil
+npm ci                          # à la racine du dépôt
+npx playwright install chromium # télécharge Chromium (une fois)
+npm run test:e2e                # bureau + mobile (Pixel 7)
+npm run test:e2e -- --project=mobile   # un seul profil
 ```
 
-Les rapports sont dans `tests/e2e/playwright-report/` (ignoré par Git). Aucun fichier `package.json` n'est ajouté à la racine du dépôt : Vercel continue de traiter le site comme statique.
+⚠️ N'installez pas de deuxième copie de Playwright dans `tests/e2e/node_modules` pour lancer les tests depuis la racine :
+deux copies chargées ensemble font échouer Playwright (« did not expect test.describe() to be called here »).
+
+Les rapports sont dans `tests/e2e/playwright-report/` (ignoré par Git).
 
 ## Couverture actuelle
 
@@ -29,11 +34,11 @@ Les rapports sont dans `tests/e2e/playwright-report/` (ignoré par Git). Aucun f
 | `specs/transport` | Rubrique accessible au visiteur ; aucune réservation sans compte |
 | `specs/commerces` | Rubrique accessible au visiteur ; aucune commande sans compte |
 | `specs/auth` | Visiteur sans session ni tentative de connexion |
-| `specs/securite` | CSP appliquée sans violation (la politique « Report-Only » est signalée sans faire échouer), en-têtes de sécurité, cible fictive |
+| `specs/securite` | CSP appliquée sans violation, styles compris (aucun `style="…"` ni `<style>` toléré), dans toutes les rubriques ; en-têtes de sécurité ; cible fictive |
+| `specs/accessibilite.spec.mjs` | Lien d’évitement, zone `<main>` unique, boutons typés, pictogrammes masqués, bouton Pause du bandeau « À la une » |
 
 ## Limites et suite
 
-- Ces tests ont été **écrits et vérifiés pour la syntaxe, mais pas exécutés** dans l'environnement qui les a préparés (pas d'accès au registre npm ni au téléchargement du navigateur). Les sélecteurs sont validés contre `index.html` par `tests/performance-garde-fous.test.cjs`. Un premier lancement chez vous peut révéler des ajustements.
+- Les sélecteurs sont aussi validés contre `index.html` par `tests/performance-garde-fous.test.cjs`.
 - Les parcours de création de compte, de connexion, de commande et de course (avec comptes TEST) restent à écrire une fois le projet Supabase TEST accessible, en s'appuyant sur `npx playwright codegen` pour relever les sélecteurs réels.
 - Les parcours d'administration relèvent de KOKI CONNECT Admin, que cette branche ne modifie pas.
-- `package.json` demande `@playwright/test ^1.50.0` sans fichier de verrouillage (aucun accès au registre lors de la préparation) : lancez `npm install`, puis versionnez `package-lock.json` si vous voulez figer les versions.

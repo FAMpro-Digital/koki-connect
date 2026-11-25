@@ -1,0 +1,219 @@
+/* Styles de base de l'accueil, sortis de index.html pour une CSP sans 'unsafe-inline' (styles). */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7f5;
+  color: #17201b;
+  padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+header {
+  background: linear-gradient(135deg, #087a3d, #0a9b50);
+  color: white;
+  padding: 28px 20px 25px;
+  border-radius: 0 0 28px 28px;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+header p {
+  margin-top: 5px;
+  opacity: 0.9;
+}
+
+.search {
+  margin: 20px;
+}
+
+.search input {
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+  font-size: 16px;
+  outline: none;
+}
+
+.section {
+  padding: 5px 20px 20px;
+}
+
+.section h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.quick,
+.services {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 18px 12px;
+  min-height: 105px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+}
+
+.card span {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.card strong {
+  font-size: 15px;
+}
+
+.highlight {
+  background: #e8f6ed;
+  color: #075f32;
+}
+
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px calc(4px + env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) calc(4px + env(safe-area-inset-left, 0px));
+  box-shadow: 0 -3px 15px rgba(0,0,0,0.08);
+}
+
+nav div {
+  text-align: center;
+  font-size: 12px;
+}
+
+nav span {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.active {
+  color: #087a3d;
+  font-weight: bold;
+}
+.opportunites-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.opportunites-filtres button {
+  border: 1px solid #087a3d;
+  border-radius: 20px;
+  padding: 10px 14px;
+  background: white;
+  color: #075f32;
+  cursor: pointer;
+  font: inherit;
+}
+
+.opportunites-filtres button[aria-pressed="true"] {
+  background: #087a3d;
+  color: white;
+}
+
+#opportunites-jeunes .card p {
+  margin-top: 12px;
+  color: #526359;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#opportunites-jeunes button:focus-visible {
+  outline: 3px solid #17201b;
+  outline-offset: 3px;
+}
+
+body { max-width: 1000px; margin: auto; }
+header { padding: 30px 24px; background: linear-gradient(130deg,#004d36,#099650); }
+.localite { margin-top: 22px; font-size: 14px; }
+.quick { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+.raccourci { border: 0; color: white; font: inherit; cursor: pointer; text-align: center; padding: 18px 6px; border-radius: 16px; min-height: 115px; box-shadow: 0 5px 12px #00000015; }
+.raccourci span { display: block; font-size: 30px; margin-bottom: 12px; }
+.raccourci strong { font-size: 12px; }
+.raccourci:focus-visible, .search input:focus-visible { outline: 3px solid #17201b; outline-offset: 3px; }
+.banniere { background: linear-gradient(120deg,#004d36,#17874d); color: white; border-radius: 20px; padding: 28px; margin-bottom: 20px; }
+.banniere h2 { font-size: 26px; max-width: 330px; line-height: 1.2; }
+.banniere p { margin-top: 12px; line-height: 1.5; }
+nav { max-width: 1000px; margin: auto; z-index: 2; }
+nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
+[hidden] { display: none !important; }
+@media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+.entete-koki { position: relative; height: clamp(300px,60vw,520px); padding: 18px 20px; border-radius: 0 0 24px 24px; background: #c6e8f8 url('../entete-horizontal.webp') center center / cover no-repeat; }
+.entete-commandes { position: relative; z-index: 1; display: flex; justify-content: space-between; }
+.entete-commandes button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffffffb8; color: #172b26; cursor: pointer; }
+.entete-commandes svg { width: 24px; height: 24px; }
+.entete-infos { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 34px 20px 28px; background: linear-gradient(transparent,#003e2fdd); border-radius: 0 0 24px 24px; }
+.entete-infos strong { font-size: 17px; }
+.entete-infos p { font-size: 12px; margin-top: 4px; }
+.meteo-entete { border: 0; color: white; background: transparent; cursor: pointer; text-align: right; font: inherit; }
+.meteo-entete span { font-size: 22px; }
+.search { position: relative; margin-top: -16px; z-index: 1; }
+.lien-evitement { position: absolute; left: 12px; top: -100px; z-index: 1000; padding: 12px 16px; border-radius: 12px; background: #0b5a3c; color: #fff; font-weight: 700; text-decoration: none; }
+.lien-evitement:focus-visible { top: calc(12px + env(safe-area-inset-top, 0px)); outline: 3px solid #f28c28; outline-offset: 2px; }
+main:focus { outline: none; }
+.visuellement-cache { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 600px) {
+  .entete-koki { height: max(300px,76vw); }
+  .entete-infos { padding-left: 18px; padding-right: 18px; }
+}
+.menu-liens { display: grid; gap: 10px; margin-bottom: 22px; }
+.menu-liens button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 16px; border: 1px solid #dce8df; border-radius: 14px; background: white; color: #17201b; text-align: left; font: inherit; cursor: pointer; }
+.menu-liens button:focus-visible { outline: 3px solid #087a3d; outline-offset: 3px; }
+#vue-menu .card { margin-bottom: 18px; }
+#vue-menu .card p { margin-top: 12px; line-height: 1.6; }
+#vue-menu a { color: #075f32; overflow-wrap: anywhere; }
+
+/* Anciens attributs style="…" de index.html : !important garde leur priorité d'origine. */
+.st-1 { color:inherit !important; font-size:10px !important; }
+.st-2 { border:0 !important; background:transparent !important; color:inherit !important; cursor:pointer !important; font-size:11px !important; }
+.st-3 { margin-top:10px !important; font-size:14px !important; }
+.raccourci[data-recherche="Transport"] { background:#245d88 !important; }
+.raccourci[data-recherche="Commerces & Services"] { background:#c76a00 !important; }
+.raccourci[data-recherche="Éducation"] { background:#087dff !important; }
+.raccourci[data-recherche="Emplois & Opportunités"] { background:#008397 !important; }
+.raccourci[data-recherche="Sport"] { background:#008444 !important; }
+.raccourci[data-recherche="Santé"] { background:#d8004f !important; }
+.raccourci[data-recherche="Événements"] { background:#ef153b !important; }
+.raccourci[data-recherche="Services publics"] { background:#820ed8 !important; }
+.st-4 { margin-top:18px !important; }
+.st-5 { margin:20px 0 !important; padding:10px 14px !important; cursor:pointer !important; }
+.st-6 { margin-bottom:15px !important; }
+.st-7 { margin-bottom:20px !important; }
+.st-8 { display:block !important; width:100% !important; max-width:360px !important; height:auto !important; margin-bottom:16px !important; border-radius:12px !important; }
+.st-9 { margin:22px 0 !important; }
+.st-10 { margin-top:22px !important; }
+.st-11 { margin-top:20px !important; }
+.st-12 { margin:20px 0 !important; padding:10px !important; }
+.st-13 { line-height:1.5 !important; margin-bottom:12px !important; }
+.st-14 { display:flex !important; flex-wrap:wrap !important; gap:10px !important; margin-bottom:12px !important; }
+.st-15 { padding:12px !important; flex:1 !important; min-width:180px !important; }
+.st-16 { padding:12px !important; }
+.st-17 { margin-bottom:10px !important; }
+.st-18 { height:440px !important; border-radius:16px !important; overflow:hidden !important; position:relative !important; z-index:0 !important; }
+.st-19 { font-size:12px !important; line-height:1.5 !important; margin:12px 0 !important; }
+.st-20 { margin-bottom:18px !important; line-height:1.5 !important; }
+.st-21 { text-align:center !important; padding:32px 20px !important; }
+.st-22 { margin-top:12px !important; color:#526359 !important; line-height:1.5 !important; }

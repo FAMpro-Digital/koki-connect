@@ -6,7 +6,8 @@ const html=require('./_aide.cjs').accueil(),app=fs.readFileSync('assets/portail/
 const EMPREINTE='f908848b1186e5ac8b497a903494b16204cd0b1049f005763cab564548c8d2a1';
 test('contrat Rubriques : identique dans les deux dépôts',()=>{assert.equal(createHash('sha256').update(fs.readFileSync(FICHIER)).digest('hex'),EMPREINTE);});
 test('accueil : les 8 raccourcis suivent le contrat (ordre, nom, icône, couleur)',()=>{
- const tuiles=[...html.matchAll(/<button type="button" class="raccourci" data-recherche="([^"]+)" style="background:(#[0-9a-f]{6})"[^>]*><span aria-hidden="true">([^<]+)<\/span><strong>([^<]+)<\/strong>/g)].map(m=>({nom:m[1],couleur:m[2],icone:m[3],titre:m[4]}));
+ const couleurs=Object.fromEntries([...html.matchAll(/\.raccourci\[data-recherche="([^"]+)"\] \{ background:(#[0-9a-f]{6}) !important; \}/g)].map(m=>[m[1],m[2]]));
+ const tuiles=[...html.matchAll(/<button type="button" class="raccourci" data-recherche="([^"]+)"[^>]*><span aria-hidden="true">([^<]+)<\/span><strong>([^<]+)<\/strong>/g)].map(m=>({nom:m[1],couleur:couleurs[m[1]],icone:m[2],titre:m[3]}));
  assert.equal(tuiles.length,8);
  assert.deepEqual(tuiles.map(t=>[t.nom,t.titre,t.icone,t.couleur]),R.rubriques.map(r=>[r.nom,r.nom,r.icone,r.couleur]));
 });
