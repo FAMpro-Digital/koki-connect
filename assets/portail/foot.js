@@ -35,7 +35,9 @@ async function demarrerDirect(){
  if(etat.direct)return;
  let client=null;try{client=await clientRealtime();}catch(_){client=null;}
  const factice={channel:()=>{const c={on(){return c;},subscribe(cb){setTimeout(()=>cb('CHANNEL_ERROR'),0);return c;},unsubscribe(){}};return c;}};
- etat.direct=D.creer({client:client||factice,rpc,
+ // Canal Realtime PRIVÉ (écoute seule, émission réservée à la base). Retour possible sans redéploiement du code :
+ // assets/business/config.json › football_canal = "public".
+ etat.direct=D.creer({client:client||factice,rpc,prive:etat.flags?.football_canal!=='public',
   onChange:()=>{etat.accueil={...(etat.accueil||{}),direct:etat.direct.matchs().filter(V.enJeu)};notifier();},
   onEvenement:id=>{if(id===etat.detailId)detail(id,{silencieux:true});},
   onEtat:e=>{etat.connexion=e;notifier();}});
@@ -190,7 +192,7 @@ async function demarrer(){
  let flags,c;try{[flags,c]=await Promise.all([json('assets/business/config.json'),json('assets/portail/backend.json')]);}catch(_){return;}
  if(flags?.modules?.football!==true)return;
  if(window.KokiPublicFeed?.cibleAutorisee&&!KokiPublicFeed.cibleAutorisee(c))return;
- etat.config=c;etat.visible=true;
+ etat.config=c;etat.flags=flags;etat.visible=true;
  if(!document.querySelector('link[href="assets/portail/foot.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href='assets/portail/foot.css';document.head.append(l);}
  etat.ecouteurs.add(carteAccueil);
  await demarrerDirect();carteAccueil();
