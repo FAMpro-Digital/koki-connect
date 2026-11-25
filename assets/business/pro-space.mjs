@@ -245,9 +245,9 @@ export async function proSpace(host,api,outer,{upload,imageSelection,intention=n
   addPhotos(card,row);
   const products=state.produits.filter(x=>x.parent_id===row.id&&x.statut!=='Archivé');
   const section=node('section',null,'pro-shop-products');section.append(node('h5','Produits de la boutique ('+products.length+')'));
+  if(activeShops().some(b=>b.id===row.id))section.append(button('Ajouter un produit',()=>go('produit',{shopId:row.id})));
   if(!products.length)section.append(node('p','Aucun produit pour le moment.','pro-hint'));
   for(const product of products){const item=listCard('produits',product,{details:[C.formaterPrix(product.payload.prix)||'Prix sur demande','Stock : '+(product.payload.stock??'non précisé')],actions:[button('Modifier le produit',()=>go('produit',{id:product.id}),{kind:'secondary'})]});addPhotos(item,product);section.append(item);}
-  if(activeShops().some(b=>b.id===row.id))section.append(button('Ajouter un produit',()=>go('produit',{shopId:row.id}),{kind:'secondary'}));
   card.append(section);
   return card;
  }
