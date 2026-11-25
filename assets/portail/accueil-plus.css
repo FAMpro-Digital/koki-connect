@@ -34,6 +34,9 @@
 #portail-une > :only-child { flex-basis: 100%; }
 .une-points { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
 .une-points[hidden] { display: none; }
+.une-pause { display: block; margin: 6px auto 0; min-height: 44px; padding: 8px 14px; border: 1px solid #cfe1d6; border-radius: 999px; background: #fff; color: #0b5a3c; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.une-pause[hidden] { display: none; }
+.une-pause:focus-visible { outline: 3px solid #0b5a3c; outline-offset: 2px; }
 .une-points span { width: 8px; height: 8px; border-radius: 50%; background: #c9d3cd; }
 .une-points span[aria-current="true"] { background: #087a3d; width: 20px; border-radius: 4px; }
 

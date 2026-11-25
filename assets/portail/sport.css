@@ -120,6 +120,8 @@
 .op-hero-texte { margin: 0 0 14px; color: rgba(255,255,255,.92); line-height: 1.4; }
 .op-recherche { display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 14px; border-radius: 16px; background: #fff; color: #13201a; }
 .op-recherche input { flex: 1; min-width: 0; border: 0 !important; outline: 0; background: transparent; font-size: 16px; padding: 12px 0 !important; margin: 0 !important; box-shadow: none !important; }
+/* Le champ n’a pas de contour propre : le cadre entier signale le focus (WCAG 2.4.7). */
+.op-recherche:focus-within { outline: 3px solid #0b5a3c; outline-offset: 2px; }
 .op-puces { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; scrollbar-width: none; }
 .op-puces::-webkit-scrollbar { display: none; }
 .op-puce { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px !important; border-radius: 999px !important; border: 1.5px solid #cfe0d5 !important; background: #fff !important; color: #0b5a3c !important; font-weight: 700; white-space: nowrap; }

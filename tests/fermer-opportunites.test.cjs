@@ -26,7 +26,7 @@ function simuler({ ouvertures = () => [], raccourcis = () => [], idsSections = [
   const sections = idsSections.map((id) => ({ id, hidden: false }));
   const document = {
     querySelector: (sel) => (sel === '.search' ? recherche : null),
-    querySelectorAll: (sel) => (sel === 'body > .section' ? sections : sel === SELECTEUR_OUVERTURE ? ouvertures(journal) : sel === SELECTEUR_RACCOURCI ? raccourcis(journal) : []),
+    querySelectorAll: (sel) => (sel === '#contenu > .section' ? sections : sel === SELECTEUR_OUVERTURE ? ouvertures(journal) : sel === SELECTEUR_RACCOURCI ? raccourcis(journal) : []),
   };
   const contexte = vm.createContext({ document, window: { scrollTo: (...a) => journal.scrolls.push(a) }, Array });
   vm.runInContext(fermerOpportunites() + '\nthis.fermer = fermerOpportunites;', contexte);

@@ -189,7 +189,7 @@
   }
   async function afficher() {
     document.querySelector('.search').hidden=true;
-    document.querySelectorAll('body > .section').forEach(section=>{section.hidden=section.id!=='vue-transport';});
+    document.querySelectorAll('#contenu > .section').forEach(section=>{section.hidden=section.id!=='vue-transport';});
     document.getElementById('titre-transport').focus();
     document.getElementById('vue-transport').scrollIntoView({block:'start'});
     message('Chargement de Transport…');
