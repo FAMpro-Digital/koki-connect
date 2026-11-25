@@ -13,7 +13,6 @@
 (function(root){'use strict';
 const CANAL='koki-foot';
 const EN_JEU=['En direct','Mi-temps','Prolongations','Tirs au but','Interrompu'];
-const CHAMPS=['revision','statut','minute','score_domicile','score_exterieur','pro_domicile','pro_exterieur','tab_domicile','tab_exterieur','date_match'];
 const ATTENTES=[1000,2000,4000,8000,16000,30000];
 const SECOURS=30000,CONTROLE=120000;
 const REGROUPEMENT=300,INTERVALLE_MIN=2000,MAX_IDS=100;

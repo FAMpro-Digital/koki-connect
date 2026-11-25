@@ -2,7 +2,7 @@
 // Toutes les actions passent par la RPC koki_sport : le serveur vérifie le rôle, la catégorie et l'académie.
 // L'interface masque seulement ce que le rôle ne peut pas faire, pour rester simple.
 (function(){'use strict';
-const K=window.KokiClubsContract,$=id=>document.getElementById(id);
+const K=window.KokiClubsContract;
 const api=()=>window.KokiClubsAPI;
 let generation=0;
 function n(tag,text,cls){const e=document.createElement(tag);if(text!==undefined&&text!==null)e.textContent=text;if(cls)e.className=cls;return e;}
@@ -154,7 +154,7 @@ async function seances(z,c,recharger){
  const cats=optCategories(c);if(!cats.length){z.append(n('p','Aucune catégorie disponible.','portail-note'));return;}
  z.append(details('➕ Programmer un entraînement',formulaire(null,[['categorie_id','Catégorie','select',{options:cats}],['debut','Début','datetime',{requis:true}],
   ['duree','Durée','select',{options:[['60','1 h'],['90','1 h 30'],['120','2 h'],['150','2 h 30']],valeur:'90'}],['lieu','Lieu','text',{max:120,placeholder:'Stade de Koki'}],['theme','Thème','text',{max:200}]],async(v,bt,f)=>{
-  if(!v.debut){statut(z,'Indiquez la date et l’heure.','erreur');return;}const fin=new Date(Date.parse(v.debut)+Number(v.duree)*60000).toISOString();const {duree,...rest}=v;
+  if(!v.debut){statut(z,'Indiquez la date et l’heure.','erreur');return;}const fin=new Date(Date.parse(v.debut)+Number(v.duree)*60000).toISOString();const {duree:_duree,...rest}=v;
   if(await agir(z,bt,()=>api().api('session_save',{request_id:rid(),club_id:c.id,...rest,fin}),'Entraînement programmé.')){f.reset();liste();}})));
  const l=n('div',undefined,'kc-lignes');z.append(l);
  async function liste(){const xs=await agir(z,null,()=>api().api('sessions_list',{club_id:c.id}));if(!xs)return;l.replaceChildren();if(!xs.length)l.append(n('p','Aucun entraînement sur la période.','kc-meta'));

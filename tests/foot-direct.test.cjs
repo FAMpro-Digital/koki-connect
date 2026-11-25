@@ -146,7 +146,7 @@ test('coupure : secours par rechargement toutes les 30 s ; connecté avec match 
 });
 
 test('matchs affichés absents de l’accueil : état exact demandé, dépubliés retirés',async()=>{
- let tour=0;const {d,client,h,appels}=monter({accueil:()=>tour++===0?{direct:[m('a',1),m('b',1)]}:{direct:[m('a',1)]},etat_matchs:({ids})=>ids.includes('b')?[]:[]});
+ let tour=0;const {d,client,appels}=monter({accueil:()=>tour++===0?{direct:[m('a',1),m('b',1)]}:{direct:[m('a',1)]},etat_matchs:({ids})=>ids.includes('b')?[]:[]});
  await d.demarrer();client.canaux[0].statutCb('SUBSCRIBED');
  await d.reveil();
  assert.deepEqual(appels.find(a=>a[0]==='etat_matchs')[1],{ids:['b']});

@@ -28,194 +28,7 @@
   <meta name="apple-mobile-web-app-title" content="KOKI CONNECT">
   <link rel="preload" as="image" href="assets/entete-horizontal.webp">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f7f5;
-      color: #17201b;
-      padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
-      padding-left: env(safe-area-inset-left, 0px);
-      padding-right: env(safe-area-inset-right, 0px);
-    }
-
-    header {
-      background: linear-gradient(135deg, #087a3d, #0a9b50);
-      color: white;
-      padding: 28px 20px 25px;
-      border-radius: 0 0 28px 28px;
-    }
-
-    header h1 {
-      font-size: 28px;
-      font-weight: 800;
-    }
-
-    header p {
-      margin-top: 5px;
-      opacity: 0.9;
-    }
-
-    .search {
-      margin: 20px;
-    }
-
-    .search input {
-      width: 100%;
-      padding: 16px 18px;
-      border: none;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
-      font-size: 16px;
-      outline: none;
-    }
-
-    .section {
-      padding: 5px 20px 20px;
-    }
-
-    .section h2 {
-      font-size: 20px;
-      margin-bottom: 15px;
-    }
-
-    .quick,
-    .services {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 18px 12px;
-      min-height: 105px;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.06);
-    }
-
-    .card span {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    .card strong {
-      font-size: 15px;
-    }
-
-    .highlight {
-      background: #e8f6ed;
-      color: #075f32;
-    }
-
-    nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px calc(4px + env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) calc(4px + env(safe-area-inset-left, 0px));
-      box-shadow: 0 -3px 15px rgba(0,0,0,0.08);
-    }
-
-    nav div {
-      text-align: center;
-      font-size: 12px;
-    }
-
-    nav span {
-      display: block;
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
-    .active {
-      color: #087a3d;
-      font-weight: bold;
-    }
-    .opportunites-filtres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
-    .opportunites-filtres button {
-      border: 1px solid #087a3d;
-      border-radius: 20px;
-      padding: 10px 14px;
-      background: white;
-      color: #075f32;
-      cursor: pointer;
-      font: inherit;
-    }
-
-    .opportunites-filtres button[aria-pressed="true"] {
-      background: #087a3d;
-      color: white;
-    }
-
-    #opportunites-jeunes .card p {
-      margin-top: 12px;
-      color: #526359;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    #opportunites-jeunes button:focus-visible {
-      outline: 3px solid #17201b;
-      outline-offset: 3px;
-    }
-
-    body { max-width: 1000px; margin: auto; }
-    header { padding: 30px 24px; background: linear-gradient(130deg,#004d36,#099650); }
-    .localite { margin-top: 22px; font-size: 14px; }
-    .quick { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
-    .raccourci { border: 0; color: white; font: inherit; cursor: pointer; text-align: center; padding: 18px 6px; border-radius: 16px; min-height: 115px; box-shadow: 0 5px 12px #00000015; }
-    .raccourci span { display: block; font-size: 30px; margin-bottom: 12px; }
-    .raccourci strong { font-size: 12px; }
-    .raccourci:focus-visible, .search input:focus-visible { outline: 3px solid #17201b; outline-offset: 3px; }
-    .banniere { background: linear-gradient(120deg,#004d36,#17874d); color: white; border-radius: 20px; padding: 28px; margin-bottom: 20px; }
-    .banniere h2 { font-size: 26px; max-width: 330px; line-height: 1.2; }
-    .banniere p { margin-top: 12px; line-height: 1.5; }
-    nav { max-width: 1000px; margin: auto; z-index: 2; }
-    nav button { border: 0; background: transparent; font: inherit; font-size: 12px; cursor: pointer; padding: 4px; }
-    [hidden] { display: none !important; }
-    @media (max-width: 360px) { .quick { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-    .entete-koki { position: relative; height: clamp(300px,60vw,520px); padding: 18px 20px; border-radius: 0 0 24px 24px; background: #c6e8f8 url('assets/entete-horizontal.webp') center center / cover no-repeat; }
-    .entete-commandes { position: relative; z-index: 1; display: flex; justify-content: space-between; }
-    .entete-commandes button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffffffb8; color: #172b26; cursor: pointer; }
-    .entete-commandes svg { width: 24px; height: 24px; }
-    .entete-infos { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 34px 20px 28px; background: linear-gradient(transparent,#003e2fdd); border-radius: 0 0 24px 24px; }
-    .entete-infos strong { font-size: 17px; }
-    .entete-infos p { font-size: 12px; margin-top: 4px; }
-    .meteo-entete { border: 0; color: white; background: transparent; cursor: pointer; text-align: right; font: inherit; }
-    .meteo-entete span { font-size: 22px; }
-    .search { position: relative; margin-top: -16px; z-index: 1; }
-    .lien-evitement { position: absolute; left: 12px; top: -100px; z-index: 1000; padding: 12px 16px; border-radius: 12px; background: #0b5a3c; color: #fff; font-weight: 700; text-decoration: none; }
-    .lien-evitement:focus-visible { top: calc(12px + env(safe-area-inset-top, 0px)); outline: 3px solid #f28c28; outline-offset: 2px; }
-    main:focus { outline: none; }
-    .visuellement-cache { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-    @media (max-width: 600px) {
-      .entete-koki { height: max(300px,76vw); }
-      .entete-infos { padding-left: 18px; padding-right: 18px; }
-    }
-    .menu-liens { display: grid; gap: 10px; margin-bottom: 22px; }
-    .menu-liens button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 16px; border: 1px solid #dce8df; border-radius: 14px; background: white; color: #17201b; text-align: left; font: inherit; cursor: pointer; }
-    .menu-liens button:focus-visible { outline: 3px solid #087a3d; outline-offset: 3px; }
-    #vue-menu .card { margin-bottom: 18px; }
-    #vue-menu .card p { margin-top: 12px; line-height: 1.6; }
-    #vue-menu a { color: #075f32; overflow-wrap: anywhere; }
-  </style>
+  <link rel="stylesheet" href="assets/portail/accueil-base.css">
   <link rel="stylesheet" href="assets/portail/style.css">
 <link rel="stylesheet" href="assets/business/style.css" media="print" data-differe>
 <link rel="stylesheet" href="assets/portail/fluidite.css">
@@ -242,8 +55,8 @@
       <div class="meteo-entete" role="status" aria-live="polite">
         <span id="icone-meteo" aria-hidden="true">🌤️</span> <strong id="temperature-meteo">— °C</strong>
         <p id="condition-meteo">Chargement…</p>
-        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" style="color:inherit; font-size:10px;">Open-Meteo</a>
-        <button id="actualiser-meteo" type="button" data-clic="chargerMeteo()" style="border:0; background:transparent; color:inherit; cursor:pointer; font-size:11px;" aria-label="Actualiser la météo de Koki">↻</button>
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="st-1">Open-Meteo</a>
+        <button id="actualiser-meteo" type="button" data-clic="chargerMeteo()" aria-label="Actualiser la météo de Koki" class="st-2">↻</button>
       </div>
     </div>
   </header>
@@ -260,23 +73,23 @@
       <div id="carte-reprendre" class="carte-reprendre" hidden></div>
     </div>
     <div id="portail-recherche" class="portail-grid"></div>
-    <p id="resultat-recherche" role="status" style="margin-top:10px; font-size:14px;"></p>
+    <p id="resultat-recherche" role="status" class="st-3"></p>
   </div>
 
 <section class="section une-vide" id="accueil-une"><div class="portail-title"><h2>🔥 À la une à Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir plus</button></div><div id="portail-une" class="portail-grid"></div></section>
   <section class="section" id="tableau-de-bord">
     <h2>Votre quotidien à Koki</h2>
     <div class="quick">
-<button type="button" class="raccourci" data-recherche="Transport" style="background:#245d88" data-clic="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
-<button type="button" class="raccourci" data-recherche="Commerces & Services" style="background:#c76a00" data-clic="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
-<button type="button" class="raccourci" data-recherche="Éducation" style="background:#087dff" data-clic="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
-<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" style="background:#008397" data-clic="KokiPortail.liste(Opportunités)"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
-<button type="button" class="raccourci" data-recherche="Sport" style="background:#008444" data-clic="KokiPortail.liste(Sports &amp; ASC)"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
-<button type="button" class="raccourci" data-recherche="Santé" style="background:#d8004f" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
-<button type="button" class="raccourci" data-recherche="Événements" style="background:#ef153b" data-clic="KokiPortail.liste(Événements)"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
-<button type="button" class="raccourci" data-recherche="Services publics" style="background:#820ed8" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
+<button type="button" class="raccourci" data-recherche="Transport" data-clic="afficherTransport()"><span aria-hidden="true">🚕</span><strong>Transport</strong></button>
+<button type="button" class="raccourci" data-recherche="Commerces & Services" data-clic="afficherCommerce()"><span aria-hidden="true">🛍️</span><strong>Commerces & Services</strong></button>
+<button type="button" class="raccourci" data-recherche="Éducation" data-clic="KokiPortail.education()"><span aria-hidden="true">🎓</span><strong>Éducation</strong></button>
+<button type="button" class="raccourci" data-recherche="Emplois & Opportunités" data-clic="KokiPortail.liste(Opportunités)"><span aria-hidden="true">💼</span><strong>Emplois & Opportunités</strong></button>
+<button type="button" class="raccourci" data-recherche="Sport" data-clic="KokiPortail.liste(Sports &amp; ASC)"><span aria-hidden="true">⚽</span><strong>Sport</strong></button>
+<button type="button" class="raccourci" data-recherche="Santé" data-clic="window.KokiSante?KokiSante.ouvrir():KokiPortail.lieux(Santé)"><span aria-hidden="true">🏥</span><strong>Santé</strong></button>
+<button type="button" class="raccourci" data-recherche="Événements" data-clic="KokiPortail.liste(Événements)"><span aria-hidden="true">📅</span><strong>Événements</strong></button>
+<button type="button" class="raccourci" data-recherche="Services publics" data-clic="window.KokiServicesPublics?KokiServicesPublics.ouvrir():KokiPortail.lieux(Services publics)"><span aria-hidden="true">🏛️</span><strong>Services publics</strong></button>
     </div>
-    <div id="service-proche" style="margin-top:18px;"></div>
+    <div id="service-proche" class="st-4"></div>
   </section>
 <p id="portail-sync" class="portail-sync" role="status">Chargement des contenus publiés…</p>
 <section class="section" id="accueil-actualites"><div class="portail-title"><h2>📰 Actualités de Koki</h2><button class="portail-more" type="button" data-clic="KokiPortail.liste(Actualités)">Voir plus</button></div><div id="portail-actualites" class="portail-grid"></div></section>
@@ -291,11 +104,11 @@
 <section class="section portail-signature" id="accueil-signature"><strong>KOKI CONNECT — Tout Koki, dans votre poche.</strong><p>Une solution FAMpro Digital</p><p>Koki Connect réunit les informations locales, commerces, services et transports de Koki et environs.</p><p><a href="/tests-application.html">Donner mon avis</a> · <a href="/confidentialite.html">Confidentialité</a> · <a href="/conditions.html">Conditions d’utilisation</a></p></section>
 <section class="section" id="vue-portail" hidden><button type="button" class="portail-more" data-clic="fermerOpportunites()">← Retour à l’accueil</button><h2 id="portail-titre" tabindex="-1"></h2><div id="portail-bandeau" class="rb-bandeau" hidden></div><div id="portail-vue"></div></section>
   <section id="opportunites-jeunes" class="section" hidden aria-labelledby="titre-opportunites">
-    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" class="st-5">← Retour à l’accueil</button>
     <h2 id="titre-opportunites" tabindex="-1">🚀 Opportunités jeunes</h2>
-    <p style="margin-bottom:15px;">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
-    <article class="card highlight" aria-labelledby="titre-fampro" style="margin-bottom:20px;">
-      <img src="assets/fampro-digital.webp" width="720" height="360" loading="lazy" decoding="async" alt="Logo Fampro Digital" style="display:block; width:100%; max-width:360px; height:auto; margin-bottom:16px; border-radius:12px;">
+    <p class="st-6">Retrouvez ici les prochaines opportunités pour les jeunes de Koki.</p>
+    <article class="card highlight st-7" aria-labelledby="titre-fampro">
+      <img src="assets/fampro-digital.webp" width="720" height="360" loading="lazy" decoding="async" alt="Logo Fampro Digital" class="st-8">
       <h3 id="titre-fampro">Découvrez Fampro Digital</h3>
       <p>Vous avez une idée ou un projet numérique ? Présentez-le à Fampro Digital pour échanger sur vos objectifs et vos besoins.</p>
       <p>📩 Contactez Fampro Digital pour en savoir plus.</p>
@@ -311,7 +124,7 @@
       <button type="button" data-filtre="Bourses" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Bourses</button>
       <button type="button" data-filtre="Financements" aria-pressed="false" data-clic="filtrerOpportunites(this.dataset.filtre)">Financements</button>
     </div>
-    <p id="statut-opportunites" role="status" style="margin-bottom:15px;">6 rubriques affichées.</p>
+    <p id="statut-opportunites" role="status" class="st-6">6 rubriques affichées.</p>
     <div class="services">
       <div class="card" data-rubrique="Emplois"><span>💼</span><strong>Emplois</strong><p>Aucune offre publiée pour le moment.</p></div>
       <div class="card" data-rubrique="Stages"><span>🤝</span><strong>Stages</strong><p>Aucune offre publiée pour le moment.</p></div>
@@ -324,7 +137,7 @@
 
   <section id="vue-commerce" class="section" hidden aria-labelledby="titre-commerce">
     <button type="button" data-clic="fermerOpportunites()">← Retour à l’accueil</button>
-    <h2 id="titre-commerce" tabindex="-1" style="margin-top:18px;">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
+    <h2 id="titre-commerce" tabindex="-1" class="st-4">🛍️ Commerces &amp; Services</h2><div id="bandeau-commerce" class="rb-bandeau" hidden></div>
     <p class="market-marque">KOKI CONNECT — Commerces &amp; Services | Une solution FAMpro Digital</p>
     <div class="market-demo" hidden><label><input id="market-demo" type="checkbox" data-change="KokiCommerce.mode()">Tester la démonstration</label><p class="market-small">Boutique fictive enregistrée sur cet appareil uniquement. Aucune commande, demande, photo ou paiement n’est envoyé à un professionnel.</p></div>
     <p id="market-message" role="status"></p>
@@ -359,7 +172,7 @@
         <label for="market-pro-logo">Photo ou logo (10 Mo maximum, réduite automatiquement)</label><input id="market-pro-logo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
         <button type="submit">Enregistrer mon profil démo</button>
       </form>
-      <hr style="margin:22px 0;">
+      <hr class="st-9">
       <h3 id="market-editeur-titre">Ajouter un produit ou service</h3>
       <form id="market-editeur" data-envoi="KokiCommerce.sauverOffre()">
         <input id="market-offre-id" type="hidden">
@@ -374,9 +187,9 @@
         <label for="market-offre-photo">Photo du produit ou de la réalisation (10 Mo maximum, réduite automatiquement)</label><input id="market-offre-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif">
         <div class="market-actions"><button type="submit" class="market-primary">Enregistrer l’offre démo</button><button type="button" data-clic="KokiCommerce.nouvelleOffre()">Nouvelle offre</button></div>
       </form>
-      <h3 style="margin-top:22px;">Mes offres</h3><div id="market-mes-offres"></div>
-      <h3 style="margin-top:22px;">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
-      <button type="button" data-clic="KokiCommerce.effacerDemo()" style="margin-top:20px;">Réinitialiser la démonstration</button>
+      <h3 class="st-10">Mes offres</h3><div id="market-mes-offres"></div>
+      <h3 class="st-10">Commandes et demandes clients démo</h3><div id="market-pro-demandes"></div>
+      <button type="button" data-clic="KokiCommerce.effacerDemo()" class="st-11">Réinitialiser la démonstration</button>
     </div>
     </div>
   </section>
@@ -437,24 +250,24 @@
   </section>
 
   <section id="vue-carte" class="section" hidden aria-labelledby="titre-carte">
-    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" class="st-12">← Retour à l’accueil</button>
     <h2 id="titre-carte" tabindex="-1">Carte de la commune de Koki</h2>
-    <p style="line-height:1.5; margin-bottom:12px;">Koki et ses villages environnants. Recherchez un lieu ou choisissez une catégorie.</p>
-    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-      <input id="recherche-carte" type="search" aria-label="Rechercher un lieu" placeholder="Village, école, commerce…" data-saisie="filtrerCarte()" style="padding:12px; flex:1; min-width:180px;">
-      <select id="categorie-carte" aria-label="Catégorie de lieu" data-change="filtrerCarte()" style="padding:12px;">
+    <p class="st-13">Koki et ses villages environnants. Recherchez un lieu ou choisissez une catégorie.</p>
+    <div class="st-14">
+      <input id="recherche-carte" type="search" aria-label="Rechercher un lieu" placeholder="Village, école, commerce…" data-saisie="filtrerCarte()" class="st-15">
+      <select id="categorie-carte" aria-label="Catégorie de lieu" data-change="filtrerCarte()" class="st-16">
         <option value="">Tous les lieux</option><option>Villages et quartiers</option><option>Éducation</option><option>Santé</option><option>Services publics</option><option>Commerces</option><option>Lieux religieux</option><option>Sports</option><option>Eau</option>
       </select>
-      <button type="button" data-clic="recentrerCarte()" style="padding:12px;">Toute la commune</button>
+      <button type="button" data-clic="recentrerCarte()" class="st-16">Toute la commune</button>
     </div>
-    <p id="statut-carte" role="status" style="margin-bottom:10px;"></p>
-    <div id="carte-koki" aria-label="Carte interactive de Koki" style="height:440px; border-radius:16px; overflow:hidden; position:relative; z-index:0;"></div>
-    <p style="font-size:12px; line-height:1.5; margin:12px 0;">Source : <a href="https://www.openstreetmap.org/relation/13067352" target="_blank" rel="noopener">OpenStreetMap</a>, relevé du 7 octobre 2026. Limite communale issue de cette base, non certifiée. Inventaire incomplet ; les positions des bâtiments et terrains sont approximatives.</p>
+    <p id="statut-carte" role="status" class="st-17"></p>
+    <div id="carte-koki" aria-label="Carte interactive de Koki" class="st-18"></div>
+    <p class="st-19">Source : <a href="https://www.openstreetmap.org/relation/13067352" target="_blank" rel="noopener">OpenStreetMap</a>, relevé du 7 octobre 2026. Limite communale issue de cette base, non certifiée. Inventaire incomplet ; les positions des bâtiments et terrains sont approximatives.</p>
     <div id="liste-carte" class="menu-liens"></div>
   </section>
 
   <section id="vue-menu" class="section" hidden aria-labelledby="titre-menu">
-    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" class="st-5">← Retour à l’accueil</button>
     <h2 id="titre-menu" tabindex="-1">Menu</h2>
     <div class="menu-liens" role="group" aria-label="Rubriques de KOKI CONNECT">
       <button type="button" data-clic="fermerOpportunites()"><span>🏠 Accueil</span><span aria-hidden="true">›</span></button>
@@ -487,21 +300,21 @@
   </section>
 
   <section id="vue-notifications" class="section" hidden aria-labelledby="titre-notifications">
-    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px 14px; cursor:pointer;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" class="st-5">← Retour à l’accueil</button>
     <h2 id="titre-notifications" tabindex="-1">Notifications</h2>
-    <p style="margin-bottom:18px; line-height:1.5;">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
+    <p class="st-20">Vos nouvelles informations KOKI CONNECT seront regroupées ici.</p>
     <section id="notifications-personnelles" class="card" aria-live="polite"></section>
     <h3>Publications récentes</h3>
     <div id="portail-notifications" class="portail-grid"></div>
-      <div class="card" style="text-align:center; padding:32px 20px;" id="notifications-vide" role="status">
+      <div class="card st-21" id="notifications-vide" role="status">
       <span aria-hidden="true">🔔</span>
       <h3>Aucune notification pour le moment</h3>
-      <p style="margin-top:12px; color:#526359; line-height:1.5;">Vous êtes à jour. Revenez ici pour consulter vos prochaines notifications.</p>
+      <p class="st-22">Vous êtes à jour. Revenez ici pour consulter vos prochaines notifications.</p>
     </div>
   </section>
 
   <section id="vue-rubrique" class="section" hidden aria-labelledby="titre-rubrique">
-    <button type="button" data-clic="fermerOpportunites()" style="margin:20px 0; padding:10px;">← Retour à l’accueil</button>
+    <button type="button" data-clic="fermerOpportunites()" class="st-12">← Retour à l’accueil</button>
     <h2 id="titre-rubrique" tabindex="-1"></h2>
     <div class="card"><h3>Bientôt disponible</h3><p>Les informations de cette rubrique sont en préparation.</p><p><a href="/tests-application.html">Proposer une information ou donner mon avis</a></p></div>
   </section>
