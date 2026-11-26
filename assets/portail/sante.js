@@ -32,7 +32,7 @@ async function ouvrir(){
  const label=n('label',undefined,'sante-recherche');const input=n('input');input.type='search';input.placeholder='Centre, pharmacie, village, service…';input.setAttribute('aria-label','Rechercher une structure de santé');input.value=etat.q;label.append(input);tete.append(label);
  const urg=n('section',undefined,'sante-urgences');urg.setAttribute('aria-label','Numéros d’urgence');urg.append(urgence('1515','Urgence médicale · SAMU','plus','rouge'),urgence('18','Accident, incendie · Pompiers','feu','sombre'),urgence('17','Police secours','bouclier','clair'));
  const corps=n('div',undefined,'sante-corps'),principal=n('div',undefined,'sante-principal'),cote=n('aside',undefined,'sante-cote');corps.append(principal,cote);
- principal.append(n('p','Chargement des structures de santé…','portail-meta'));
+ principal.append(n('p','Chargement des structures de santé…','portail-meta koki-chargement'));
  box.append(tete,urg,corps);
  let feed;try{feed=await KokiPublicFeed.charger();}catch{feed=null;}
  if(g!==generation||$('portail-titre').textContent!==TITRE)return;

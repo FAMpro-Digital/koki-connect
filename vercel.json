@@ -3,6 +3,7 @@
   "installCommand": "echo \"Site statique : aucune dépendance à installer\"",
   "git": {
     "deploymentEnabled": {
+      "design/identite-visuelle": false,
       "securite/hsts-sous-domaines": false,
       "amelioration/csp-styles-outils": false,
       "amelioration/modernisation-web": false,

@@ -40,7 +40,7 @@ function chips(liste,courant,fn,label){const box=n('div',undefined,'sp-chips');b
  for(const [cle,texte] of liste){const c=b(texte,()=>fn(cle),'sp-chip');c.setAttribute('aria-pressed',String(cle===courant));box.append(c);}return box;}
 
 async function ouvrir(onglet){
- if(onglet)etat.onglet=onglet;const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement des services publics…','portail-meta'));
+ if(onglet)etat.onglet=onglet;const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement des services publics…','portail-meta koki-chargement'));
  let D;try{D=donnees(await KokiPublicFeed.charger());}catch{if(g!==generation||!actif(TITRE))return;box.replaceChildren(n('p','Connexion internet indisponible. Les services publics se chargeront au retour de la connexion.','portail-note'),b('Réessayer',()=>ouvrir(),'sp-btn sp-btn-plein'));return;}
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();
  const hero=n('section',undefined,'sp-hero');hero.append(n('p','KOKI CONNECT · SERVICES PUBLICS','sp-hero-sur'),n('h3','Vos démarches et services à Koki','sp-hero-titre'));

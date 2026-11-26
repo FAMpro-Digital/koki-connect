@@ -1,0 +1,210 @@
+/* KOKI CONNECT — identité visuelle (chargée en dernier dans index.html).
+   Couche légère : jetons de couleur, typographie système, boutons, cartes, états,
+   barre du bas, écrans vides et chargements. Aucune police ni image à télécharger.
+   Les couleurs des 8 raccourcis restent celles du contrat Rubriques (accueil-base.css). */
+
+:root {
+  --koki-vert: #0b5a3c;          /* vert Koki foncé : structure, titres, onglet actif */
+  --koki-vert-action: #087a3d;   /* boutons principaux, liens */
+  --koki-vert-clair: #e3f1e9;    /* fonds d'état (actif, survol) */
+  --koki-orange: #f28c28;        /* accent décoratif uniquement (jamais du texte sur blanc) */
+  --koki-orange-texte: #b25400;  /* orange lisible sur blanc : 5,0:1 */
+  --koki-orange-clair: #fff1e2;
+  --koki-encre: #17201b;
+  --koki-encre-douce: #4a5a50;   /* texte secondaire : 7,2:1 sur blanc */
+  --koki-fond: #f4f7f5;
+  --koki-trait: #dbe6df;
+  --koki-ombre: 0 1px 2px rgb(11 90 60 / .06), 0 8px 24px -12px rgb(11 90 60 / .22);
+  --koki-rayon: 16px;
+  --koki-police: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- Typographie ---------- */
+body {
+  font-family: var(--koki-police);
+  color: var(--koki-encre);
+  background: var(--koki-fond);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font-family: inherit; }
+.section > h2, .portail-title h2, #vue-portail > h2 { font-size: 21px; line-height: 1.25; letter-spacing: -.012em; color: var(--koki-encre); }
+.portail-card h3 { font-size: 18px; line-height: 1.3; letter-spacing: -.006em; }
+.portail-card p { color: #2b3830; }
+.portail-meta { color: var(--koki-encre-douce); font-size: 13px; }
+.priere-heure, .priere strong, time, .cat-price, .tr-prix { font-variant-numeric: tabular-nums; }
+
+/* ---------- Liens ---------- */
+.portail-signature a, .section a:not([class]) { color: var(--koki-vert-action); text-underline-offset: 3px; }
+.portail-signature a:hover { color: var(--koki-vert); }
+
+/* ---------- Focus clavier : un seul anneau, partout ---------- */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--koki-vert);
+  outline-offset: 2px;
+}
+/* Sur les fonds vert foncé (en-têtes de page), l'anneau passe en blanc. */
+.entete-koki :focus-visible, .barre-page :focus-visible, .pf-tete :focus-visible, .act-connexion :focus-visible { outline-color: #fff; }
+
+/* ---------- Recherche de l'accueil ---------- */
+.search input {
+  border: 1px solid var(--koki-trait);
+  box-shadow: var(--koki-ombre);
+}
+
+/* ---------- Raccourcis « Votre quotidien » ---------- */
+.raccourci {
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .22), 0 6px 16px -8px rgb(23 32 27 / .45);
+}
+
+/* ---------- Cartes de publication ---------- */
+.portail-card, .portail-panel {
+  border: 1px solid var(--koki-trait);
+  border-radius: 18px;
+  box-shadow: var(--koki-ombre);
+}
+.portail-card > .portail-meta:first-of-type { margin-bottom: 2px; font-weight: 600 !important; color: var(--koki-orange-texte); }
+
+/* ---------- Boutons : discret (par défaut), puis états ---------- */
+.portail-card button, .portail-panel button, .portail-actions button {
+  border-color: var(--koki-trait);
+  border-radius: 12px;
+  color: var(--koki-vert);
+  font-size: 14px;
+  padding: 9px 12px;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.portail-card .portail-actions, .portail-actions, .publication-actions { gap: 6px; }
+.portail-actions button { background: #fff; }
+@media (hover: hover) {
+  .portail-card button:hover, .portail-panel button:hover, .portail-actions button:hover {
+    background: var(--koki-vert-clair);
+    border-color: #b9d6c5;
+  }
+  .raccourci:hover { filter: brightness(1.06); }
+}
+.portail-card button:active, .portail-panel button:active, .portail-actions button:active { background: #d2e8db; }
+.portail-card button[aria-pressed="true"] { background: var(--koki-vert-clair); border-color: #9cc7ae; }
+
+/* « Voir plus » : lien d'action discret à droite du titre de section. */
+.portail-title .portail-more {
+  border: 0;
+  background: transparent;
+  padding: 10px 6px 10px 12px;
+  color: var(--koki-vert-action);
+  font-size: 14px;
+  border-radius: 10px;
+}
+.portail-title .portail-more::after { content: " ›"; font-size: 17px; line-height: 0; }
+@media (hover: hover) { .portail-title .portail-more:hover { background: var(--koki-vert-clair); } }
+
+/* ---------- Sections vides : elles s'effacent pour laisser parler le contenu ---------- */
+.portail-grid > p:only-child {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed #c9d8cf;
+  border-radius: 14px;
+  background: rgb(255 255 255 / .55);
+  color: var(--koki-encre-douce);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.section:has(> .portail-grid > p:only-child) { padding-bottom: 6px; }
+.section:has(> .portail-grid > p:only-child) .portail-title h2 { font-size: 18px; }
+
+/* ---------- Chargements des rubriques ---------- */
+.koki-chargement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 2px;
+  color: var(--koki-encre-douce);
+}
+.koki-chargement::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid var(--koki-vert-clair);
+  border-top-color: var(--koki-vert);
+  animation: koki-tourne .8s linear infinite;
+}
+@keyframes koki-tourne { to { transform: rotate(360deg); } }
+
+/* ---------- Barre de navigation du bas ---------- */
+nav[aria-label="Navigation principale"] {
+  background: rgb(255 255 255 / .94);
+  border-top: 1px solid var(--koki-trait);
+  box-shadow: 0 -8px 24px -14px rgb(11 90 60 / .35);
+  padding-top: 8px;
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  nav[aria-label="Navigation principale"] {
+    background: rgb(255 255 255 / .9);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    backdrop-filter: saturate(1.6) blur(14px);
+  }
+}
+nav[aria-label="Navigation principale"] button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 60px;
+  min-height: 52px;
+  padding: 2px 4px;
+  color: var(--koki-encre-douce);
+  font-size: 11.5px;
+  letter-spacing: .01em;
+  border-radius: 14px;
+}
+nav[aria-label="Navigation principale"] button > span {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 30px;
+  margin: 0;
+  border-radius: 999px;
+  font-size: 0;
+  transition: background-color .2s ease, color .2s ease;
+}
+nav[aria-label="Navigation principale"] button svg { width: 24px; height: 24px; }
+nav[aria-label="Navigation principale"] button[aria-current="page"] { color: var(--koki-vert); }
+nav[aria-label="Navigation principale"] button[aria-current="page"] > span {
+  transform: none;
+  background: var(--koki-vert-clair);
+  color: var(--koki-vert);
+}
+nav[aria-label="Navigation principale"] button[aria-current="page"] svg { stroke-width: 2.3; }
+/* L'ancien trait orange sous l'onglet devient un point, plus discret que la pastille verte. */
+nav[aria-label="Navigation principale"] button[aria-current="page"]::after {
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  bottom: -4px;
+  border-radius: 50%;
+}
+@media (hover: hover) {
+  nav[aria-label="Navigation principale"] button:not([aria-current="page"]):hover > span { background: #eef4f0; }
+}
+nav[aria-label="Navigation principale"] button:focus-visible { outline-offset: 0; }
+
+/* ---------- Mouvement réduit ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .koki-chargement::before { animation-duration: 2.4s; }
+  .portail-card button, .portail-panel button, .portail-actions button,
+  nav[aria-label="Navigation principale"] button > span { transition: none; }
+}
+
+/* ---------- Contraste renforcé (Windows et autres) ---------- */
+@media (forced-colors: active) {
+  nav[aria-label="Navigation principale"] button[aria-current="page"] > span { border: 2px solid CanvasText; }
+  .koki-chargement::before { border-color: CanvasText; border-top-color: Highlight; }
+}
+
+/* ---------- Connexion (Profil) : respiration et boutons de même largeur ---------- */
+:has(> .google-signin) > p { margin: 8px 0; line-height: 1.5; }
+.google-signin { display: block; width: 100%; margin: 10px 0 !important; }

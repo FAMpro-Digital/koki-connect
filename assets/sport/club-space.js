@@ -38,7 +38,7 @@ function details(titre,contenu,ouvert=false){const d=n('details',undefined,'kc-d
 
 // ═════ Accueil de l'espace ═════
 async function ouvrir(){
- const g=++generation;const box=KokiPortail.ouvrir('🎓 Mon espace académie');box.append(n('p','Chargement…','portail-meta'));
+ const g=++generation;const box=KokiPortail.ouvrir('🎓 Mon espace académie');box.append(n('p','Chargement…','portail-meta koki-chargement'));
  if(!api()||!await api().actif()){box.replaceChildren(n('p','Espace indisponible pour le moment.','portail-note'));return;}
  const s=await api().session();if(g!==generation)return;box.replaceChildren();
  if(!s){box.append(n('p','Connectez-vous avec votre compte Koki Connect pour gérer votre académie ou rejoindre une équipe d’encadrement.','portail-note'),b('Se connecter',()=>KokiPortail.profil()));return;}
@@ -63,7 +63,7 @@ function retourListe(){if(window.KokiNavigation?.profondeur()>0)history.back();e
 // ═════ Espace d'une académie ═════
 const ONGLETS={responsable:['Tableau','Joueurs','Entraînements','Matchs','Publications','Équipe','Académie'],entraineur:['Tableau','Joueurs','Entraînements','Matchs'],communication:['Tableau','Publications','Académie']};
 async function club(id,onglet='Tableau'){
- const g=++generation;const box=KokiPortail.ouvrir('🎓 Mon académie');box.append(n('p','Chargement…','portail-meta'));
+ const g=++generation;const box=KokiPortail.ouvrir('🎓 Mon académie');box.append(n('p','Chargement…','portail-meta koki-chargement'));
  let c;try{c=await api().api('club_get',{club_id:id});}catch(e){box.replaceChildren();statut(box,K.messageErreur(e),'erreur');box.append(b('← Mes académies',ouvrir));return;}
  // Le titre reste « 🎓 Mon académie » : le renommer créerait une 2e étape d'historique (Retour à presser deux fois).
  if(g!==generation)return;box.replaceChildren();

@@ -24,7 +24,7 @@ function vue(){
  const box=n('div',undefined,'kc-liste');const g=++state.generation;
  const entete=n('div',undefined,'kc-entete');entete.append(n('p','Les académies et clubs de Koki gèrent ici leurs équipes, matchs et actualités.','portail-meta'),
   b('🎓 Mon espace académie',()=>window.KokiClubSpace?.ouvrir(),'sp-bouton sp-bouton-clair'));
- const zone=n('div');zone.append(n('p','Chargement…','portail-meta'));box.append(entete,zone);
+ const zone=n('div');zone.append(n('p','Chargement…','portail-meta koki-chargement'));box.append(entete,zone);
  (async()=>{try{const clubs=await api().lecture('clubs');if(g!==state.generation)return;
    const urls=await api().urls(clubs.map(c=>c.logo_path));zone.replaceChildren();
    if(!clubs.length){zone.append(n('p','Aucune académie n’est encore publiée.','portail-note'));return;}
@@ -39,7 +39,7 @@ function vue(){
 
 // ───── Page d'une académie ─────
 async function page(slug){
- const g=++state.generation;const box=KokiPortail.ouvrir('🎓 Académie');box.append(n('p','Chargement…','portail-meta'));
+ const g=++state.generation;const box=KokiPortail.ouvrir('🎓 Académie');box.append(n('p','Chargement…','portail-meta koki-chargement'));
  let c;try{c=await api().lecture('club',{slug});}catch(e){if(g===state.generation)erreur(box,e,()=>page(slug));return;}
  if(g!==state.generation)return;
  const chemins=[c.logo_path,...c.encadrement.map(s=>s.photo_path),...c.joueurs.map(j=>j.photo_path),...c.galerie.map(m=>m.storage_path),...c.publications.flatMap(p=>p.medias.map(m=>m.storage_path))];

@@ -21,7 +21,7 @@ async function ouvrir(){
  grille.append(raccourci('📥','Mes livres',livres?livres+' hors ligne':'Lire sans internet',()=>window.KokiBibliotheque?KokiBibliotheque.mesLivres():KokiPortail.education()),
   raccourci('♡','Favoris',favoris?favoris+' enregistré'+(favoris>1?'s':''):'Aucun pour l’instant',()=>KokiPortail.favoris()),
   raccourci('🔔','Notifications',notifs?notifs+' cette semaine':'Vous êtes à jour',()=>window.afficherNotifications&&afficherNotifications()));
- const suivi=n('div',undefined,'act-suivi');suivi.append(n('p','Chargement de vos courses et commandes…','portail-meta'));
+ const suivi=n('div',undefined,'act-suivi');suivi.append(n('p','Chargement de vos courses et commandes…','portail-meta koki-chargement'));
  box.append(suivi,grille);
  let a=null;try{a=window.KokiBusiness?.activite?await KokiBusiness.activite():null;}catch{a=null;}
  if(g!==generation||$('portail-titre').textContent!==TITRE)return;suivi.replaceChildren();

@@ -24,7 +24,7 @@ function carte({row,v},now=Date.now()){
 }
 
 async function ouvrir(){
- const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement de l’agenda…','portail-meta'));
+ const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement de l’agenda…','portail-meta koki-chargement'));
  let liste;try{liste=evenements(await KokiPublicFeed.charger());}catch{if(g!==generation||!actif(TITRE))return;box.replaceChildren(n('p','Connexion internet indisponible. L’agenda se chargera au retour de la connexion.','portail-note'),b('Réessayer',ouvrir,'ev-bouton'));return;}
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();
  const now=Date.now(),enCours=liste.filter(x=>E.etat(x.row,x.v,now)==='En cours'),prochain=liste.find(x=>E.etat(x.row,x.v,now)==='À venir');
