@@ -41,7 +41,7 @@ function carteMatch(m,d){
 function vide(t){return n('p',t,'portail-meta sp-vide');}
 
 async function accueil(){
- const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement…','portail-meta'));
+ const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement…','portail-meta koki-chargement'));
  let d;try{d=donnees(await KokiPublicFeed.charger());}catch{if(g!==generation||!actif(TITRE))return;box.replaceChildren(n('p','Connexion indisponible. Réessayez dans un instant.','portail-note'),b('Réessayer',accueil,'sp-bouton'));return;}
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();
  // Bandeau : match en direct, sinon prochain match, sinon dernier résultat.

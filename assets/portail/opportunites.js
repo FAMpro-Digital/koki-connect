@@ -25,7 +25,7 @@ function carte({row,v}){
 
 async function ouvrir(famille){
  if(typeof famille==='string')choix=famille;
- const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement des offres…','portail-meta'));
+ const g=++generation,box=KokiPortail.ouvrir(TITRE);box.append(n('p','Chargement des offres…','portail-meta koki-chargement'));
  let liste;try{liste=offres(await KokiPublicFeed.charger());}catch{if(g!==generation||!actif(TITRE))return;box.replaceChildren(n('p','Connexion internet indisponible. Les offres se chargeront au retour de la connexion.','portail-note'),b('Réessayer',()=>ouvrir(),'op-bouton'));return;}
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();
  const hero=n('section',undefined,'op-hero');const urgentes=liste.filter(x=>x.v&&O.echeance(x.v)?.urgent).length;

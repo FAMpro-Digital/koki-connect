@@ -34,7 +34,7 @@ async function charger(){return livres(await KokiPublicFeed.charger());}
 
 async function bibliotheque(categorie){
  if(typeof categorie==='string')filtre={acces:'Tous',categorie,q:''};
- const g=++generation,box=ouvrir(TITRE);box.append(n('p','Chargement des livres publiés…','portail-meta'));
+ const g=++generation,box=ouvrir(TITRE);box.append(n('p','Chargement des livres publiés…','portail-meta koki-chargement'));
  let items;try{items=await charger();}
  catch{if(g!==generation||!actif(TITRE))return;box.replaceChildren(n('p','La bibliothèque est indisponible. Vérifiez votre connexion.','portail-note'),b('Réessayer',()=>bibliotheque()),b('📥 Mes livres téléchargés ('+H.liste().length+')',mesLivres));return;}
  if(g!==generation||!actif(TITRE))return;box.replaceChildren();

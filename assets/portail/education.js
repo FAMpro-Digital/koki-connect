@@ -28,7 +28,7 @@ async function accueil(){
  const tM=b('',()=>B().mesLivres(),'edu-tuile edu-tuile-mes');const nbMes=KokiLivresHorsLigne.liste().length;tM.append(n('span','📥','edu-tuile-icone'),n('strong','Mes livres'),n('span',nbMes?nbMes+' hors ligne':'Lire sans internet','edu-tuile-info'));
  tuiles.append(tB,tE,tM);
  const resultats=n('div',undefined,'edu-resultats');resultats.setAttribute('aria-live','polite');
- const contenu=n('div',undefined,'edu-contenu');contenu.append(n('p','Chargement…','portail-meta'));
+ const contenu=n('div',undefined,'edu-contenu');contenu.append(n('p','Chargement…','portail-meta koki-chargement'));
  box.append(hero,tuiles,resultats,contenu);
  let feed;try{feed=await KokiPublicFeed.charger();}catch{if(g!==generation||!actif(TITRE))return;contenu.replaceChildren(n('p','Connexion indisponible : la bibliothèque et les établissements se chargeront au retour d’internet. Vos livres téléchargés restent lisibles dans « Mes livres ».','portail-note'),b('Réessayer',accueil));tB.lastChild.textContent='Hors connexion';tE.lastChild.textContent='Hors connexion';return;}
  if(g!==generation||!actif(TITRE))return;
@@ -62,7 +62,7 @@ async function ecolesCarte(l){
  }catch{/* la carte reste accessible depuis le menu */}}
 
 async function etablissements(){
- const g=++generation,box=KokiPortail.ouvrir(TITRE_ECOLES);box.append(n('p','Chargement des établissements publiés…','portail-meta'));
+ const g=++generation,box=KokiPortail.ouvrir(TITRE_ECOLES);box.append(n('p','Chargement des établissements publiés…','portail-meta koki-chargement'));
  let liste;try{liste=ecoles(await KokiPublicFeed.charger());}catch{if(g!==generation||!actif(TITRE_ECOLES))return;box.replaceChildren(n('p','Le catalogue est indisponible. Vérifiez votre connexion.','portail-note'),b('Réessayer',etablissements));return;}
  if(g!==generation||!actif(TITRE_ECOLES))return;box.replaceChildren();
  const rech=n('label',undefined,'biblio-recherche');const q=n('input');q.type='search';q.placeholder='Une école, un village…';q.setAttribute('aria-label','Rechercher un établissement scolaire');rech.append(n('span','🔎','biblio-loupe'),q);
